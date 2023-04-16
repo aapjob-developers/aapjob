@@ -1,0 +1,27 @@
+import 'dart:ui';
+
+const Color cWhite = Color(0xFFFFFFFF);
+Color cOffWhite = Color(0xFFE8E8E8).withOpacity(0.66);
+Color cLightWhite = Color(0xFFE8E8E8).withOpacity(0.94);
+const Color cRed = Color(0xFFE4081E);
+const Color cGreen = Color(0xFF3DB166);
+const Color cRegentGray = Color(0xFF8590A4);
+const Color cNavyBlue = Color(0xFF192F59);
+const Color cBlack = Color(0xFF2E2E2E);
+const Color cOffBlack = Color(0xFFE2E2E2);
+const Color Primary = Color(0xFF4F144C);
+const Color Secondary = Color(0xFF4F144C);
+const Color circleImageColor= Color(0xFF25D366);
+const Color greyColor= Color(0xFFE2E2E2);
+const Color blueColor= Color(0xFF3C8EEC);
+const Color langBgColor= Color(0xFFF7F8FA);
+const Color langHightlightColor= Color(0xFFE8E8ED);
+const Color photoIconBgColor= Color(0xFFF1F1F1);
+const Color photoIconColor= Color(0xFF9DAAB3);
+const Color profilePageBg= Color(0xFFF7F8FA);
+const Color chatPageBgColor= Color(0xFFEFE7DE);
+const Color chatPageDoodleColor= Color(0xFFDAD8D8);
+const Color senderChatCardBg= Color(0xFFE7FFDB);
+const Color receiverChatCardBg= Color(0xFFFFFFFF);
+const Color yellowCardBgColor= Color(0xFFFFEECC);
+const Color yellowCardTextColor= Color(0xFF13191C);

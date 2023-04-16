@@ -1,0 +1,115 @@
+import 'dart:convert';
+
+import 'package:Aap_job/providers/jobtitle_provider.dart';
+import 'package:flutter/material.dart';
+import 'package:Aap_job/data/datasource/remote/dio/dio_client.dart';
+import 'package:dio/dio.dart';
+import 'package:Aap_job/models/CitiesModel.dart';
+import 'package:Aap_job/models/JobTitleModel.dart';
+import 'package:Aap_job/utill/app_constants.dart';
+import 'package:Aap_job/utill/colors.dart';
+import 'package:google_language_fonts/google_language_fonts.dart';
+import 'package:provider/provider.dart';
+
+
+class JobTitleSelectionScreen extends StatefulWidget {
+  JobTitleSelectionScreen({Key? key}) : super(key: key);
+  // List<JobTitleModel> duplicate ;
+  // bool hasdata;
+  @override
+  _JobTitleSelectionScreenState createState() => new _JobTitleSelectionScreenState();
+}
+
+class _JobTitleSelectionScreenState extends State<JobTitleSelectionScreen> {
+  // final Dio _dio = Dio();
+  // final _baseUrl = AppConstants.BASE_URL;
+  // var apidata;
+ // bool _hasData=false;
+
+  List<JobTitleModel> duplicateItems = <JobTitleModel>[];
+  var items = <JobTitleModel>[];
+
+  TextEditingController editingController = TextEditingController();
+
+  @override
+  void initState() {
+    duplicateItems=Provider.of<JobtitleProvider>(context, listen: false).jobtitleList;
+    // _hasData=widget.hasdata;
+    items.addAll(duplicateItems);
+    super.initState();
+  }
+
+  void filterSearchResults(String query) {
+    List<JobTitleModel> dummySearchList = <JobTitleModel>[];
+    dummySearchList.addAll(duplicateItems);
+    if(query.isNotEmpty) {
+      List<JobTitleModel> dummyListData = <JobTitleModel>[];
+      dummySearchList.forEach((item) {
+        if(item.name.toUpperCase().contains(query.toUpperCase())) {
+          dummyListData.add(item);
+        }
+      });
+      setState(() {
+        items.clear();
+        items.addAll(dummyListData);
+      });
+      return;
+    } else {
+      setState(() {
+        items.clear();
+        items.addAll(duplicateItems);
+      });
+    }
+
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return new Scaffold(
+      appBar: new AppBar(
+        backgroundColor: Primary,
+        title: new Text("Select a Job Title"),
+      ),
+      body: Container(
+        child: Column(
+          children: <Widget>[
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: TextField(
+                onChanged: (value) {
+                  filterSearchResults(value);
+                },
+                controller: editingController,
+                decoration: InputDecoration(
+                    labelText: "Search",
+                    hintText: "Search",
+                    prefixIcon: Icon(Icons.search),
+                    border: OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(25.0)))),
+              ),
+            ),
+            duplicateItems.length!=0&&duplicateItems.length!=null?
+            Expanded(
+              child: ListView.separated(
+                shrinkWrap: true,
+                itemCount: items.length,
+                separatorBuilder: (context, index){
+                  return Divider(height: 1,);
+                },
+                itemBuilder: (context, index) {
+                  return ListTile(
+                    onTap: (){
+                      Navigator.pop(context,items[index]);
+                    },
+                    title: Text('${items[index].name}',style: LatinFonts.aBeeZee(fontSize: 14, fontWeight: FontWeight.bold),),
+                  );
+                },
+              ),
+            ):
+            CircularProgressIndicator(),
+          ],
+        ),
+      ),
+    );
+  }
+}

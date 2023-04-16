@@ -1,0 +1,78 @@
+{
+  "project_info": {
+    "project_number": "798937931743",
+    "project_id": "aap-job",
+    "storage_bucket": "aap-job.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:798937931743:android:d147c1fae12abb516eee6a",
+        "android_client_info": {
+          "package_name": "com.unick.aapjob"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "798937931743-1ncc0alm0aeohpe6it0eqspvti89pbv0.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.unick.aapjob",
+            "certificate_hash": "edaca2f0060b72f3bf21b9f932f1af1994120918"
+          }
+        },
+        {
+          "client_id": "798937931743-7ihog4p5htm6uvqp7qcd071jkc5nfvgf.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.unick.aapjob",
+            "certificate_hash": "f704b2bf4de173262dc8355282c7c27585a9b3d0"
+          }
+        },
+        {
+          "client_id": "798937931743-rb4i680bu2bbjji94dd9lu6f6ocrhpg1.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.unick.aapjob",
+            "certificate_hash": "3ec4eb41fcd3b4c5b125b57d4458dcc079e218c5"
+          }
+        },
+        {
+          "client_id": "798937931743-vg539te93cl2pg15lodai01tgimed447.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.unick.aapjob",
+            "certificate_hash": "82558a3396b8398a35551f6bc3b814a0666a9715"
+          }
+        },
+        {
+          "client_id": "798937931743-cm1j70q26lctpimv0gfrh85cg7fh9jmj.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAOpQUGKhLlB0fkZWH1LMA8uAd9hDQ0Q28"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "798937931743-cm1j70q26lctpimv0gfrh85cg7fh9jmj.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "798937931743-p6k71cf4lr6o4e3a152m8q6bgfngspvq.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.unick.aapjob"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

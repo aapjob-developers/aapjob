@@ -1,4 +1,4 @@
-
+import 'dart:io';
 import 'package:Aap_job/localization/language_constrants.dart';
 import 'package:Aap_job/models/common_functions.dart';
 import 'package:Aap_job/providers/config_provider.dart';
@@ -11,6 +11,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:dio/dio.dart';
+import 'package:the_apple_sign_in/scope.dart';
 // import 'package:permission_handler/permission_handler.dart';
 
 class MainloginScreen extends StatefulWidget {
@@ -25,8 +26,16 @@ class _MainloginScreenState extends State<MainloginScreen> {
   SharedPreferences? sharedPreferences;
   Future<void> initializePreference() async{
     this.sharedPreferences = await SharedPreferences.getInstance();
-    await signInWithGoogle();
+    if(Platform.isIOS)
+      {
+        await signInWithApple();
+      }
+    else
+      {
+        await signInWithGoogle();
+      }
   }
+
   Future<dynamic> signInWithGoogle() async {
     user=await Authentification().signInWithGoogle();
     if(user!=null)
@@ -40,6 +49,19 @@ class _MainloginScreenState extends State<MainloginScreen> {
 
   }
 
+  Future<dynamic> signInWithApple() async {
+    user=await Authentification().signInWithApple(
+        scopes: [Scope.email, Scope.fullName]);
+    if(user!=null)
+    {
+      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => SelectOptionScreen()),);
+    }
+    else
+    {
+      CommonFunctions.showInfoDialog("Could not Complete Login", context);
+    }
+
+  }
   @override
   void dispose() {
     super.dispose();
@@ -95,7 +117,29 @@ class _MainloginScreenState extends State<MainloginScreen> {
                             ),
                             padding: const EdgeInsets.all(8.0),
                           ),
+                          Platform.isIOS?
+                          new Padding(
+                            child:
+                            new Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                mainAxisSize: MainAxisSize.max,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: <Widget>[
+                                  GestureDetector(
+                                    onTap: signInWithApple,
+                                    child:
+                                    new Image.asset(
+                                      'assets/images/applesignin.png',
+                                      fit: BoxFit.contain,
+                                      width: deviceSize.width * 0.8,
+                                    ),
+                                  ),
+                                ]
 
+                            ),
+                            padding: const EdgeInsets.all(10.0),
+                          )
+                              :
                           new Padding(
                             child:
                             new Row(

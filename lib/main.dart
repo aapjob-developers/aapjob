@@ -49,7 +49,9 @@ import 'package:go_router/go_router.dart';
 import 'package:logging/logging.dart';
 import 'package:provider/provider.dart';
 import 'di_container.dart' as di;
+import 'helper/AppleSignInAvailable.dart';
 import 'helper/custom_delegate.dart';
+
 
 final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
 Future<void> main() async {
@@ -76,9 +78,9 @@ Future<void> main() async {
   if (remoteMessage != null) {
     payload = remoteMessage.notification!.titleLocKey != null ? remoteMessage.notification!.titleLocKey: "";
   }
-  
   await MyNotification.initialize(flutterLocalNotificationsPlugin);
   FirebaseMessaging.onBackgroundMessage(myBackgroundMessageHandler);
+  final appleSignInAvailable = await AppleSignInAvailable.check();
   ErrorWidget.builder = (FlutterErrorDetails details) {
     return Container(
       color: Colors.white,
@@ -128,6 +130,7 @@ Future<void> main() async {
       ChangeNotifierProvider(create: (context) => di.sl<ContactsRepository>()),
       ChangeNotifierProvider(create: (context) => di.sl<ChatAuthRepository>()),
       ChangeNotifierProvider(create: (context) => di.sl<ChatRepository>()),
+      Provider<AppleSignInAvailable>.value(value: appleSignInAvailable,),
     ],
     child: MyApp(),
   ));

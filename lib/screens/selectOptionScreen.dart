@@ -266,6 +266,18 @@ class _SelectOptionScreenState extends State<SelectOptionScreen> {
                                     style: new TextStyle(
                                         color: Colors.white, fontSize: 16),
                                     textAlign: TextAlign.center,),
+                                ]
+
+                            ),
+                            padding: const EdgeInsets.all(8.0),
+                          ),
+                          new Padding(
+                            child:
+                            new Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                mainAxisSize: MainAxisSize.max,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: <Widget>[
                                   GestureDetector(
                                     onTap: (){
                                       Provider.of<AuthProvider>(context, listen: false).clearSharedData().then((condition) {
@@ -280,7 +292,6 @@ class _SelectOptionScreenState extends State<SelectOptionScreen> {
                                         color: Colors.white, fontSize: 16,decoration: TextDecoration.underline,),
                                       textAlign: TextAlign.center,),
                                   ),
-
                                 ]
 
                             ),

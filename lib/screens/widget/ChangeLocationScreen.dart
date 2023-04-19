@@ -6,6 +6,8 @@ import 'package:Aap_job/providers/category_provider.dart';
 import 'package:Aap_job/screens/LocationSelectionScreen.dart';
 import 'package:Aap_job/screens/homepage.dart';
 import 'package:Aap_job/screens/widget/CitySelectionScreen.dart';
+import 'package:Aap_job/widgets/show_loading_dialog.dart';
+import 'package:Aap_job/widgets/show_location_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:Aap_job/data/datasource/remote/dio/dio_client.dart';
 import 'package:dio/dio.dart';
@@ -451,13 +453,14 @@ class _ChangeLocationScreenState extends State<ChangeLocationScreen> {
 
   _getAddressFromCurrentLocation(LatLng coordinate) async {
    // var coordinate = await SharedManager.shared.getLocationCoordinate();
+        Navigator.pop(context);
     print("Stored Location:$coordinate");
     //final coordinates =   new Coordinates(coordinate.latitude, coordinate.longitude);
     // final coordinates =   new Coordinates(28.426830769483015, 77.32730148765563);
     // var addresses =
     // await Geocoder.local.findAddressesFromCoordinates(coordinates);
-    //var addresses=await placemarkFromCoordinates(coordinate.latitude, coordinate.latitude);
-    var addresses=await placemarkFromCoordinates(28.7658685, 77.3283171);
+    var addresses=await placemarkFromCoordinates(coordinate.latitude, coordinate.longitude);
+   // var addresses=await placemarkFromCoordinates(28.7658685, 77.3283171);
 
     var first = addresses.first;
     print('adminArea: ${first.administrativeArea}');
@@ -571,7 +574,10 @@ class _ChangeLocationScreenState extends State<ChangeLocationScreen> {
                 child:
                 GestureDetector(
                   onTap:(){
-                    //  CommonFunctions.showSuccessToast("");
+                    showLocationDialog(
+                      context: context,
+                      message: 'assets/lottie/location-permissions.json',
+                    );
                       _getLocation();
                   },
                   child:

@@ -4,6 +4,8 @@ import 'package:Aap_job/localization/language_constrants.dart';
 import 'package:Aap_job/screens/homepage.dart';
 import 'package:Aap_job/screens/hrhomepage.dart';
 import 'package:Aap_job/screens/select_language.dart';
+import 'package:Aap_job/widgets/show_loading_dialog.dart';
+import 'package:Aap_job/widgets/show_location_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:Aap_job/models/CitiesModel.dart';
@@ -391,8 +393,9 @@ class _EditJobProfileDetailsState extends State<EditJobProfileDetails> {
 
   _getAddressFromCurrentLocation(LatLng coordinate) async {
     //var coordinate = await SharedManager.shared.getLocationCoordinate();
+        Navigator.pop(context);
     print("Stored Location:$coordinate");
-    var addresses=await placemarkFromCoordinates(coordinate.latitude, coordinate.latitude);
+    var addresses=await placemarkFromCoordinates(coordinate.latitude, coordinate.longitude);
     var first = addresses.first;
     print('adminArea: ${first.administrativeArea}');
     print('locality: ${first.locality}');
@@ -578,7 +581,14 @@ class _EditJobProfileDetailsState extends State<EditJobProfileDetails> {
                       child:
                       GestureDetector(
                         onTap:(){
-                          //  CommonFunctions.showSuccessToast("");
+                          // showLoadingDialog(
+                          //   context: context,
+                          //   message: "Getting Your Current Location. Please Wait.",
+                          // );
+                          showLocationDialog(
+                            context: context,
+                            message: 'assets/lottie/location-permissions.json',
+                          );
                           _getLocation();
                         },
                         child:

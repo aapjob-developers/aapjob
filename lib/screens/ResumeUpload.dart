@@ -99,7 +99,7 @@ class _ResumeUploadState extends State<ResumeUpload> {
         String university=collegenameController.text.trim();
             if(degree.isNotEmpty&&university.isNotEmpty&&eduvalue.isNotEmpty)
               {
-                if(eduvalue!='Select Prefered workshift') {
+                if(shiftvalue!='Select Prefered workshift') {
                   sharedPreferences!.setString("pref_shift",shiftvalue);
                   sharedPreferences!.setString("education", eduvalue);
                   sharedPreferences!.setString("degree", degree);

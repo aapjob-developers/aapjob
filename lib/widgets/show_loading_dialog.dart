@@ -1,5 +1,6 @@
 import 'package:Aap_job/utill/colors.dart';
 import 'package:flutter/material.dart';
+import 'package:lottie/lottie.dart';
 
 showLoadingDialog({
   required BuildContext context,
@@ -15,9 +16,11 @@ showLoadingDialog({
           children: [
             Row(
               children: [
-                const CircularProgressIndicator(
-                  color: Primary,
-                ),
+                Lottie.asset(
+                  'assets/lottie/gps.json',
+                  height: MediaQuery.of(context).size.width*0.1,
+                  //width: MediaQuery.of(context).size.width*0.45,
+                  animate: true,),
                 const SizedBox(width: 20),
                 Expanded(
                   child: Text(

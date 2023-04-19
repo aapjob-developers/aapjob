@@ -3,6 +3,7 @@ import 'package:Aap_job/models/ChatUserModel.dart';
 import 'package:Aap_job/models/last_message_model.dart';
 import 'package:Aap_job/screens/JobLiveDataScreen.dart';
 import 'package:Aap_job/screens/chat_page.dart';
+import 'package:Aap_job/utill/app_constants.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -31,10 +32,6 @@ class ChatHomePage extends StatelessWidget {
                     return ListTile(
                       onTap: () {
                         Navigator.push( context, MaterialPageRoute(builder: (context) => ChatPage(user:
-                        // Navigator.pushNamed(
-                        //   context,
-                        //   Routes.chat,
-                        //   arguments:
                           ChatUserModel(
                             username: lastMessageData.username,
                             uid: lastMessageData.contactId,
@@ -47,7 +44,6 @@ class ChatHomePage extends StatelessWidget {
                             jobtitle: "",
                             JobCat: []
                           ),
-                        // );
                         )));
                       },
                       title: Row(
@@ -74,7 +70,7 @@ class ChatHomePage extends StatelessWidget {
                       ),
                       leading: CircleAvatar(
                         backgroundImage: CachedNetworkImageProvider(
-                          lastMessageData.profileImageUrl,
+                          AppConstants.BASE_URL+lastMessageData.profileImageUrl,
                         ),
                         radius: 24,
                       ),

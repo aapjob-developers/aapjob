@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:ui';
 import 'dart:io';
 import 'dart:math';
+import 'package:Aap_job/localization/language_constrants.dart';
 import 'package:Aap_job/models/category.dart';
 import 'package:Aap_job/providers/auth_provider.dart';
 import 'package:Aap_job/screens/AppliedJobDetailScreen.dart';
@@ -150,7 +151,7 @@ class _MyAppliedJobsState extends State<MyAppliedJobs> {
             children: [
               Container(
                 width: MediaQuery.of(context).size.width*0.7,
-                child: new Text("My Applied Jobs ",style: LatinFonts.aBeeZee(color:Colors.white,fontSize: 14,fontWeight: FontWeight.w700,fontStyle: FontStyle.italic ),softWrap: true,maxLines: 2,),
+                child: new Text(getTranslated('My_Applied_jobs', context)!,style: LatinFonts.aBeeZee(color:Colors.white,fontSize: 14,fontWeight: FontWeight.w700,fontStyle: FontStyle.italic ),softWrap: true,maxLines: 2,),
               ),
             ],
           ),

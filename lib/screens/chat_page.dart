@@ -10,6 +10,8 @@ import 'package:Aap_job/helper/last_seen_message.dart';
 import 'package:Aap_job/models/ChatUserModel.dart';
 import 'package:Aap_job/models/message_model.dart';
 import 'package:Aap_job/screens/widget/custom_icon_button.dart';
+import 'package:Aap_job/utill/app_constants.dart';
+import 'package:Aap_job/utill/colors.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:custom_clippers/custom_clippers.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -31,6 +33,7 @@ class ChatPage extends StatelessWidget {
       Scaffold(
       backgroundColor: Colors.black12,
       appBar: AppBar(
+        backgroundColor: Primary,
         leading: InkWell(
           onTap: () {
             Navigator.pop(context);
@@ -38,7 +41,7 @@ class ChatPage extends StatelessWidget {
           borderRadius: BorderRadius.circular(20),
           child: Row(
             children: [
-              const Icon(Icons.arrow_back),
+             const Icon(Icons.arrow_back_ios_new),
               Hero(
                 tag: 'profile',
                 child: Container(
@@ -46,7 +49,7 @@ class ChatPage extends StatelessWidget {
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     image: DecorationImage(
-                      image: CachedNetworkImageProvider(user.profileImageUrl),
+                      image: CachedNetworkImageProvider(AppConstants.BASE_URL+user.profileImageUrl),
                     ),
                   ),
                 ),
@@ -56,11 +59,6 @@ class ChatPage extends StatelessWidget {
         ),
         title: InkWell(
           onTap: () {
-            // Navigator.pushNamed(
-            //   context,
-            //   Routes.profile,
-            //   arguments: user,
-            // );
           },
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 5),
@@ -70,11 +68,11 @@ class ChatPage extends StatelessWidget {
                 Text(
                   user.username,
                   style: const TextStyle(
-                    fontSize: 18,
+                    fontSize: 20,
                     color: Colors.white,
                   ),
                 ),
-                const SizedBox(height: 3),
+                const SizedBox(height: 2),
                 StreamBuilder(
                   stream: Provider.of<ChatAuthRepository>(context, listen: false).getUserPresenceStatus(uid: user.uid),
                   builder: (_, snapshot) {
@@ -96,23 +94,6 @@ class ChatPage extends StatelessWidget {
             ),
           ),
         ),
-        // actions: [
-        //   CustomIconButton(
-        //     onPressed: () {},
-        //     icon: Icons.video_call,
-        //     iconColor: Colors.white,
-        //   ),
-        //   CustomIconButton(
-        //     onPressed: () {},
-        //     icon: Icons.call,
-        //     iconColor: Colors.white,
-        //   ),
-        //   CustomIconButton(
-        //     onPressed: () {},
-        //     icon: Icons.more_vert,
-        //     iconColor: Colors.white,
-        //   ),
-        // ],
       ),
       body: Stack(
         children: [
@@ -210,7 +191,6 @@ class ChatPage extends StatelessWidget {
         ),
       );
     });}),
-
           ),
           Container(
             alignment: const Alignment(0, 1),

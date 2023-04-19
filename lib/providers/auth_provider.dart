@@ -227,6 +227,12 @@ class AuthProvider with ChangeNotifier {
     return authRepo.getMobile();
   }
 
+  bool IsMobileVerified() {
+    return authRepo.IsMobileVerified();
+  }
+
+
+
   String getHrName() {
     return authRepo.getHrName();
   }

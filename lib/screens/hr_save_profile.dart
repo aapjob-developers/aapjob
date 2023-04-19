@@ -7,6 +7,8 @@ import 'package:Aap_job/screens/HrVerificationScreen.dart';
 import 'package:Aap_job/screens/hrhomepage.dart';
 import 'package:Aap_job/screens/select_language.dart';
 import 'package:Aap_job/screens/widget/VideoPopup.dart';
+import 'package:Aap_job/widgets/show_loading_dialog.dart';
+import 'package:Aap_job/widgets/show_location_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:Aap_job/models/CitiesModel.dart';
@@ -208,7 +210,6 @@ class _HrSaveProfileState extends State<HrSaveProfile> {
 
   Future<void> _getCurrentPosition() async {
     final hasPermission = await _handleLocationPermission();
-
     if (!hasPermission) return;
     await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high)
         .then((Position position) {
@@ -222,9 +223,10 @@ class _HrSaveProfileState extends State<HrSaveProfile> {
 
   _getAddressFromCurrentLocation(LatLng coordinate) async {
    // var coordinate = await SharedManager.shared.getLocationCoordinate();
+        Navigator.pop(context);
     print("Stored Location:$coordinate");
-    var addresses=await placemarkFromCoordinates(coordinate.latitude, coordinate.latitude);
-    var first = addresses.first;
+    var addresses=await placemarkFromCoordinates(coordinate.latitude, coordinate.longitude);
+    var first = addresses.reversed.last;
     print('adminArea: ${first.administrativeArea}');
     print('locality: ${first.locality}');
     print('addressLine: ${first.name}');
@@ -319,7 +321,7 @@ class _HrSaveProfileState extends State<HrSaveProfile> {
         _localityController.text= sharedPreferences!.getString("HrLocality")=="no Locality"||sharedPreferences!.getString("HrLocality")==null?"":sharedPreferences!.getString("HrLocality")?? "";
         _websiteController.text= sharedPreferences!.getString("HrWebsite")=="no website"||sharedPreferences!.getString("HrWebsite")==null?"":sharedPreferences!.getString("HrWebsite")?? "";
         Imagepath=sharedPreferences!.getString("profileImage")?? "";
-        if(Imagepath!="")
+        if(Imagepath!=""&&Imagepath!="no profileImage")
         {
           _profileImageuploaded=true;
         }
@@ -736,7 +738,14 @@ class _HrSaveProfileState extends State<HrSaveProfile> {
                       child:
                       GestureDetector(
                         onTap:(){
-                          //  CommonFunctions.showSuccessToast("");
+                          // showLoadingDialog(
+                          //   context: context,
+                          //   message: "Getting Your Current Location. Please Wait.",
+                          // );
+                          showLocationDialog(
+                            context: context,
+                            message: 'assets/lottie/location-permissions.json',
+                          );
                           _getLocation();
                         },
                         child:
@@ -1111,6 +1120,13 @@ class _HrSaveProfileState extends State<HrSaveProfile> {
       child: Stack(children: <Widget>[
         _cropedFile == null&&Imagepath==""
             ?
+        Lottie.asset(
+          'assets/lottie/profilene.json',
+          height: 150,
+          width: 150,
+          animate: true,)
+            :
+        Imagepath=="no profileImage"?
         Lottie.asset(
           'assets/lottie/profilene.json',
           height: 150,

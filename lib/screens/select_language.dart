@@ -201,7 +201,7 @@ class _SelectLanguageState extends State<SelectLanguage> {
         }
         else
         {
-          if( Provider.of<AuthProvider>(context, listen: false).getMobile()=="no Mobile") {
+          if( Provider.of<AuthProvider>(context, listen: false).getMobile()=="no Mobile"||Provider.of<AuthProvider>(context, listen: false).IsMobileVerified()) {
             Navigator.pushAndRemoveUntil(context, MaterialPageRoute(
                 builder: (context) => LoginScreen()), (route) => false);
           }
@@ -318,6 +318,19 @@ class _SelectLanguageState extends State<SelectLanguage> {
                                 style: new TextStyle(
                                     color: Colors.white, fontSize: 14),
                                 textAlign: TextAlign.center,),
+
+                            ]
+
+                        ),
+                        padding: const EdgeInsets.all(1.0),
+                      ),
+                      new Padding(
+                        child:
+                        new Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            mainAxisSize: MainAxisSize.max,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: <Widget>[
                               Flexible(child:
                               GestureDetector(
                                 onTap: (){
@@ -336,7 +349,7 @@ class _SelectLanguageState extends State<SelectLanguage> {
                             ]
 
                         ),
-                        padding: const EdgeInsets.all(8.0),
+                        padding: const EdgeInsets.all(2.0),
                       ),
                       Center(
                           child: ValueListenableBuilder<int>(

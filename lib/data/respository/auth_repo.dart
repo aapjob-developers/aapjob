@@ -169,6 +169,7 @@ class AuthRepo {
       sharedPreferences!.setString("name",user.name==""?"no Name":user.name);
       sharedPreferences!.setString("jobcity",user.preferredCity==""?"no Jobcity":user.preferredCity);
       sharedPreferences!.setString("phone",user.mobile==""?"no Mobile":user.mobile);
+      sharedPreferences!.setBool("IsMobileVerified",user.mobile==""||user.mobile==null?false:true);
       sharedPreferences!.setString("gender",user.gender==""?"no gender":user.gender);
       sharedPreferences!.setString("status",user.status==""?"0":user.status);
       // print("status : "+user.status);
@@ -273,7 +274,12 @@ class AuthRepo {
       sharedPreferences!.setString("HrCompanyName", user.companyName==""?"no Company Name":user.companyName);
       sharedPreferences!.setString("HrCity",user.city==""?"no City":user.city);
       sharedPreferences!.setString("HrCompanyCertificate",user.docResumeSrc==""?"no Certificate":user.docResumeSrc );
+      if(sharedPreferences!.getString("HrCompanyCertificate")=="no Certificate"&&sharedPreferences!.getString("cfilename")!=null)
+        {
+          sharedPreferences!.setString("HrCompanyCertificate","uploads/hr_resume/docs/"+sharedPreferences!.getString("cfilename")!);
+        }
       sharedPreferences!.setString("phone",user.mobile==""?"no Mobile":user.mobile);
+      sharedPreferences!.setBool("IsMobileVerified",user.mobile==""||user.mobile==null?false:true);
       sharedPreferences!.setString("HrLocality",user.location==""?"no Locality":user.location);
       //  sharedPreferences!.setString("certificate", user.docResumeSrc);
       sharedPreferences!.setString("status",user.status==""?"no Status":user.status);
@@ -397,6 +403,9 @@ class AuthRepo {
     return sharedPreferences!.getString("phone") ?? "";
   }
 
+  bool IsMobileVerified() {
+    return sharedPreferences!.getBool("IsMobileVerified") ?? false;
+  }
   String getName() {
     return sharedPreferences!.getString("name") ?? "";
   }

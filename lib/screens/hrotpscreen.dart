@@ -275,6 +275,7 @@ class _AuthCardState extends State<AuthCard> with CodeAutoFill{
       // Navigator.pushReplacement( context,  MaterialPageRoute(builder: (context) => JobTypeSelect()),);
       this.sharedPreferences = await SharedPreferences.getInstance();
       sharedPreferences!.setBool("step2", true);
+      sharedPreferences!.setBool("IsMobileVerified", true);
       Navigator.pushReplacement( context,  MaterialPageRoute(builder: (context) => HrSaveProfile(path: "",)),);
     } else {
       CommonFunctions.showErrorDialog(errorMessage,context);

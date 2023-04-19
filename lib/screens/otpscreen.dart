@@ -10,6 +10,7 @@ import 'package:Aap_job/screens/videoApp.dart';
 import 'package:Aap_job/utill/colors.dart';
 import 'package:Aap_job/view/basewidget/textfield/custom_textfield.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:sms_autofill/sms_autofill.dart';
 import '../models/common_functions.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -131,7 +132,7 @@ class AuthCard extends StatefulWidget {
   _AuthCardState createState() => _AuthCardState();
 }
 
-class _AuthCardState extends State<AuthCard> {
+class _AuthCardState extends State<AuthCard> with CodeAutoFill{
   TextEditingController _box1Controller = TextEditingController();
   TextEditingController _box2Controller = TextEditingController();
   TextEditingController _box3Controller = TextEditingController();
@@ -148,11 +149,12 @@ class _AuthCardState extends State<AuthCard> {
     'mobile': '',
     'otp':'',
   };
+  String codeValue = "";
   var _isLoading = false;
   SharedPreferences? sharedPreferences;
   int secondsRemaining = 30;
   bool enableResend = false;
-  Timer? timer;
+  late Timer timer;
   bool loggedin=false, step1=false, step2=false;
 
   @override
@@ -176,8 +178,25 @@ class _AuthCardState extends State<AuthCard> {
 
 
   @override
-  dispose(){
-    timer?.cancel();
+  void codeUpdated() {
+    print("Update code $code");
+    setState(() {
+      print("codeUpdated");
+    });
+  }
+
+  void listenOtp() async {
+    // await SmsAutoFill().unregisterListener();
+    // listenForCode();
+    await SmsAutoFill().listenForCode;
+    print("OTP listen Called");
+  }
+
+  @override
+  void dispose() {
+    SmsAutoFill().unregisterListener();
+    timer.cancel();
+    print("unregisterListener");
     super.dispose();
   }
 
@@ -191,44 +210,70 @@ class _AuthCardState extends State<AuthCard> {
   noroute(bool isRoute, String errorMessage) async {
   }
 
+  // Future<void> _submit() async {
+  //   if (!_formKey.currentState!.validate()) {
+  //     // Invalid!
+  //     return;
+  //   }
+  //   _formKey.currentState!.save();
+  //   setState(() {
+  //     _isLoading = true;
+  //   });
+  //
+  //   String _box1 = _box1Controller.text.trim();
+  //   String _box2 = _box2Controller.text.trim();
+  //   String _box3 = _box3Controller.text.trim();
+  //   String _box4 = _box4Controller.text.trim();
+  //
+  //   if (_box1.isEmpty||_box2.isEmpty||_box3.isEmpty||_box4.isEmpty) {
+  //     CommonFunctions.showSuccessToast('Please fill all boxes');
+  //   }
+  //   else
+  //     {
+  //       String Otp = _box1 + _box2 + _box3 + _box4;
+  //       if(Otp==Provider.of<AuthProvider>(context, listen: false).getOtp())
+  //         {
+  //           await Provider.of<AuthProvider>(context, listen: false).login(Provider.of<AuthProvider>(context, listen: false).getUserid(),Provider.of<AuthProvider>(context, listen: false).getMobile(), route);
+  //         }
+  //       else
+  //         {
+  //           CommonFunctions.showSuccessToast('OTP Not Matched');
+  //         }
+  //     }
+  //   setState(() {
+  //     _isLoading = false;
+  //   });
+  // }
   Future<void> _submit() async {
-    if (!_formKey.currentState!.validate()) {
-      // Invalid!
-      return;
-    }
-    _formKey.currentState!.save();
-    setState(() {
-      _isLoading = true;
-    });
-
-    String _box1 = _box1Controller.text.trim();
-    String _box2 = _box2Controller.text.trim();
-    String _box3 = _box3Controller.text.trim();
-    String _box4 = _box4Controller.text.trim();
-
-    if (_box1.isEmpty||_box2.isEmpty||_box3.isEmpty||_box4.isEmpty) {
-      CommonFunctions.showSuccessToast('Please fill all boxes');
+    if(codeValue==Provider.of<AuthProvider>(context, listen: false).getOtp())
+    {
+      await Provider.of<AuthProvider>(context, listen: false).login(Provider.of<AuthProvider>(context, listen: false).getUserid(),Provider.of<AuthProvider>(context, listen: false).getMobile(), route);
     }
     else
-      {
-        String Otp = _box1 + _box2 + _box3 + _box4;
-        if(Otp==Provider.of<AuthProvider>(context, listen: false).getOtp())
-          {
-            await Provider.of<AuthProvider>(context, listen: false).login(Provider.of<AuthProvider>(context, listen: false).getUserid(),Provider.of<AuthProvider>(context, listen: false).getMobile(), route);
-          }
-        else
-          {
-            CommonFunctions.showSuccessToast('OTP Not Matched');
-          }
-      }
+    {
+      CommonFunctions.showSuccessToast("Otp Not Matched");
+    }
+
     setState(() {
       _isLoading = false;
     });
   }
+  // route(bool isRoute, String route, String errorMessage) async {
+  //   if (isRoute) {
+  //     this.sharedPreferences = await SharedPreferences.getInstance();
+  //     sharedPreferences!.setBool("step2", true);
+  //     Navigator.pushReplacement( context,  MaterialPageRoute(builder: (context) => SaveProfile(path: "",)),);
+  //   } else {
+  //     CommonFunctions.showErrorDialog(errorMessage,context);
+  //   }
+  // }
+
   route(bool isRoute, String route, String errorMessage) async {
     if (isRoute) {
+      // Navigator.pushReplacement( context,  MaterialPageRoute(builder: (context) => JobTypeSelect()),);
       this.sharedPreferences = await SharedPreferences.getInstance();
       sharedPreferences!.setBool("step2", true);
+      sharedPreferences!.setBool("IsMobileVerified", true);
       Navigator.pushReplacement( context,  MaterialPageRoute(builder: (context) => SaveProfile(path: "",)),);
     } else {
       CommonFunctions.showErrorDialog(errorMessage,context);
@@ -247,60 +292,83 @@ class _AuthCardState extends State<AuthCard> {
         child: SingleChildScrollView(
           child: Column(
             children: <Widget>[
-          Container(
-          margin: EdgeInsets.only(left: 20, right: 20),
-          child: Row(
-            children: [
-              Expanded(
-                  child: CustomTextField(
-                    hintText: "0",
-                    textInputType: TextInputType.phone,
-                    focusNode: _box1Focus,
-                    nextNode: _box2Focus,
-                    isOtp: true,
-                    maxLine: 1,
-                    capitalization: TextCapitalization.words,
-                    controller: _box1Controller,
-                    textInputAction: TextInputAction.next,
-                  )),
-              SizedBox(width: 15),
-              Expanded(
-                  child: CustomTextField(
-                    hintText: "0",
-                    textInputType: TextInputType.phone,
-                    focusNode: _box2Focus,
-                    nextNode: _box3Focus,
-                    isOtp: true,
-                    maxLine: 1,
-                    capitalization: TextCapitalization.words,
-                    controller: _box2Controller,
-                    textInputAction: TextInputAction.next,
-                  )),
-              SizedBox(width: 15),
-              Expanded(
-                  child: CustomTextField(
-                    hintText: "0",
-                    textInputType: TextInputType.phone,
-                    focusNode: _box3Focus,
-                    nextNode: _box4Focus,
-                    isOtp: true,
-                    maxLine: 1,
-                    capitalization: TextCapitalization.words,
-                    controller: _box3Controller,
-                    textInputAction: TextInputAction.next,
-                  )),
-              SizedBox(width: 15),
-              Expanded(
-                  child: CustomTextField(
-                    hintText: "0",
-                    textInputType: TextInputType.phone,
-                    focusNode: _box4Focus,
-                    isOtp: true,
-                    maxLine: 1,
-                    capitalization: TextCapitalization.words,
-                    controller: _box4Controller,
-                  )),
-            ])),
+          // Container(
+          // margin: EdgeInsets.only(left: 20, right: 20),
+          // child: Row(
+          //   children: [
+          //     Expanded(
+          //         child: CustomTextField(
+          //           hintText: "0",
+          //           textInputType: TextInputType.phone,
+          //           focusNode: _box1Focus,
+          //           nextNode: _box2Focus,
+          //           isOtp: true,
+          //           maxLine: 1,
+          //           capitalization: TextCapitalization.words,
+          //           controller: _box1Controller,
+          //           textInputAction: TextInputAction.next,
+          //         )),
+          //     SizedBox(width: 15),
+          //     Expanded(
+          //         child: CustomTextField(
+          //           hintText: "0",
+          //           textInputType: TextInputType.phone,
+          //           focusNode: _box2Focus,
+          //           nextNode: _box3Focus,
+          //           isOtp: true,
+          //           maxLine: 1,
+          //           capitalization: TextCapitalization.words,
+          //           controller: _box2Controller,
+          //           textInputAction: TextInputAction.next,
+          //         )),
+          //     SizedBox(width: 15),
+          //     Expanded(
+          //         child: CustomTextField(
+          //           hintText: "0",
+          //           textInputType: TextInputType.phone,
+          //           focusNode: _box3Focus,
+          //           nextNode: _box4Focus,
+          //           isOtp: true,
+          //           maxLine: 1,
+          //           capitalization: TextCapitalization.words,
+          //           controller: _box3Controller,
+          //           textInputAction: TextInputAction.next,
+          //         )),
+          //     SizedBox(width: 15),
+          //     Expanded(
+          //         child: CustomTextField(
+          //           hintText: "0",
+          //           textInputType: TextInputType.phone,
+          //           focusNode: _box4Focus,
+          //           isOtp: true,
+          //           maxLine: 1,
+          //           capitalization: TextCapitalization.words,
+          //           controller: _box4Controller,
+          //         )),
+          //   ])),
+              Container(
+                margin: EdgeInsets.only(left: 20, right: 20),
+                child:
+                Center(
+                  child: PinFieldAutoFill(
+                    decoration: UnderlineDecoration(
+                      textStyle: TextStyle(fontSize: 20, color: Colors.white),
+                      colorBuilder: FixedColorBuilder(Colors.white.withOpacity(0.3)),
+                    ),
+                    currentCode: codeValue,
+                    codeLength: 4,
+                    onCodeChanged: (code) {
+                      print("onCodeChanged $code");
+                      setState(() {
+                        codeValue = code.toString();
+                      });
+                      _submit();
+                    },
+                    onCodeSubmitted: (val) {
+                      print("onCodeSubmitted $val");
+                    },
+                  ),
+                ),),
               SizedBox(
                 height: 20,
               ),

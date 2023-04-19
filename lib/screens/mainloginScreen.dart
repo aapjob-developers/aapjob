@@ -4,6 +4,8 @@ import 'package:Aap_job/models/common_functions.dart';
 import 'package:Aap_job/providers/config_provider.dart';
 import 'package:Aap_job/screens/widget/adsView.dart';
 import 'package:Aap_job/utill/authentification.dart';
+import 'package:Aap_job/widgets/show_loading_dialog.dart';
+import 'package:Aap_job/widgets/show_location_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:Aap_job/screens/selectOptionScreen.dart';
 import 'package:Aap_job/utill/colors.dart';
@@ -37,13 +39,19 @@ class _MainloginScreenState extends State<MainloginScreen> {
   }
 
   Future<dynamic> signInWithGoogle() async {
+    showLocationDialog(
+      context: context,
+      message: 'assets/lottie/wait.json',
+    );
     user=await Authentification().signInWithGoogle();
     if(user!=null)
     {
+      Navigator.pop(context);
       Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => SelectOptionScreen()),);
     }
     else
     {
+      Navigator.pop(context);
       CommonFunctions.showInfoDialog("Could not Complete Login", context);
     }
 

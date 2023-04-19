@@ -239,6 +239,7 @@ File? file,videofile;
     setState(() {
     fileselected=true;
     filename=result.files.single.name;
+    sharedPreferences!.setString("cfilename", filename!);
     file=File(resumepath);
         if(result.files.single.extension=="jpg")
         {
@@ -300,12 +301,12 @@ File? file,videofile;
     String acctype="hr";
     await Provider.of<AuthProvider>(context, listen: false).checkaccount(acctype,email!, AccessToken!, routers);
   }
-
   routers(bool isRoute, String route,String status, String errorMessage) async {
     print(route);
     sharedPreferences!.setString("route", route);
     if (isRoute) {
       sharedPreferences!.setBool("loggedin", true);
+      sharedPreferences!.setString("HrCompanyCertificate","uploads/hr_resume/docs/"+filename);
       Navigator.pushReplacement( context,  MaterialPageRoute(builder: (context) => HrHomePage()),);
     } else {
       CommonFunctions.showErrorDialog(errorMessage,context);

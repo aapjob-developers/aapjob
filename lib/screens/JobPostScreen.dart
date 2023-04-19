@@ -3,6 +3,9 @@ import 'dart:io';
 import 'package:Aap_job/helper/SharedManager.dart';
 import 'package:Aap_job/localization/language_constrants.dart';
 import 'package:Aap_job/providers/jobtitle_provider.dart';
+import 'package:Aap_job/screens/widget/job_reset_confirmation_dialog.dart';
+import 'package:Aap_job/widgets/show_loading_dialog.dart';
+import 'package:Aap_job/widgets/show_location_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:Aap_job/models/CitiesModel.dart';
@@ -117,6 +120,8 @@ class _JobPostScreenState extends State<JobPostScreen> {
     super.initState();
   }
 
+
+
 ///////////////////////////////////job titles ////////////////////
 
   bool _hasJobTitle=false;
@@ -131,10 +136,6 @@ class _JobPostScreenState extends State<JobPostScreen> {
   var city = "";
 
   _getLocation() async {
-    // final coordinate = await SharedManager.shared.getLocationCoordinate();
-    // this.latitude = coordinate.latitude;
-    // this.longitude = coordinate.longitude;
-    // _getAddressFromCurrentLocation( await SharedManager.shared.getLocationCoordinate());
     await _getCurrentPosition();
   }
 
@@ -172,31 +173,33 @@ class _JobPostScreenState extends State<JobPostScreen> {
 
   Future<void> _getCurrentPosition() async {
     final hasPermission = await _handleLocationPermission();
-
     if (!hasPermission) return;
-    await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high)
+    await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.medium)
         .then((Position position) {
       setState(() => _currentPosition = position);
       var latlong = LatLng(_currentPosition!.latitude, _currentPosition!.longitude);
       _getAddressFromCurrentLocation(latlong);
     }).catchError((e) {
       debugPrint(e);
+      Navigator.pop(context);
     });
   }
 
   _getAddressFromCurrentLocation(LatLng coordinate) async {
    // var coordinate = await SharedManager.shared.getLocationCoordinate();
+    
+        Navigator.pop(context);
     print("Stored Location:$coordinate");
-    var addresses=await placemarkFromCoordinates(coordinate.latitude, coordinate.latitude);
+    var addresses=await placemarkFromCoordinates(coordinate.latitude, coordinate.longitude);
     var first = addresses.first;
-    print('adminArea: ${first.administrativeArea}');
-    print('locality: ${first.locality}');
-    print('addressLine: ${first.name}');
-    print('featureName: ${first.street}');
-    print('subAdminArea: ${first.subAdministrativeArea}');
-    print('subLocality: ${first.subLocality}');
-    print('subThoroughfare: ${first.subThoroughfare}');
-    print('thoroughfare: ${first.thoroughfare}');
+    // print('adminArea: ${first.administrativeArea}');
+    // print('locality: ${first.locality}');
+    // print('addressLine: ${first.name}');
+    // print('featureName: ${first.street}');
+    // print('subAdminArea: ${first.subAdministrativeArea}');
+    // print('subLocality: ${first.subLocality}');
+    // print('subThoroughfare: ${first.subThoroughfare}');
+    // print('thoroughfare: ${first.thoroughfare}');
     if(first.locality!=null)
     {
       this.city = first.locality!;
@@ -232,7 +235,7 @@ class _JobPostScreenState extends State<JobPostScreen> {
         CommonFunctions.showInfoDialog("Your City is not in list. Please select a near by city from City List", context);
       }
 
-      jobcityid=cityid!;
+      jobcityid=city.id!;
       if (cityname != first.locality && first.locality != null) {
         _localityController.text = first.locality!;
       } else if (cityname != first.subLocality && first.subLocality != null) {
@@ -584,7 +587,7 @@ String Jobtype="";
         sharedPreferences!.setString("education", eduvalue);
         sharedPreferences!.setBool("postjobstep1", true);
         sharedPreferences!.setString("address", _address);
-        Navigator.push(context, MaterialPageRoute(builder: (context) => JobPostScreen2()));
+        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => JobPostScreen2()));
       }
     }
     else
@@ -1007,6 +1010,14 @@ String Jobtype="";
                           GestureDetector(
                             onTap:(){
                               //  CommonFunctions.showSuccessToast("");
+                              // showLoadingDialog(
+                              //   context: context,
+                              //   message: "Getting Your Current Location. Please Wait.",
+                              // );
+                              showLocationDialog(
+                                context: context,
+                                message: 'assets/lottie/location-permissions.json',
+                              );
                               _getLocation();
                             },
                             child:
@@ -1484,13 +1495,37 @@ String Jobtype="";
                         new Padding(
                           child:
                               Row(
-                                mainAxisAlignment: MainAxisAlignment.end,
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
+                                  ElevatedButton(
+                                    child:
+                                    Row(
+                                      crossAxisAlignment: CrossAxisAlignment.center,
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Text("Reset",style:TextStyle(fontWeight: FontWeight.w700)),
+                                        Lottie.asset(
+                                          'assets/lottie/resetb.json',
+                                          height: MediaQuery.of(context).size.width*0.06,
+                                          //width: MediaQuery.of(context).size.width*0.45,
+                                          animate: true,),
+                                      ],
+                                    ),
+                                    onPressed: () => showAnimatedDialog(context, JobResetConfirmationDialog(), isFlip: true),
+                                    style: ElevatedButton.styleFrom(
+                                        minimumSize: new Size(deviceSize.width * 0.4,20),
+                                        shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(16)),
+                                        primary: Colors.red,
+                                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                                        textStyle:
+                                        const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                                  ),
                                   _isLoading?
                                       CircularProgressIndicator()
                                       :
                                   ElevatedButton(
-                                    child: const Text('Next'),
+                                    child: const Text('Next',style:TextStyle(fontWeight: FontWeight.w700)),
                                     onPressed: () {
     if (_formKey.currentState!.validate()) {
       _savedata();

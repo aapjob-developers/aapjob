@@ -2,6 +2,8 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:Aap_job/localization/language_constrants.dart';
 import 'package:Aap_job/providers/auth_provider.dart';
+import 'package:Aap_job/screens/JobPostScreen.dart';
+import 'package:Aap_job/screens/widget/job_reset_confirmation_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:Aap_job/models/CitiesModel.dart';
@@ -1674,8 +1676,20 @@ class _JobPostScreen2State extends State<JobPostScreen2> {
                         new Padding(
                           child:
                           Row(
-                            mainAxisAlignment: MainAxisAlignment.end,
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
+                              ElevatedButton(
+                                child: const Text('Reset'),
+                                onPressed: () => showAnimatedDialog(context, JobResetConfirmationDialog(), isFlip: true),
+                                style: ElevatedButton.styleFrom(
+                                    minimumSize: new Size(deviceSize.width * 0.4,20),
+                                    shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(16)),
+                                    primary: Colors.red,
+                                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                                    textStyle:
+                                    const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                              ),
                               _isLoading?
                               CircularProgressIndicator()
                                   :

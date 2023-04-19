@@ -24,7 +24,6 @@ class ChatRepository extends ChangeNotifier {
     required this.firestore,
   });
 
-
   void sendFileMessage({
     required var file,
     required BuildContext context,
@@ -97,6 +96,24 @@ class ChatRepository extends ChangeNotifier {
     });
   }
 
+  Stream<int> getAllUnseenMessage() {
+    return firestore
+        .collection('users')
+        .doc(auth.currentUser!.uid)
+        .collection('messages')
+        .orderBy('timeSent')
+        .snapshots()
+        .map((event) {
+      int _totalunseenmsg=0;
+      for (var message in event.docs) {
+        print("in");
+       if(!MessageModel.fromMap(message.data()).isSeen)
+         _totalunseenmsg++;
+      }
+      return _totalunseenmsg;
+    });
+  }
+
   Stream<List<LastMessageModel>> getAllLastMessageList() {
     return firestore
         .collection('users')
@@ -118,6 +135,7 @@ class ChatRepository extends ChangeNotifier {
             lastMessage: lastMessage.lastMessage,
           ),
         );
+
       }
       return contacts;
     });

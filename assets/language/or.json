@@ -46,7 +46,7 @@
   "WHO_CAN_APPLY":"କିଏ ଆବେଦନ କରିପାରିବେ |",
   "POST_A_JOB":"2 ମିନିଟରେ ଏକ ଚାକିରି ପୋଷ୍ଟ କରନ୍ତୁ |",
   "EDIT_PROFILE_VIDEO":"ପ୍ରୋଫାଇଲ୍ ଭିଡିଓ ସଂପାଦନ କରନ୍ତୁ |",
-  "EDIT_COMPANY_DETAILS":"କମ୍ପାନୀ ବିବରଣୀ ସଂପାଦନ କରନ୍ତୁ |",
+  "EDIT_COMPANY_DETAILS":" କମ୍ପାନୀ ବିବରଣୀ ସଂପାଦନ କରନ୍ତୁ |",
   "EDIT_PROFILE_DETAILS":"ପ୍ରୋଫାଇଲ୍ ଛବି ସଂପାଦନ କରନ୍ତୁ |",
   "MY_CLOSED_JOBS":"ମୋର ବନ୍ଦ ଚାକିରି |",
   "EDIT_BASIC_DETAILS":"ମ basic ଳିକ ବିବରଣୀ ସଂପାଦନ କରନ୍ତୁ |",
@@ -91,6 +91,10 @@
   "NEW_UPDATE_AVAILABLE":"ଆପଣଙ୍କ ପାଇଁ ଆମର ଏକ ନୂଆ ଆପ୍ ଅପଡେଟ୍ ଅଛି |",
   "NEW_UPDATE_MSG":"ଏକ ଅଦ୍ୟତନ ଅଭିଜ୍ଞତା ସହିତ ନୂତନ ବ features ଶିଷ୍ଟ୍ୟଗୁଡିକ |",
   "YOUR_EXPERIENCE":"ତୁମର ଅଭିଜ୍ଞତା",
-  "DO_YOU_HAVE_EXP": "ଆପଣଙ୍କର କ experience ଣସି ଅଭିଜ୍ଞତା ଅଛି କି?"
-
+  "DO_YOU_HAVE_EXP": "ଆପଣଙ୍କର କ experience ଣସି ଅଭିଜ୍ଞତା ଅଛି କି?",
+  "MY_BILLING": "ମୋର ଖର୍ଚ୍ଚ ଏବଂ ବ୍ୟବହାର",
+  "CHANGE_LANGUAGE": "ଭାଷା ପରିବର୍ତ୍ତନ କରନ୍ତୁ |",
+  "Rate_and_Share": "ଆପୋଜ ଆପ୍ ରେଟ୍ ଏବଂ ସେୟାର୍ କରନ୍ତୁ |",
+  "My_Applied_jobs": "ଚାକିରି ପାଇଁ ମୁଁ ଆବେଦନ କରିଛି |",
+  "MY_SHORT_LIST": "ସାକ୍ଷାତକାର ପାଇଁ ମୋତେ ଡାକ |"
 }

@@ -126,6 +126,8 @@ flutter:
     - assets/images/editjob.png
     - assets/images/WhatsApp.png
     - assets/lottie/hiring.json
+    - assets/lottie/resetb.json
+    - assets/lottie/location-permissions.json
     - assets/lottie/addprofile.json
     - assets/lottie/blinkingeyes.json
     - assets/lottie/humanresources.json
@@ -144,6 +146,7 @@ flutter:
     - assets/lottie/callicon.json
     - assets/lottie/telegram.json
     - assets/lottie/arrowright.json
+    - assets/lottie/wait.json
     - assets/lottie/mailicon.json
     - assets/lottie/website.json
     - assets/lottie/purchasedetail.json
@@ -171,6 +174,7 @@ flutter:
     - assets/images/cemara.png
     - assets/images/gallery.png
     - assets/images/pdficon.png
+    - assets/images/msg.png
     - assets/language/
 #  fonts:
 #    - family: Permanent Marker

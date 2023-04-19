@@ -37,6 +37,7 @@ class _ProfileExpState extends State<ProfileExp> {
   Color yesbutton=Colors.amber,nobutton=Colors.amber;
   String pt="",emaile="";
   File? file;
+
   void initState() {
     super.initState();
     initializePreference().whenComplete((){
@@ -69,12 +70,18 @@ class _ProfileExpState extends State<ProfileExp> {
     if(exp)
       {
       }
-    else
-      {
+    else {
+      if (test == false) {
+        CommonFunctions.showInfoDialog("Please Select Yes Or No to Continue", context);
+      }
+      else {
         sharedPreferences!.setBool("myexp", false);
         sharedPreferences!.setBool("step4", true);
-        Navigator.pushAndRemoveUntil(context,  MaterialPageRoute(builder: (context)=> ResumeUpload()), (route) => false);
+        Navigator.pushAndRemoveUntil(
+            context, MaterialPageRoute(builder: (context) => ResumeUpload()), (
+            route) => false);
       }
+    }
 
    }
 
@@ -190,7 +197,7 @@ class _ProfileExpState extends State<ProfileExp> {
                 mainAxisSize: MainAxisSize.max,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: <Widget>[
-                  Text("Do you have any experience ?",style: TextStyle(fontSize: 16,color: Colors.white),)
+                  Text(getTranslated('DO_YOU_HAVE_EXP', context)!,style: TextStyle(fontSize: 16,color: Colors.white),)
                 ]
             ),
             new Row(
@@ -211,6 +218,7 @@ class _ProfileExpState extends State<ProfileExp> {
                             child: const Text('Yes'),
                             onPressed: () {
                               setState(() {
+                                test=true;
                                 exp=true;
                                 yesbutton=Colors.green;
                                 nobutton=Colors.amber;
@@ -231,6 +239,7 @@ class _ProfileExpState extends State<ProfileExp> {
                             child: const Text('No'),
                             onPressed: () {
                               setState(() {
+                                test=true;
                                 exp=false;
                                 yesbutton=Colors.amber;
                                 nobutton=Colors.green;
@@ -353,10 +362,11 @@ class _ExpBoxState extends State<ExpBox> {
 
   final _formKey = GlobalKey<FormState>();
 // Initial Selected Value
-  String dropdownvalue = '0- Rs. 10,000';
+  String dropdownvalue = 'Please Select Salary';
   String totalexp="none";
   // List of items in our dropdown menu
   var items = [
+    'Please Select Salary',
     '0- Rs. 10,000',
     'Rs. 10,000- Rs. 15,000',
     'Rs. 15,000- Rs. 20,000',
@@ -454,16 +464,17 @@ class _ExpBoxState extends State<ExpBox> {
 ///////////////////////////////////////////////////////
 
   Future<void> _savestep3() async {
-    final sharedPreferences = await SharedPreferences.getInstance();
-    String _Jobtitle = _jobtitleController.text.trim();
-    String _companyname = companynameController.text.trim();
-
-    if(_Jobtitle.isEmpty||_companyname.isEmpty||totalexp=="none")
-    {
-       CommonFunctions.showInfoDialog("Please select Years of Experience", context);
-    }
-    else
-      {
+      final sharedPreferences = await SharedPreferences.getInstance();
+      String _Jobtitle = _jobtitleController.text.trim();
+      String _companyname = companynameController.text.trim();
+      if (_Jobtitle.isEmpty || _companyname.isEmpty || totalexp == "none") {
+        CommonFunctions.showInfoDialog(
+            "Please select Years of Experience", context);
+      } else if(dropdownvalue == "Please Select Salary")
+        {
+          CommonFunctions.showInfoDialog("Please select your Salary", context);
+        }
+      else {
         sharedPreferences!.setBool("myexp", true);
         sharedPreferences!.setString("jobtitle", _Jobtitle);
         sharedPreferences!.setString("companyname", _companyname);
@@ -471,8 +482,11 @@ class _ExpBoxState extends State<ExpBox> {
         sharedPreferences!.setString("currentsalary", dropdownvalue);
         sharedPreferences!.setString("candidateskills", selectedIndexes.toString());
         sharedPreferences!.setBool("step4", true);
-        Navigator.pushAndRemoveUntil(context,  MaterialPageRoute(builder: (context)=> ResumeUpload()), (route) => false);
+        Navigator.pushAndRemoveUntil(
+            context, MaterialPageRoute(builder: (context) => ResumeUpload()), (
+            route) => false);
       }
+
 
   }
   Future<void> _saveexp(String exper) async {

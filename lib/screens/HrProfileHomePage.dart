@@ -233,7 +233,7 @@ class _HrProfileHomeScreenState extends State<HrProfileHomeScreen> {
                                     padding: EdgeInsets.symmetric(vertical: 10),
                                     child: Divider(color: Colors.white,thickness: 2,),
                                   ),
-                                  Provider.of<ProfileProvider>(context, listen: false).getProfileString()=="no video"||Provider.of<ProfileProvider>(context, listen: false).getProfileString()==null
+                                  Provider.of<ProfileProvider>(context, listen: false).getProfileString()==""||Provider.of<ProfileProvider>(context, listen: false).getProfileString()=="no video"||Provider.of<ProfileProvider>(context, listen: false).getProfileString()==null
                                       ?
                                   GestureDetector(
                                       onTap: (){
@@ -340,7 +340,7 @@ class _HrProfileHomeScreenState extends State<HrProfileHomeScreen> {
               },
               child:
               Padding(
-                padding: const EdgeInsets.all(2.0),
+                padding: const EdgeInsets.all(5.0),
                 child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     mainAxisSize: MainAxisSize.max,
@@ -369,7 +369,7 @@ class _HrProfileHomeScreenState extends State<HrProfileHomeScreen> {
               },
               child:
               Padding(
-                padding: const EdgeInsets.all(2.0),
+                padding: const EdgeInsets.all(8.0),
                 child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     mainAxisSize: MainAxisSize.max,
@@ -398,13 +398,13 @@ class _HrProfileHomeScreenState extends State<HrProfileHomeScreen> {
               },
               child:
               Padding(
-                padding: const EdgeInsets.all(2.0),
+                padding: const EdgeInsets.all(8.0),
                 child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     mainAxisSize: MainAxisSize.max,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: <Widget>[
-                      Text(" My Billings",style: LatinFonts.aBeeZee(fontSize: 14,fontWeight: FontWeight.bold,color: Color.fromARGB(255,39, 170, 225))),
+                      Text(getTranslated('MY_BILLING', context)!,style: LatinFonts.aBeeZee(fontSize: 14,fontWeight: FontWeight.bold,color: Color.fromARGB(255,39, 170, 225))),
                       Lottie.asset(
                         'assets/lottie/arrowright.json',
                         height: MediaQuery.of(context).size.width*0.08,
@@ -424,13 +424,13 @@ class _HrProfileHomeScreenState extends State<HrProfileHomeScreen> {
               },
               child:
               Padding(
-                padding: const EdgeInsets.all(2.0),
+                padding: const EdgeInsets.all(8.0),
                 child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     mainAxisSize: MainAxisSize.max,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: <Widget>[
-                      Text(" Change Language",style: LatinFonts.aBeeZee(fontSize: 14,fontWeight: FontWeight.bold,color: Color.fromARGB(255,39, 170, 225))),
+                      Text(getTranslated('CHANGE_LANGUAGE', context)!,style: LatinFonts.aBeeZee(fontSize: 14,fontWeight: FontWeight.bold,color: Color.fromARGB(255,39, 170, 225))),
                       Lottie.asset(
                         'assets/lottie/arrowright.json',
                         height: MediaQuery.of(context).size.width*0.08,
@@ -449,20 +449,23 @@ class _HrProfileHomeScreenState extends State<HrProfileHomeScreen> {
                 Navigator.push( context,  MaterialPageRoute(builder: (context) => ShareAppScreen()));
               },
               child:
-              Container(
-                child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    mainAxisSize: MainAxisSize.max,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: <Widget>[
-                      Text(" Rate and Share AapJob App",style: LatinFonts.aBeeZee(fontSize: 14,fontWeight: FontWeight.bold,color: Color.fromARGB(255,39, 170, 225))),
-                      Lottie.asset(
-                        'assets/lottie/arrowright.json',
-                        height: MediaQuery.of(context).size.width*0.08,
-                        width: MediaQuery.of(context).size.width*0.08,
-                        animate: true,),
-                    ]
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Container(
+                  child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      mainAxisSize: MainAxisSize.max,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: <Widget>[
+                        Text(getTranslated('Rate_and_Share', context)!,style: LatinFonts.aBeeZee(fontSize: 14,fontWeight: FontWeight.bold,color: Color.fromARGB(255,39, 170, 225))),
+                        Lottie.asset(
+                          'assets/lottie/arrowright.json',
+                          height: MediaQuery.of(context).size.width*0.08,
+                          width: MediaQuery.of(context).size.width*0.08,
+                          animate: true,),
+                      ]
 
+                  ),
                 ),
               ),
             ),

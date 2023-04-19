@@ -13,6 +13,8 @@ import 'package:Aap_job/providers/content_provider.dart';
 import 'package:Aap_job/screens/select_language.dart';
 import 'package:Aap_job/screens/widget/CitySelectionScreen.dart';
 import 'package:Aap_job/screens/widget/VideoPopup.dart';
+import 'package:Aap_job/widgets/show_loading_dialog.dart';
+import 'package:Aap_job/widgets/show_location_dialog.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
@@ -98,7 +100,6 @@ class _SaveProfileState extends State<SaveProfile> {
   void initState() {
     super.initState();
     initializePreference().whenComplete((){
-
       setState(() {
         status=sharedPreferences!.getString("status")?? "0";
         _nameController.text= sharedPreferences!.getString("name")=="no Name"?"":sharedPreferences!.getString("name")?? "";
@@ -106,9 +107,12 @@ class _SaveProfileState extends State<SaveProfile> {
         _jobloczController.text= sharedPreferences!.getString("joblocation")=="no Jobcity"?"":sharedPreferences!.getString("joblocation")?? "";
         Imagepath=sharedPreferences!.getString("profileImage")?? "";
         pathe=sharedPreferences!.getString("profileVideo")?? "";
-        if(Imagepath!=""||Imagepath!="No profileImage")
-        {
-          _profileImageuploaded=true;
+        if(Imagepath!="")
+          {
+                if(Imagepath!="No profileImage")
+              {
+                _profileImageuploaded=true;
+              }
         }
         if(pathe!="")
         {
@@ -309,8 +313,9 @@ class _SaveProfileState extends State<SaveProfile> {
 
   _getAddressFromCurrentLocation(LatLng coordinate) async {
    // var coordinate = await SharedManager.shared.getLocationCoordinate();
+        Navigator.pop(context);
     print("Stored Location:$coordinate");
-    var addresses=await placemarkFromCoordinates(coordinate.latitude, coordinate.latitude);
+    var addresses=await placemarkFromCoordinates(coordinate.latitude, coordinate.longitude);
     var first = addresses.first;
     print('adminArea: ${first.administrativeArea}');
     print('locality: ${first.locality}');
@@ -474,7 +479,6 @@ class _SaveProfileState extends State<SaveProfile> {
         {
           setState(() {
             _profileuploaded=true;
-            _isLoading=false;
           });
           sharedPreferences!.setString("name", Name);
           sharedPreferences!.setString("jobcity",City);
@@ -484,7 +488,7 @@ class _SaveProfileState extends State<SaveProfile> {
           sharedPreferences!.setBool("step3", true);
           print("clicked");
           File imagefile=Imagepath!=""?File(Imagepath):File(_cropedFile!.path);
-          Timer(Duration(seconds: 5), () {
+          Timer(Duration(seconds: 4), () {
             setState(() {
               _isLoading = false;
             });
@@ -690,7 +694,14 @@ class _SaveProfileState extends State<SaveProfile> {
                           child:
                           GestureDetector(
                             onTap:(){
-                              //  CommonFunctions.showSuccessToast("");
+                              // showLoadingDialog(
+                              //   context: context,
+                              //   message: "Getting Your Current Location. Please Wait.",
+                              // );
+                              showLocationDialog(
+                                context: context,
+                                message: 'assets/lottie/location-permissions.json',
+                              );
                               _getLocation();
                             },
                             child:

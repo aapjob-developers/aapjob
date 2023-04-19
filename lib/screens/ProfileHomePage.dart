@@ -738,7 +738,7 @@ class _ProfileHomeScreenState extends State<ProfileHomeScreen> {
                         mainAxisSize: MainAxisSize.max,
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: <Widget>[
-                          Text(" My Applied Jobs",style: LatinFonts.aBeeZee(fontSize: 14,fontWeight: FontWeight.bold, color: Color.fromARGB(255,39, 170, 225))),
+                          Text(getTranslated('My_Applied_jobs', context)!,style: LatinFonts.aBeeZee(fontSize: 14,fontWeight: FontWeight.bold, color: Color.fromARGB(255,39, 170, 225))),
                           Lottie.asset(
                             'assets/lottie/arrowright.json',
                             height: MediaQuery.of(context).size.width*0.08,
@@ -772,7 +772,7 @@ class _ProfileHomeScreenState extends State<ProfileHomeScreen> {
                           children: <Widget>[
                             Row(
                               children: [
-                                Text("Shortlist List ",style: LatinFonts.aBeeZee(fontSize: 14,fontWeight: FontWeight.bold, color: Color.fromARGB(255,39, 170, 225))),
+                                Text(getTranslated('MY_SHORT_LIST', context)!,style: LatinFonts.aBeeZee(fontSize: 14,fontWeight: FontWeight.bold, color: Color.fromARGB(255,39, 170, 225))),
                                 _hasJobsModel==true?
                                 Jobslist.length==Provider.of<AuthProvider>(context, listen: false).getCurrentShortlistCount()
                                 ?
@@ -812,7 +812,7 @@ class _ProfileHomeScreenState extends State<ProfileHomeScreen> {
                           mainAxisSize: MainAxisSize.max,
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: <Widget>[
-                            Text(" Change Language",style: LatinFonts.aBeeZee(fontSize: 14,fontWeight: FontWeight.bold,color: Color.fromARGB(255,39, 170, 225))),
+                            Text(getTranslated('CHANGE_LANGUAGE', context)!,style: LatinFonts.aBeeZee(fontSize: 14,fontWeight: FontWeight.bold,color: Color.fromARGB(255,39, 170, 225))),
                             Lottie.asset(
                               'assets/lottie/arrowright.json',
                               height: MediaQuery.of(context).size.width*0.08,
@@ -837,7 +837,7 @@ class _ProfileHomeScreenState extends State<ProfileHomeScreen> {
                           mainAxisSize: MainAxisSize.max,
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: <Widget>[
-                            Text("Rate and Share AapJob App",style: LatinFonts.aBeeZee(fontSize: 14,fontWeight: FontWeight.bold,color: Color.fromARGB(255,39, 170, 225))),
+                            Text(getTranslated('Rate_and_Share', context)!,style: LatinFonts.aBeeZee(fontSize: 14,fontWeight: FontWeight.bold,color: Color.fromARGB(255,39, 170, 225))),
                             Lottie.asset(
                               'assets/lottie/arrowright.json',
                               height: MediaQuery.of(context).size.width*0.08,

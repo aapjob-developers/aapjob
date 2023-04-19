@@ -25,8 +25,7 @@ class ContactsRepository extends ChangeNotifier{
         for (var contact in allContactsInThePhone) {
           for (var firebaseContactData in userCollection.docs) {
             var firebaseContact = ChatUserModel.fromMap(firebaseContactData.data());
-
-            print("Firebase Contact ${firebaseContact.phoneNumber} PhoneContact ${contact.phones[0].number.replaceAll(' ', '').replaceAll('-','').replaceAll('(','').replaceAll(')','')}");
+           // print("Firebase Contact ${firebaseContact.phoneNumber} PhoneContact ${contact.phones[0].number.replaceAll(' ', '').replaceAll('-','').replaceAll('(','').replaceAll(')','')}");
             if (contact.phones[0].number.replaceAll(' ', '').replaceAll('-','').replaceAll('(','').replaceAll(')','') ==
                 firebaseContact.phoneNumber) {
               firebaseContacts.add(firebaseContact);

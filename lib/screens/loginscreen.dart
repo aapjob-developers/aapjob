@@ -17,6 +17,7 @@ import 'package:Aap_job/view/basewidget/animated_custom_dialog.dart';
 import 'package:Aap_job/view/basewidget/my_dialog.dart';
 import '../models/register_model.dart';
 import 'package:Aap_job/utill/colors.dart';
+import 'package:sms_autofill/sms_autofill.dart';
 
 class LoginScreen extends StatefulWidget {
   LoginScreen({Key? key}) : super(key: key);
@@ -29,29 +30,29 @@ class _LoginScreenState extends State<LoginScreen> {
   GlobalKey<FormState> _formKey= new GlobalKey<FormState>();
   TextEditingController _phoneController = TextEditingController();
   String? mobile,otp, signature="";
-  //final SmsAutoFill _autoFill = SmsAutoFill();
+  final SmsAutoFill _autoFill = SmsAutoFill();
   var phone;
   @override
   void initState() {
     super.initState();
     _formKey = GlobalKey<FormState>();
-    // Future<void>.delayed(const Duration(milliseconds: 300), _tryPasteCurrentPhone);
+     Future<void>.delayed(const Duration(milliseconds: 300), _tryPasteCurrentPhone);
   }
 
-  //
-  // Future _tryPasteCurrentPhone() async {
-  //   if (!mounted) return;
-  //   try {
-  //     final autoFill = SmsAutoFill();
-  //      phone = await autoFill.hint;
-  //     signature = await SmsAutoFill().getAppSignature;
-  //     if (phone == null) return;
-  //     if (!mounted) return;
-  //     _phoneController.text = phone.toString().trim().substring(phone.toString().trim().length - 10);
-  //   } on PlatformException catch (e) {
-  //     print('Failed to get mobile number because of: ${e.message}');
-  //   }
-  // }
+
+  Future _tryPasteCurrentPhone() async {
+    if (!mounted) return;
+    try {
+      final autoFill = SmsAutoFill();
+       phone = await autoFill.hint;
+      signature = await SmsAutoFill().getAppSignature;
+      if (phone == null) return;
+      if (!mounted) return;
+      _phoneController.text = phone.toString().trim().substring(phone.toString().trim().length - 10);
+    } on PlatformException catch (e) {
+      print('Failed to get mobile number because of: ${e.message}');
+    }
+  }
 
   _submit() async {
     if (!_formKey.currentState!.validate()) {
@@ -59,7 +60,7 @@ class _LoginScreenState extends State<LoginScreen> {
       return;
     }
     _formKey.currentState!.save();
-   // CommonFunctions.showErrorDialog(signature, context);
+
     await Provider.of<AuthProvider>(context, listen: false).sendotp(mobile!,otp!,signature!,"candidate",route);
   }
 

@@ -46,7 +46,7 @@
   "WHO_CAN_APPLY":"कोण अर्ज करू शकतो",
   "POST_A_JOB":"2 मिनिटांत नोकरी पोस्ट करा",
   "EDIT_PROFILE_VIDEO":"प्रोफाइल व्हिडिओ संपादित करा",
-  "EDIT_COMPANY_DETAILS":"कंपनी तपशील संपादित करा",
+  "EDIT_COMPANY_DETAILS":" कंपनी तपशील संपादित करा",
   "EDIT_PROFILE_DETAILS":"प्रोफाइल चित्र संपादित करा",
   "MY_CLOSED_JOBS":"माझ्या बंद नोकऱ्या",
   "EDIT_BASIC_DETAILS":"मूलभूत तपशील संपादित करा",
@@ -91,6 +91,10 @@
   "NEW_UPDATE_AVAILABLE":"आमच्याकडे तुमच्यासाठी नवीन अॅप अपडेट आहे",
   "NEW_UPDATE_MSG":"अद्ययावत अनुभवासह नवीन वैशिष्ट्ये",
   "YOUR_EXPERIENCE":"तुमचा अनुभव",
-  "DO_YOU_HAVE_EXP": "तुम्हाला काही अनुभव आहे का?"
-
+  "DO_YOU_HAVE_EXP": "तुम्हाला काही अनुभव आहे का?",
+  "MY_BILLING": "ममाझा खर्च आणि वापर",
+  "CHANGE_LANGUAGE": "भाषा बदला",
+  "Rate_and_Share": "Aapjob अॅप रेट करा आणि शेअर करा",
+  "My_Applied_jobs": "मी ज्या नोकऱ्यांसाठी अर्ज केला आहे",
+  "MY_SHORT_LIST": "मला मुलाखतीसाठी कॉल करा"
 }

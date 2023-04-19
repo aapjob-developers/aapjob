@@ -3,6 +3,8 @@ import 'dart:convert';
 import 'package:Aap_job/helper/LocationManager.dart';
 import 'package:Aap_job/helper/SharedManager.dart';
 import 'package:Aap_job/models/common_functions.dart';
+import 'package:Aap_job/widgets/show_loading_dialog.dart';
+import 'package:Aap_job/widgets/show_location_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:Aap_job/data/datasource/remote/dio/dio_client.dart';
 import 'package:dio/dio.dart';
@@ -106,8 +108,9 @@ class _CitySelectionScreenState extends State<CitySelectionScreen> {
 
  _getAddressFromCurrentLocation(LatLng coordinate) async {
    // var coordinate = await SharedManager.shared.getLocationCoordinate();
-   print("Stored Location:$coordinate");
-    var addresses=await placemarkFromCoordinates(coordinate.latitude, coordinate.latitude);
+       Navigator.pop(context);
+    print("Stored Location:$coordinate");
+    var addresses=await placemarkFromCoordinates(coordinate.latitude, coordinate.longitude);
     var first = addresses.first;
     print('adminArea: ${first.administrativeArea}');
     print('locality: ${first.locality}');
@@ -228,7 +231,14 @@ class _CitySelectionScreenState extends State<CitySelectionScreen> {
               child:
                   GestureDetector(
                     onTap:(){
-                    //  CommonFunctions.showSuccessToast("");
+                      // showLoadingDialog(
+                      //   context: context,
+                      //   message: "Getting Your Current Location. Please Wait.",
+                      // );
+                      showLocationDialog(
+                        context: context,
+                        message: 'assets/lottie/location-permissions.json',
+                      );
                       _getLocation();
                     },
                     child:

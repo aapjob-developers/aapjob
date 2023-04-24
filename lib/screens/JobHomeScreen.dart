@@ -424,7 +424,12 @@ String Joblist="";
 
             },
           )
-              : Center(child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation<Color>(Theme.of(context).primaryColor)));
+              : Center(child: Lottie.asset(
+            'assets/lottie/gps.json',
+            height: 140,
+            //width: MediaQuery.of(context).size.width*0.45,
+            animate: true,
+          ),);
 
         }
     ),
@@ -463,14 +468,15 @@ class _TopbarState extends State<Topbar> {
     try {
       Response response = await _dio.get(_baseUrl + AppConstants.UPDATE_CATEGORY_URI+categoryid+"&userid="+Provider.of<AuthProvider>(context, listen: false).getUserid());
       apidata = response.data;
-      print('rev :'+apidata.toString());
+      //print('rev :'+apidata.toString());
       if(apidata.toString().contains("added"))
         {
-          FirebaseMessaging.instance.subscribeToTopic(perma);
-          print('add cate : ${perma}');
+          if(perma!=null)
+            {FirebaseMessaging.instance.subscribeToTopic(perma); print('add cate : ${perma}'); }
         }
       else if(apidata.toString().contains("deleted"))
         {
+          if(perma!=null)
           FirebaseMessaging.instance.unsubscribeFromTopic(perma);
           print('del cate : ${perma}');
         }
@@ -756,7 +762,12 @@ class _TopbarState extends State<Topbar> {
                     // );
                   },
                 )
-                    : Center(child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation<Color>(Theme.of(context).primaryColor)));
+                    : Center(child: Lottie.asset(
+                  'assets/lottie/gps.json',
+                  height: 40,
+                  //width: MediaQuery.of(context).size.width*0.45,
+                  animate: true,
+                ),);
               },
             ),
 

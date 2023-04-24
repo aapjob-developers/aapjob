@@ -22,6 +22,7 @@ import 'package:Aap_job/providers/cities_provider.dart';
 import 'package:Aap_job/providers/config_provider.dart';
 import 'package:Aap_job/providers/content_provider.dart';
 import 'package:Aap_job/providers/hrplan_provider.dart';
+import 'package:Aap_job/providers/jobselect_category_provider.dart';
 import 'package:Aap_job/providers/jobtitle_provider.dart';
 import 'package:Aap_job/providers/localization_provider.dart';
 import 'package:Aap_job/providers/notification_provider.dart';
@@ -63,6 +64,7 @@ Future<void> init() async {
   sl.registerFactory(() => AuthProvider(authRepo: sl()));
   sl.registerFactory(() => ProfileProvider(authRepo: sl()));
   sl.registerFactory(() => CategoryProvider(categoryRepo: sl()));
+  sl.registerFactory(() => JobServiceCategoryProvider(categoryRepo: sl()));
   sl.registerFactory(() => JobsProvider(jobsRepo: sl()));
   sl.registerFactory(() => AdsProvider(adsRepo: sl()));
   sl.registerFactory(() => HrPlanProvider(hrPlanRepo: sl()));

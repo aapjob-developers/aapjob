@@ -143,7 +143,7 @@ class _SelectLanguageState extends State<SelectLanguage> {
         }
         else
         {
-          if( Provider.of<AuthProvider>(context, listen: false).getMobile()=="no Mobile") {
+          if( Provider.of<AuthProvider>(context, listen: false).getMobile()=="no Mobile"||!Provider.of<AuthProvider>(context, listen: false).IsMobileVerified()) {
             Navigator.pushReplacement(context, MaterialPageRoute(
                 builder: (context) => HrLoginScreen()));
           }
@@ -201,7 +201,8 @@ class _SelectLanguageState extends State<SelectLanguage> {
         }
         else
         {
-          if( Provider.of<AuthProvider>(context, listen: false).getMobile()=="no Mobile"||Provider.of<AuthProvider>(context, listen: false).IsMobileVerified()) {
+          if( Provider.of<AuthProvider>(context, listen: false).getMobile()=="no Mobile"||!Provider.of<AuthProvider>(context, listen: false).IsMobileVerified()) {
+          print(Provider.of<AuthProvider>(context, listen: false).getMobile());
             Navigator.pushAndRemoveUntil(context, MaterialPageRoute(
                 builder: (context) => LoginScreen()), (route) => false);
           }

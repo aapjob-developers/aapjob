@@ -5,7 +5,7 @@ description: Aap job provide a vast experience for people who are looking for ri
 # pub.dev using `pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 
-version: 27.0.0
+version: 29.0.0
 
 environment:
   sdk: ">=2.18.0 <3.0.0"
@@ -105,6 +105,7 @@ flutter:
     - assets/images/applesignin.png
     - assets/images/facebookbtn.png
     - assets/images/googlebtn.png
+    - assets/images/messanger.png
     - assets/images/map.png
     - assets/images/hr.png
     - assets/images/candidate.png

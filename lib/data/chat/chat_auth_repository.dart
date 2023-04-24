@@ -72,10 +72,10 @@ class ChatAuthRepository extends ChangeNotifier {
     required bool mounted,
   }) async {
     try {
-      showLoadingDialog(
-        context: context,
-        message: "Saving user info ... ",
-      );
+      // showLoadingDialog(
+      //   context: context,
+      //   message: "Saving user info ... ",
+      // );
       String uid = auth.currentUser!.uid;
       String profileImageUrl = profileImage is String ? profileImage : '';
       if (profileImage != null && profileImage is! String) {

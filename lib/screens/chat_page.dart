@@ -162,7 +162,6 @@ class ChatPage extends StatelessWidget {
           itemBuilder: (_, index) {
             final message = snapshot.data![index];
             final isSender = message.senderId == FirebaseAuth.instance.currentUser!.uid;
-
             final haveNip = (index == 0) ||
                 (index == snapshot.data!.length - 1 &&
                     message.senderId != snapshot.data![index - 1].senderId) ||

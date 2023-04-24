@@ -21,6 +21,7 @@ import 'package:Aap_job/providers/cities_provider.dart';
 import 'package:Aap_job/providers/config_provider.dart';
 import 'package:Aap_job/providers/content_provider.dart';
 import 'package:Aap_job/providers/hrplan_provider.dart';
+import 'package:Aap_job/providers/jobselect_category_provider.dart';
 import 'package:Aap_job/providers/jobtitle_provider.dart';
 import 'package:Aap_job/providers/localization_provider.dart';
 import 'package:Aap_job/providers/notification_provider.dart';
@@ -115,6 +116,7 @@ Future<void> main() async {
       ChangeNotifierProvider(create: (context) => di.sl<AuthProvider>()),
       ChangeNotifierProvider(create: (context) => di.sl<ProfileProvider>()),
       ChangeNotifierProvider(create: (context) => di.sl<CategoryProvider>()),
+      ChangeNotifierProvider(create: (context) => di.sl<JobServiceCategoryProvider>()),
       ChangeNotifierProvider(create: (context) => di.sl<AdsProvider>()),
       ChangeNotifierProvider(create: (context) => di.sl<JobsProvider>()),
       ChangeNotifierProvider(create: (context) => di.sl<HrPlanProvider>()),

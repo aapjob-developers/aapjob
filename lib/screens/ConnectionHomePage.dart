@@ -194,7 +194,6 @@ class _ConnectionHomeScreenState extends State<ConnectionHomeScreen>
                             itemBuilder: (context, index) {
                               ChatUserModel? firebaseContacts;
                               ChatUserModel? phoneContacts;
-
                               if (index < firebaseContactsList.length) {
                                 firebaseContacts = firebaseContactsList[index];
                               } else {
@@ -556,72 +555,92 @@ class _TopbarState extends State<Topbar> {
                     SizedBox(
                       width: MediaQuery.of(context).size.width * 0.005,
                     ),
-                    Consumer<ChatRepository>(
-                        builder: (context, ChatRepo, _) {
-                          return StreamBuilder<int>(
-                              stream: ChatRepo.getAllUnseenMessage(),
-                              builder: (context, snapshot) {
-                                if (snapshot.connectionState != ConnectionState.active) {
-
-                                }
-                              return new Stack(
-                                  children: <Widget>[
-                                    GestureDetector(
-                                        onTap: () {
-                                          if (Provider.of<AuthProvider>(context,
-                                              listen: false)
-                                              .setCurrentNotificationCount(
-                                              snapshot.data!))
-                                            Navigator.push(
-                                                context,
-                                                MaterialPageRoute(
-                                                    builder: (context) =>
-                                                        InboxScreen()));
-                                        },
-                                        child: Image.asset(
-                                          'assets/images/msg.png',
-                                          height:
-                                          MediaQuery.of(context).size.width * 0.1,
-                                          width:
-                                          MediaQuery.of(context).size.width * 0.1,
-                                        )
-                                      // Lottie.asset(
-                                      //   'assets/lottie/notification_bell.json',
-                                      //   height:
-                                      //       MediaQuery.of(context).size.width * 0.1,
-                                      //   width:
-                                      //       MediaQuery.of(context).size.width * 0.1,
-                                      //   animate: true,
-                                      // ),
-                                    ),
-                                    snapshot.data ==0 ? new Container()
-                                        : new Positioned(
-                                      right: 5,
-                                      top: 5,
-                                      child: new Container(
-                                        padding: EdgeInsets.all(2),
-                                        decoration: new BoxDecoration(
-                                          color: Colors.red,
-                                          borderRadius:
-                                          BorderRadius.circular(6),
-                                        ),
-                                        constraints: BoxConstraints(
-                                          minWidth: 10,
-                                          minHeight: 10,
-                                        ),
-                                        child: Text(
-                                          snapshot.data.toString(),
-                                          style: TextStyle(
-                                            color: Colors.white,
-                                            fontSize: 6,
-                                          ),
-                                          textAlign: TextAlign.center,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                );
-                              });}),
+                    GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) =>
+                                      InboxScreen()));
+                        },
+                        child: Image.asset(
+                          'assets/images/messanger.png',
+                          height:
+                          MediaQuery.of(context).size.width * 0.1,
+                          width:
+                          MediaQuery.of(context).size.width * 0.1,
+                        )
+                      // Lottie.asset(
+                      //   'assets/lottie/notification_bell.json',
+                      //   height:
+                      //       MediaQuery.of(context).size.width * 0.1,
+                      //   width:
+                      //       MediaQuery.of(context).size.width * 0.1,
+                      //   animate: true,
+                      // ),
+                    ),
+                    // Consumer<ChatRepository>(
+                    //     builder: (context, ChatRepo, _) {
+                    //       return StreamBuilder<int>(
+                    //           stream: ChatRepo.getAllUnseenMessage(),
+                    //           builder: (context, snapshot) {
+                    //             if (snapshot.connectionState != ConnectionState.active) {
+                    //
+                    //             }
+                    //           return new Stack(
+                    //               children: <Widget>[
+                    //                 GestureDetector(
+                    //                     onTap: () {
+                    //                         Navigator.push(
+                    //                             context,
+                    //                             MaterialPageRoute(
+                    //                                 builder: (context) =>
+                    //                                     InboxScreen()));
+                    //                     },
+                    //                     child: Image.asset(
+                    //                       'assets/images/msg.png',
+                    //                       height:
+                    //                       MediaQuery.of(context).size.width * 0.1,
+                    //                       width:
+                    //                       MediaQuery.of(context).size.width * 0.1,
+                    //                     )
+                    //                   // Lottie.asset(
+                    //                   //   'assets/lottie/notification_bell.json',
+                    //                   //   height:
+                    //                   //       MediaQuery.of(context).size.width * 0.1,
+                    //                   //   width:
+                    //                   //       MediaQuery.of(context).size.width * 0.1,
+                    //                   //   animate: true,
+                    //                   // ),
+                    //                 ),
+                    //                 snapshot.data ==0 ? new Container()
+                    //                     : new Positioned(
+                    //                   right: 5,
+                    //                   top: 5,
+                    //                   child: new Container(
+                    //                     padding: EdgeInsets.all(2),
+                    //                     decoration: new BoxDecoration(
+                    //                       color: Colors.red,
+                    //                       borderRadius:
+                    //                       BorderRadius.circular(6),
+                    //                     ),
+                    //                     constraints: BoxConstraints(
+                    //                       minWidth: 10,
+                    //                       minHeight: 10,
+                    //                     ),
+                    //                     child: Text(
+                    //                       snapshot.data.toString(),
+                    //                       style: TextStyle(
+                    //                         color: Colors.white,
+                    //                         fontSize: 6,
+                    //                       ),
+                    //                       textAlign: TextAlign.center,
+                    //                     ),
+                    //                   ),
+                    //                 ),
+                    //               ],
+                    //             );
+                    //           });}),
 
                   ],
                 ),

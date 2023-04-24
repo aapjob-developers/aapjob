@@ -9,8 +9,6 @@ class CategoryModel {
   String _icon = "";
   String _perma="";
   bool _selected = false;
-  Color _mycolor = Colors.transparent;
-  List<JobsModel> _jobsModellist = [];
 
   CategoryModel(
       {required String id,
@@ -18,16 +16,12 @@ class CategoryModel {
         required String perma,
         required String icon,
         required bool selected,
-        required Color mycolor,
-        required List<JobsModel> jobsModellist
       }) {
     this._id = id;
     this._name = name;
     this._perma=perma;
     this._icon = icon;
     this._selected=selected;
-    this._mycolor=mycolor;
-    this._jobsModellist=jobsModellist;
   }
 
   String get id => _id;
@@ -35,22 +29,9 @@ class CategoryModel {
   String get icon => _icon;
   String get perma => _perma;
   bool get selected => _selected;
-  Color get mycolor => _mycolor;
-
-
-  List<JobsModel> get jobsModellist => _jobsModellist;
 
   set selected(bool value) {
     _selected = value;
-  }
-
-
-  set jobsModel(List<JobsModel> jobsModellist) {
-    _jobsModellist = jobsModellist;
-  }
-
-  set mycolor(Color value) {
-    _mycolor = value;
   }
 
   CategoryModel.fromJson(Map<String, dynamic> json) {
@@ -65,6 +46,7 @@ class CategoryModel {
     final Map<String, dynamic> data = new Map<String, dynamic>();
     data['id'] = this._id;
     data['name'] = this._name;
+    data['perma']=this.perma;
     data['icon_src'] = this._icon;
     data['selected'] = this._selected;
     return data;

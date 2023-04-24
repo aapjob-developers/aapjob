@@ -268,7 +268,7 @@ class _SaveProfileState extends State<SaveProfile> {
     final hasPermission = await _handleLocationPermission();
 
     if (!hasPermission) return;
-    await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high)
+    await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.medium)
         .then((Position position) {
       setState(() => _currentPosition = position);
       var latlong = LatLng(_currentPosition!.latitude, _currentPosition!.longitude);
@@ -438,7 +438,7 @@ class _SaveProfileState extends State<SaveProfile> {
       if(pathe!="") {
         if (_CheckUpload()) {
           uploadFile();
-          http.StreamedResponse response = await updateProfileDetails(
+           await updateProfileDetails(
               _Name, _jobcity, _joblocation,
               _value == 0 ? "Male" : "Female",
               _dob);
@@ -451,19 +451,16 @@ class _SaveProfileState extends State<SaveProfile> {
       }
       else
       {
-        http.StreamedResponse response = await updateProfileDetails(
-            _Name, _jobcity, _joblocation, _value == 0 ? "Male" : "Female",
-            _dob);
+        await updateProfileDetails(_Name, _jobcity, _joblocation, _value == 0 ? "Male" : "Female", _dob);
       }
     }
   }
 
   Future<http.StreamedResponse> updateProfileDetails(String Name,String City,String Locality,String gender,String dob) async {
     http.MultipartRequest request = http.MultipartRequest('POST', Uri.parse('${AppConstants.BASE_URL}${AppConstants.SAVE_PROFILE_DETAIL_DATA_URI}'));
-    String userid=Provider.of<AuthProvider>(context, listen: false).getUserid();
     Map<String, String> _fields = Map();
     _fields.addAll(<String, String>{
-      'userid':userid.toString(),
+      'userid':Provider.of<AuthProvider>(context, listen: false).getUserid(),
       'Name':Name,
       'City':City,
       'Locality':Locality,
@@ -473,7 +470,7 @@ class _SaveProfileState extends State<SaveProfile> {
     request.fields.addAll(_fields);
     http.StreamedResponse response = await request.send();
     response.stream.transform(utf8.decoder).listen((value) {
-      print("response : "+value);
+      // print("response : "+value);
       if (response.statusCode == 200) {
         if(response.toString()!="Failed")
         {
@@ -486,15 +483,10 @@ class _SaveProfileState extends State<SaveProfile> {
           sharedPreferences!.setString("gender", gender);
           sharedPreferences!.setString("dob", dob);
           sharedPreferences!.setBool("step3", true);
-          print("clicked");
-          File imagefile=Imagepath!=""?File(Imagepath):File(_cropedFile!.path);
-          Timer(Duration(seconds: 4), () {
             setState(() {
               _isLoading = false;
             });
             Navigator.pushAndRemoveUntil(context,  MaterialPageRoute(builder: (context)=> ProfileExp()), (route) => false);
-          });
-
         }
         else
         {

@@ -4,6 +4,7 @@ import 'dart:io';
 import 'dart:math';
 import 'package:Aap_job/localization/language_constrants.dart';
 import 'package:Aap_job/models/category.dart';
+import 'package:Aap_job/models/categorywithjob.dart';
 import 'package:Aap_job/providers/auth_provider.dart';
 import 'package:Aap_job/screens/JobAppliedCandidatesList.dart';
 import 'package:Aap_job/screens/JobDetailScreen.dart';
@@ -40,7 +41,7 @@ import 'package:provider/provider.dart';
 
 class JobListOfCategorySceen extends StatefulWidget {
   JobListOfCategorySceen({Key? key, required this.jobCategory, required this.City}) : super(key: key);
-  final Category jobCategory;
+  final CategoryWithJob jobCategory;
   final  String City;
   @override
   _JobListOfCategorySceenState createState() => new _JobListOfCategorySceenState();

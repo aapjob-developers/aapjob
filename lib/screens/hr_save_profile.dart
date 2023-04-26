@@ -169,61 +169,61 @@ class _HrSaveProfileState extends State<HrSaveProfile> {
   }
 
   _getLocation() async {
-    // final coordinate = await SharedManager.shared.getLocationCoordinate();
-    // this.latitude = coordinate.latitude;
-    // this.longitude = coordinate.longitude;
-    // _getAddressFromCurrentLocation( await SharedManager.shared.getLocationCoordinate());
-    await _getCurrentPosition();
+    final coordinate = await SharedManager.shared.getLocationCoordinate();
+    this.latitude = coordinate.latitude;
+    this.longitude = coordinate.longitude;
+    _getAddressFromCurrentLocation( await SharedManager.shared.getLocationCoordinate());
+  //  await _getCurrentPosition();
   }
 
-  String? _currentAddress;
-  Position? _currentPosition;
-
-  Future<bool> _handleLocationPermission() async {
-    bool serviceEnabled;
-    LocationPermission permission;
-
-    serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content: Text(
-              'Location services are disabled. Please enable the services')));
-      return false;
-    }
-    permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.denied) {
-        ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Location permissions are denied')));
-        return false;
-      }
-    }
-    if (permission == LocationPermission.deniedForever) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content: Text(
-              'Location permissions are permanently denied, we cannot request permissions.')));
-      return false;
-    }
-    return true;
-  }
-
-  Future<void> _getCurrentPosition() async {
-    final hasPermission = await _handleLocationPermission();
-    if (!hasPermission) return;
-    await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high)
-        .then((Position position) {
-      setState(() => _currentPosition = position);
-      var latlong = LatLng(_currentPosition!.latitude, _currentPosition!.longitude);
-      _getAddressFromCurrentLocation(latlong);
-    }).catchError((e) {
-      debugPrint(e);
-    });
-  }
+  // String? _currentAddress;
+  // Position? _currentPosition;
+  //
+  // Future<bool> _handleLocationPermission() async {
+  //   bool serviceEnabled;
+  //   LocationPermission permission;
+  //
+  //   serviceEnabled = await Geolocator.isLocationServiceEnabled();
+  //   if (!serviceEnabled) {
+  //     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+  //         content: Text(
+  //             'Location services are disabled. Please enable the services')));
+  //     return false;
+  //   }
+  //   permission = await Geolocator.checkPermission();
+  //   if (permission == LocationPermission.denied) {
+  //     permission = await Geolocator.requestPermission();
+  //     if (permission == LocationPermission.denied) {
+  //       ScaffoldMessenger.of(context).showSnackBar(
+  //           const SnackBar(content: Text('Location permissions are denied')));
+  //       return false;
+  //     }
+  //   }
+  //   if (permission == LocationPermission.deniedForever) {
+  //     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+  //         content: Text(
+  //             'Location permissions are permanently denied, we cannot request permissions.')));
+  //     return false;
+  //   }
+  //   return true;
+  // }
+  //
+  // Future<void> _getCurrentPosition() async {
+  //   final hasPermission = await _handleLocationPermission();
+  //   if (!hasPermission) return;
+  //   await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high)
+  //       .then((Position position) {
+  //     setState(() => _currentPosition = position);
+  //     var latlong = LatLng(_currentPosition!.latitude, _currentPosition!.longitude);
+  //     _getAddressFromCurrentLocation(latlong);
+  //   }).catchError((e) {
+  //     debugPrint(e);
+  //   });
+  // }
 
   _getAddressFromCurrentLocation(LatLng coordinate) async {
    // var coordinate = await SharedManager.shared.getLocationCoordinate();
-        Navigator.pop(context);
+    Navigator.pop(context);
     print("Stored Location:$coordinate");
     var addresses=await placemarkFromCoordinates(coordinate.latitude, coordinate.longitude);
     var first = addresses.reversed.last;

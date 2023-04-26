@@ -741,7 +741,7 @@ class _GetJobDetailSceenState extends State<GetJobDetailSceen> {
                               mainAxisSize: MainAxisSize.max,
                               crossAxisAlignment: CrossAxisAlignment.center,
                               children: <Widget>[
-                                Text(jobsModel.des,style: LatinFonts.aBeeZee(color: Colors.black,fontSize: 12,),),
+                                Container(width:deviceSize.width*0.8,child:Text(jobsModel.des,style: LatinFonts.aBeeZee(color: Colors.black,fontSize: 12,),maxLines: 10,)),
                               ]
                           ),
                           padding: const EdgeInsets.only(left: 10,bottom: 10)

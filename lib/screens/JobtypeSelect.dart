@@ -87,19 +87,19 @@ class _JobTypeSelectState extends State<JobTypeSelect> {
          }
          else
          {
+           setState(() {
+             _isLoading = false;
+           });
            CommonFunctions.showInfoDialog("Please select Maximum 5 Job category to Continue",context);
          }
-
        }
      else
        {
+         setState(() {
+           _isLoading = false;
+         });
          CommonFunctions.showInfoDialog("Please select atleast One Job category to Continue",context);
        }
-
-    setState(() {
-      _isLoading = false;
-    });
-
   }
 
   _submit() async {
@@ -108,12 +108,12 @@ class _JobTypeSelectState extends State<JobTypeSelect> {
   }
 
   route(bool isRoute, String route,String status, String errorMessage) async {
-    print(route);
+   // print(route);
     sharedPreferences!.setString("route", route);
     if (isRoute) {
       sharedPreferences!.setBool("loggedin", true);
       saveUserDataToFirebase();
-      await Future.delayed(Duration(milliseconds: 5000));
+    //  await Future.delayed(Duration(milliseconds: 5000));
       Navigator.pushReplacement( context,  MaterialPageRoute(builder: (context) => HomePage()),);
     } else {
       CommonFunctions.showErrorDialog(errorMessage,context);
@@ -395,7 +395,6 @@ class _JobTypeSelectState extends State<JobTypeSelect> {
                           if (_isLoading)
                             CircularProgressIndicator()
                           else
-
                           ElevatedButton(
                             child: const Text('Save and Continue'),
                             onPressed: () {

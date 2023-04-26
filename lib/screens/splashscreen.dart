@@ -63,7 +63,7 @@ class _SplashScreenState extends State<SplashScreen>
     //   vsync: this,
     // );
     super.initState();
-    //LocationManager.shared.getCurrentLocation();
+    LocationManager.shared.getCurrentLocation();
     _loadData(context, false);
   }
 

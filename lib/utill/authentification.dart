@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/services.dart';
@@ -14,8 +16,7 @@ class Authentification {
 
 
   Future<dynamic> signInWithGoogle() async {
-    final googleSignIn = GoogleSignIn();
-    final googleUser = await googleSignIn.signIn();
+    final googleUser = await GoogleSignIn().signIn();
     if (googleUser != null) {
       final googleAuth = await googleUser.authentication;
       if (googleAuth.idToken != null) {
@@ -23,17 +24,17 @@ class Authentification {
           GoogleAuthProvider.credential(
               idToken: googleAuth.idToken, accessToken: googleAuth.accessToken),
         );
-        print("user accessToken: ${userCredential.credential!.accessToken}");
-        final fcmToken = await FirebaseMessaging.instance.getToken();
-        await _setemail(userCredential.user!.email??"");
-        _setaccesstoken(fcmToken!);
+      //  print("user accessToken: ${userCredential.credential!.accessToken}");
+        final  fcmToken= await FirebaseMessaging.instance.getToken();
+        _setemail(userCredential.user!.email??"",fcmToken!);
         return userCredential.user;
       }
     } else {
-      throw FirebaseAuthException(
-        message: "Sign in aborded by user",
-        code: "ERROR_ABORDER_BY_USER",
-      );
+      // throw FirebaseAuthException(
+      //   message: "Sign in aborded by user",
+      //   code: "ERROR_ABORDER_BY_USER",
+      // );
+      return _firebaseAuth.currentUser;
     }
   }
 
@@ -53,10 +54,9 @@ class Authentification {
         );
         final userCredential =
         await _firebaseAuth.signInWithCredential(credential);
-        print("user accessToken: ${userCredential.credential!.accessToken}");
+      //  print("user accessToken: ${userCredential.credential!.accessToken}");
         final fcmToken = await FirebaseMessaging.instance.getToken();
-        await _setemail(userCredential.user!.email??"");
-        _setaccesstoken(fcmToken!);
+        await _setemail(userCredential.user!.email??"",fcmToken!);
         final firebaseUser = userCredential.user!;
         if (scopes.contains(apple.Scope.fullName)) {
           final fullName = appleIdCredential.fullName;
@@ -84,17 +84,12 @@ class Authentification {
     }
   }
 
-  _setemail(String email) async {
+  _setemail(String email,String token) async {
     final sharedPreferences = await SharedPreferences.getInstance();
     sharedPreferences.setString("email", email);
-    print("set email"+email);
+    sharedPreferences.setString("AccessToken", token);
   }
 
-  _setaccesstoken(String token) async {
-    final sharedPreferences = await SharedPreferences.getInstance();
-    sharedPreferences.setString("AccessToken", token);
-    print("set token"+token);
-  }
   //
   // Future<dynamic> signInWithGoogleSilent() async {
   //   dynamic _user;
@@ -106,8 +101,16 @@ class Authentification {
   // }
 
   Future<void> signOut() async {
-    final googleSignIn = GoogleSignIn();
-    await googleSignIn.signOut();
-    await _firebaseAuth.signOut();
+    if(Platform.isIOS)
+    {
+      await _firebaseAuth.signOut();
+    }
+    else
+    {
+      final googleSignIn = GoogleSignIn();
+      await googleSignIn.signOut();
+      await _firebaseAuth.signOut();
+    }
+
   }
 }

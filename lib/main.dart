@@ -44,6 +44,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_downloader/flutter_downloader.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'firebase_options.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:go_router/go_router.dart';
@@ -55,6 +56,7 @@ import 'helper/custom_delegate.dart';
 
 
 final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
    await Firebase.initializeApp(
@@ -62,6 +64,16 @@ Future<void> main() async {
    );
   await FlutterDownloader.initialize(debug: true, ignoreSsl: true);
   await di.init();
+
+  Map<Permission, PermissionStatus> statuses = await [
+    Permission.location,
+    Permission.camera,
+    Permission.storage,
+    Permission.mediaLibrary,
+    Permission.accessMediaLocation,
+    //add more permission to request here.
+  ].request();
+
   final NotificationAppLaunchDetails? notificationAppLaunchDetails = await flutterLocalNotificationsPlugin.getNotificationAppLaunchDetails();
   String? payload;
   if (notificationAppLaunchDetails?.didNotificationLaunchApp ?? false) {

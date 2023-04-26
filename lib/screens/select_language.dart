@@ -96,7 +96,7 @@ class _SelectLanguageState extends State<SelectLanguage> {
     print("SelectedInd->${selectedIndexNotifier.value-1}");
     final sharedPreferences = await SharedPreferences.getInstance();
     sharedPreferences!.setBool("step1", true);
-    print("clicked");
+   // print("clicked");
     route();
   }
 
@@ -111,10 +111,6 @@ class _SelectLanguageState extends State<SelectLanguage> {
 
 
   route() async {
-    setState(() {
-      _isLoading = false;
-    });
-
     if(acctype=="hr")
     {
       if(widget.isHome)
@@ -194,7 +190,7 @@ class _SelectLanguageState extends State<SelectLanguage> {
               {
                 saveUserDataToFirebase();
               }
-            await Future.delayed(Duration(milliseconds: 5000));
+          //  await Future.delayed(Duration(milliseconds: 5000));
             Navigator.pushAndRemoveUntil(context, MaterialPageRoute(
                 builder: (context) => HomePage()), (route) => false);
           }
@@ -227,7 +223,7 @@ class _SelectLanguageState extends State<SelectLanguage> {
                 {
                   saveUserDataToFirebase();
                 }
-                await Future.delayed(Duration(milliseconds: 5000));
+              //  await Future.delayed(Duration(milliseconds: 5000));
                 Navigator.pushAndRemoveUntil(context, MaterialPageRoute(
                     builder: (context) => HomePage()), (route) => false);
               }

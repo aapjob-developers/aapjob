@@ -19,21 +19,19 @@ class SharedManager {
 
   storeLocationCoordinate(LatLng coordinates) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-
     if (coordinates.latitude != 0.0 || coordinates.longitude != 0.0) {
       await prefs.setDouble("latitude", coordinates.latitude);
       await prefs.setDouble("longitude", coordinates.longitude);
     }
   }
 
-  //Future<LatLng> getLocationCoordinate() async {
-    // SharedPreferences? prefs = await SharedPreferences.getInstance();
-    //
-    // await LocationManager.shared.getCurrentLocation();
-    // this.latitude = await LocationManager.shared.latitude!;
-    // this.longitude = await LocationManager.shared.longitude!;
-    // var latlong = LatLng(latitude, longitude);
-  //  return latlong;
-  //}
+  Future<LatLng> getLocationCoordinate() async {
+    SharedPreferences? prefs = await SharedPreferences.getInstance();
+    await LocationManager.shared.getCurrentLocation();
+    this.latitude = await LocationManager.shared.latitude!;
+    this.longitude = await LocationManager.shared.longitude!;
+    var latlong = LatLng(latitude, longitude);
+   return latlong;
+  }
 
 }

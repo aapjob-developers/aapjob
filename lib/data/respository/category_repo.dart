@@ -28,5 +28,14 @@ class CategoryRepo {
       return ApiResponse.withError(ApiErrorHandler.getMessage(e));
     }
   }
+  Future<ApiResponse> getCategoryListById2(String userid) async {
+    try {
+      final response = await dioClient.get(AppConstants.CATEGORIES2_URI+"?userid="+userid);
+      print(response);
+      return ApiResponse.withSuccess(response);
+    } catch (e) {
+      return ApiResponse.withError(ApiErrorHandler.getMessage(e));
+    }
+  }
 
 }

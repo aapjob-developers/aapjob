@@ -12,6 +12,7 @@ class AppConstants {
   static const String HR_CONSULTANCY_PLAN_URI = 'api/getconsultancyplans';
   static const String HR_UPDATE_CURRENT_PLAN_URI = 'api/updateHrPlan';
   static const String CATEGORIES_URI = 'api/categories';
+  static const String CATEGORIES2_URI = 'api/categories2';
   static const String CATEGORY_URI = 'api/category';
   static const String ADS_URI = 'api/get_ads';
   static const String CONFIG_URI = 'api/getAppSettings';

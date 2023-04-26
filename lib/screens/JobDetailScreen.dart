@@ -641,7 +641,7 @@ class _JobDetailSceenState extends State<JobDetailSceen> {
                               mainAxisSize: MainAxisSize.max,
                               crossAxisAlignment: CrossAxisAlignment.center,
                               children: <Widget>[
-                                Text(getTranslated("JOB_DESP", context)!,style: LatinFonts.aBeeZee(color: Colors.black,fontSize: 16,fontWeight: FontWeight.bold),),
+ Text(getTranslated("JOB_DESP", context)!,style: LatinFonts.aBeeZee(color: Colors.black,fontSize: 16,fontWeight: FontWeight.bold),),
                               ]
                           ),
                           padding: const EdgeInsets.only(top: 10,left: 10,bottom: 10)
@@ -653,7 +653,7 @@ class _JobDetailSceenState extends State<JobDetailSceen> {
                               mainAxisSize: MainAxisSize.max,
                               crossAxisAlignment: CrossAxisAlignment.center,
                               children: <Widget>[
-                                Text(widget.jobsModel.des,style: LatinFonts.aBeeZee(color: Colors.black,fontSize: 12,),),
+                          Container(width:deviceSize.width*0.8,child:Text(widget.jobsModel.des,style: LatinFonts.aBeeZee(color: Colors.black,fontSize: 12,),maxLines: 10,)),
                               ]
                           ),
                           padding: const EdgeInsets.only(left: 10,bottom: 10)

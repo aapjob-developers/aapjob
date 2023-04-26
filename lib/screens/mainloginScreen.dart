@@ -52,7 +52,7 @@ class _MainloginScreenState extends State<MainloginScreen> {
     else
     {
       Navigator.pop(context);
-      CommonFunctions.showInfoDialog("Could not Complete Login", context);
+      CommonFunctions.showInfoDialog("Could not Complete Login due to error, Please try again", context);
     }
 
   }

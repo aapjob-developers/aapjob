@@ -104,17 +104,20 @@ class CategoryProvider extends ChangeNotifier {
     ApiResponse apiResponse = await categoryRepo.getCategoryListById2(Provider.of<AuthProvider>(context, listen: false).getUserid());
     if (apiResponse.response != null && apiResponse.response!.statusCode == 200) {
       _NewcategoryList.clear();
+    //  List<Map<String, dynamic>> output = List.from(json.decode(apiResponse.response!.data.toString()) as List);
       List<Map<String, dynamic>> output = List.from(json.decode(apiResponse.response!.data.toString()) as List);
       for (var item in output) {
         mm=Colors.primaries[Random().nextInt(Colors.primaries.length)];
         List<CatJobsModel> joblist=[];
-        if(item['jobs']!=null)
-        {
-          List<Map<String, dynamic>> dd = List.from(jsonDecode(item['jobs'].toString()) as List);
-          for (var d in dd) {
-            joblist.add(CatJobsModel.fromJson(d));
-          }
-        }
+      //   if(item['jobs']!="[]") {
+        //   List<Map<String, dynamic>> dd = List.from(json.decode(item['jobs'].toString()) as List);
+           List<dynamic> dd = item['jobs'];
+           List<CatJobsModel> jobs=dd.map((job) => CatJobsModel.fromJson(job as Map<String, dynamic>)).toList();
+           joblist.addAll(jobs);
+           // for (var d in dd) {
+           //   joblist.add(CatJobsModel.fromJson(d));
+           // }
+       //  }
         if(item['selected'])
         {
           mm=Colors.white;

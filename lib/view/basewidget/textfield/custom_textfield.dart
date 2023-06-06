@@ -19,6 +19,7 @@ class CustomTextField extends StatelessWidget {
   final TextInputAction? textInputAction;
   final bool? isPhoneNumber;
   final bool isOtp;
+  final bool isName;
   final bool isValidator;
   final String? validatorMessage;
   final Color? fillColor;
@@ -33,6 +34,7 @@ class CustomTextField extends StatelessWidget {
       this.nextNode,
       this.textInputAction,
       this.isPhoneNumber = false,
+      this.isName = false,
       this.isOtp = false,
       this.isValidator=false,
       this.validatorMessage,
@@ -65,7 +67,7 @@ class CustomTextField extends StatelessWidget {
           FocusScope.of(context).requestFocus(nextNode);
         },
         //autovalidate: true,
-        inputFormatters: [isPhoneNumber==true||isOtp ? FilteringTextInputFormatter.digitsOnly : FilteringTextInputFormatter.singleLineFormatter],
+        inputFormatters: [isPhoneNumber==true||isOtp ? FilteringTextInputFormatter.digitsOnly : isName==true? FilteringTextInputFormatter.allow(RegExp(r'[0-9a-zA-Z\s]')): FilteringTextInputFormatter.singleLineFormatter],
         validator: (input){
           if(input!.isEmpty){
             if(isValidator){

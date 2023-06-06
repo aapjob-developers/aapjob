@@ -79,8 +79,8 @@ File? file,videofile;
         HrLocality = sharedPreferences!.getString("HrLocality") ?? "no Locality";
         HrWebsite = sharedPreferences!.getString("HrWebsite") ?? "no Website";
         Imagepath=sharedPreferences!.getString("profileImage")?? "no Name";
-        email=sharedPreferences!.getString("email")?? "email";
-        AccessToken=sharedPreferences!.getString("AccessToken")?? "email";
+        email=sharedPreferences!.getString("email")?? "No Email";
+        AccessToken=sharedPreferences!.getString("AccessToken")?? "nn";
         videopath=sharedPreferences!.getString("profileVideo")?? "no Name";
         getRecruiterlist();
          uploadProfileFile();
@@ -299,7 +299,7 @@ File? file,videofile;
 
   _submit() async {
     String acctype="hr";
-    await Provider.of<AuthProvider>(context, listen: false).checkaccount(acctype,email!, AccessToken!, routers);
+    await Provider.of<AuthProvider>(context, listen: false).checkaccount(acctype,Provider.of<AuthProvider>(context, listen: false).getMobile(), AccessToken!, routers);
   }
   routers(bool isRoute, String route,String status, String errorMessage) async {
     print(route);
@@ -423,7 +423,7 @@ File? file,videofile;
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
                      // Profilebox(path:Provider.of<ProfileProvider>(context, listen: false).getProfileString()==null? AppConstants.BASE_URL+'uploads/ads/smallest_video4.mp4': Provider.of<ProfileProvider>(context, listen: false).getProfileString(),),
-                      imageProfile(Imagepath!),
+                      imageProfile(Provider.of<AuthProvider>(context, listen: false).getprofileImage()),
                       Container(
                         width: deviceSize.width*0.41,
                         child: new Column(
@@ -1222,6 +1222,7 @@ File? file,videofile;
                   children: <Widget>[
                     Expanded(
                         child: CustomTextField(
+                          isName: false,
                           hintText: _hinttext,
                           textInputType: TextInputType.text,
                           isOtp: false,

@@ -7,7 +7,7 @@ import 'package:Aap_job/screens/widget/job_reset_confirmation_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:Aap_job/models/CitiesModel.dart';
-import 'package:Aap_job/models/JobCategoryModel.dart';
+
 import 'package:Aap_job/models/JobTitleModel.dart';
 import 'package:Aap_job/models/JobskillModel.dart';
 import 'package:Aap_job/models/LocationModel.dart';
@@ -226,6 +226,7 @@ class _JobPostScreen2State extends State<JobPostScreen2> {
   _savedata() async {
     setState(() {
       _isLoading=true;
+      print("I am Running");
     });
 
     sharedPreferences!.setString("Min exp", Minexp);
@@ -271,7 +272,7 @@ class _JobPostScreen2State extends State<JobPostScreen2> {
         "cab":selectedCab,"meal":selectedMeal,"insurance":selectedInsurance,"PF":selectedPF,"medical":selectedMedical,
         "Other":selectedOther,"otherbenefits":Others});
 
-      print(formData.fields.toString());
+     // print(formData.fields.toString());
       try {
         Response response = await _dio.post(_baseUrl + AppConstants.SAVE_JOB_DATA_URI,data:formData );
         apiresponse= response.data;

@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:Aap_job/providers/notification_provider.dart';
 import 'package:Aap_job/screens/basewidget/no_internet_screen.dart';
 import 'package:Aap_job/screens/notification/widget/notification_dialog.dart';
@@ -45,7 +47,7 @@ class NotificationScreen extends StatelessWidget {
                         decoration: BoxDecoration(color: Colors.white,boxShadow: [BoxShadow(color: Colors.grey.withOpacity(0.3), spreadRadius: 1, blurRadius: 5)],),
                         child: ListTile(
                           leading:
-                          notification.notificationList[index].image!=null?
+                          notification.notificationList[index].image!=""?
                           ClipOval(child: FadeInImage.assetNetwork(
                             placeholder: 'assets/images/appicon.png',
                             image: AppConstants.BASE_URL+notification.notificationList[index].image,

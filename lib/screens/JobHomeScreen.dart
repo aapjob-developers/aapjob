@@ -1,12 +1,15 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:developer' as dev;
 import 'dart:math';
 
 import 'package:Aap_job/localization/language_constrants.dart';
 import 'package:Aap_job/models/CatJobsModel.dart';
 import 'package:Aap_job/models/ContentModel.dart';
 import 'package:Aap_job/models/categorywithjob.dart';
+import 'package:Aap_job/models/common_functions.dart';
 import 'package:Aap_job/providers/auth_provider.dart';
+import 'package:Aap_job/providers/cities_provider.dart';
 import 'package:Aap_job/providers/content_provider.dart';
 import 'package:Aap_job/providers/notification_provider.dart';
 import 'package:Aap_job/screens/JobListOfCategory.dart';
@@ -16,7 +19,9 @@ import 'package:Aap_job/screens/NotificationScreen.dart';
 import 'package:Aap_job/screens/SearchScreen.dart';
 import 'package:Aap_job/screens/SupportScreen.dart';
 import 'package:Aap_job/screens/getjobdetails.dart';
+import 'package:Aap_job/screens/myloginscreen.dart';
 import 'package:Aap_job/screens/notification/notification_screen.dart';
+import 'package:Aap_job/screens/splashscreen.dart';
 import 'package:Aap_job/screens/widget/ChangeLocationScreen.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -41,6 +46,8 @@ import 'package:Aap_job/utill/app_constants.dart';
 import 'package:google_language_fonts/google_language_fonts.dart';
 import 'package:Aap_job/utill/date_converter.dart';
 
+import 'SelectedJobCatScreen.dart';
+
 class JobHomeScreen extends StatefulWidget {
   JobHomeScreen({Key? key}) : super(key: key);
   @override
@@ -59,14 +66,14 @@ class _JobHomeScreenState extends State<JobHomeScreen> {
   List<Category> categoryList = [];
 
   Future<void> _loadData(BuildContext context) async {
+    checkvalid();
     await Provider.of<CategoryProvider>(context, listen: false).getSelectedCategoryListById(context);
-
   }
   addviews(String jobid) async {
     try {
       Response response = await _dio.get(_baseUrl + AppConstants.UPDATE_VIEW_URI+jobid);
       apidata = response.data;
-      print('Job categories : ${apidata}');
+      //print('Job categories : ${apidata}');
     } on DioError catch (e) {
       // The request was made and the server responded with a status code
       // that falls out of the range of 2xx and is also not 304.
@@ -83,10 +90,43 @@ class _JobHomeScreenState extends State<JobHomeScreen> {
     }
 
   }
+  checkvalid() async {
+    try {
+      Response response = await _dio.get(_baseUrl + AppConstants.CHECK_CANDIDATE_PROFILE_STATUS_URI+Provider.of<AuthProvider>(context, listen: false).getUserid());
+      if (response.statusCode == 200)
+      {
+        print("rrrr-"+response.data.toString());
+        if(response.data.toString()=="5")
+        {
+          Provider.of<AuthProvider>(context, listen: false).clearSharedData().then((condition) {
+            FirebaseMessaging.instance.deleteToken();
+            Provider.of<AuthProvider>(context,listen: false).clearSharedData();
+            Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (context) => SplashScreen()), (route) => false);
+          });
+        }
+      }
+      else {
+        print('${response.statusCode} ${response.data}');
+        CommonFunctions.showErrorDialog("Error in Connection", context);
+      }
+    } on DioError catch (e) {
+      // The request was made and the server responded with a status code
+      // that falls out of the range of 2xx and is also not 304.
+      if (e.response != null) {
+        print('Dio error!');
+        print('STATUS: ${e.response?.statusCode}');
+        print('DATA: ${e.response?.data}');
+        print('HEADERS: ${e.response?.headers}');
+      } else {
+        // Error due to setting up or sending the request
+        print('Error sending request!');
+        print(e.message);
+      }
+    }
+  }
 
   initState() {
     initializePreference().whenComplete((){
-      getdata();
     });
     super.initState();
 
@@ -94,6 +134,7 @@ class _JobHomeScreenState extends State<JobHomeScreen> {
 
   Future<void> initializePreference() async{
     this.sharedPreferences = await SharedPreferences.getInstance();
+    await _loadData(context);
    // await Provider.of<ContentProvider>(context, listen: false).getContent(context);
   }
 
@@ -211,6 +252,7 @@ class _JobHomeScreenState extends State<JobHomeScreen> {
                       physics: NeverScrollableScrollPhysics(),
                       itemBuilder: (context, index) {
                         CatJobsModel jobmodel = selectedcategory.jobsModellist[index];
+                        print("${jobmodel.id}");
                         return  GestureDetector(
                           onTap: (){
                             addviews(jobmodel.id);
@@ -322,36 +364,36 @@ class _JobHomeScreenState extends State<JobHomeScreen> {
                                               mainAxisSize: MainAxisSize.max,
                                               crossAxisAlignment: CrossAxisAlignment.start,
                                               children: <Widget>[
-                                               // Text( jobmodel.create_time.toString()),
-                                                DateTime.now().difference(jobmodel.create_time).inMinutes >= 59
+                                               // Text( jobmodel.createTime.toString()),
+                                                DateTime.now().difference(jobmodel.createTime).inMinutes >= 59
                                                     ?
-                                                          DateTime.now().difference(jobmodel.create_time).inHours >= 23 ?
-                                                                        DateTime.now().difference(jobmodel.create_time).inDays > 1 ?
+                                                          DateTime.now().difference(jobmodel.createTime).inHours >= 23 ?
+                                                                        DateTime.now().difference(jobmodel.createTime).inDays > 1 ?
                                                                         new Container(
                                                                           padding: EdgeInsets.symmetric(horizontal: 5,vertical: 2),
                                                                           child:
-                                                                          Text("Posted on : "+DateFormat('dd/MM/yyyy').format(DateConverter.isoStringToLocalDate(jobmodel.create_time.toString())).toString()
+                                                                          Text("Posted on : "+DateFormat('dd/MM/yyyy').format(DateConverter.isoStringToLocalDate(jobmodel.createTime.toString())).toString()
                                                                             ,style: LatinFonts.aBeeZee(color:Colors.white,fontSize: 10,fontWeight: FontWeight.w700,fontStyle: FontStyle.italic ),),
                                                                         )
                                                                                         :
                                                                         new Container(
                                                                           padding: EdgeInsets.symmetric(horizontal: 5,vertical: 2),
                                                                           child:
-                                                                          Text("Posted on : "+DateTime.now().difference(jobmodel.create_time).inDays.toStringAsFixed(0)+" Day Ago"
+                                                                          Text("Posted on : "+DateTime.now().difference(jobmodel.createTime).inDays.toStringAsFixed(0)+" Day Ago"
                                                                             ,style: LatinFonts.aBeeZee(color:Colors.white,fontSize: 10,fontWeight: FontWeight.w700,fontStyle: FontStyle.italic ),),
                                                                         )
                                                               :
                                                           new Container(
                                                             padding: EdgeInsets.symmetric(horizontal: 5,vertical: 2),
                                                             child:
-                                                            Text("Posted on : "+DateTime.now().difference(jobmodel.create_time).inHours.toStringAsFixed(0)+" Hours Ago"
+                                                            Text("Posted on : "+DateTime.now().difference(jobmodel.createTime).inHours.toStringAsFixed(0)+" Hours Ago"
                                                               ,style: LatinFonts.aBeeZee(color:Colors.white,fontSize: 10,fontWeight: FontWeight.w700,fontStyle: FontStyle.italic ),),
                                                           )
                                                     :
                                                 new Container(
                                                   padding: EdgeInsets.symmetric(horizontal: 5,vertical: 2),
                                                   child:
-                                                  Text("Posted on : "+DateTime.now().difference(jobmodel.create_time).inMinutes.toStringAsFixed(0)+" Minutes Ago"
+                                                  Text("Posted on : "+DateTime.now().difference(jobmodel.createTime).inMinutes.toStringAsFixed(0)+" Minutes Ago"
                                                     ,style: LatinFonts.aBeeZee(color:Colors.white,fontSize: 10,fontWeight: FontWeight.w700,fontStyle: FontStyle.italic ),),
                                                 ),
                                               ]
@@ -448,8 +490,15 @@ class _TopbarState extends State<Topbar> {
   void initState() {
     super.initState();
   }
-
-  adcategory(String categoryid,String perma) async {
+  showerror ()
+  {
+    CommonFunctions.showInfoDialog("You Can Select Maximum 5 Job Category or Minimum 1 Job Category.", context);
+  }
+  adcategory(String categoryid,String perma, String type, CategoryWithJob _category) async {
+    // if(type=="remove")
+    //   Provider.of<CategoryProvider>(context, listen: false).NewSelectedcategoryList.remove(_category);
+    // else
+    //   Provider.of<CategoryProvider>(context, listen: false).NewSelectedcategoryList.add(_category);
     try {
       Response response = await _dio.get(_baseUrl + AppConstants.UPDATE_CATEGORY_URI+categoryid+"&userid="+Provider.of<AuthProvider>(context, listen: false).getUserid());
       apidata = response.data;
@@ -586,8 +635,8 @@ class _TopbarState extends State<Topbar> {
                       initialData: Provider.of<NotificationProvider>(context, listen: false).noti_count,
                       stream: getnotificationcount(),
                       builder: (context, snapshot) {
-                        if(snapshot.data!<Provider.of<AuthProvider>(context, listen: false).getCurrentNotificationCount()){
-                          Provider.of<AuthProvider>(context, listen: false).setCurrentNotificationCount(snapshot.data!);}
+                        // if(snapshot.data!<Provider.of<AuthProvider>(context, listen: false).getCurrentNotificationCount()){
+                        //   Provider.of<AuthProvider>(context, listen: false).setCurrentNotificationCount(snapshot.data!);}
                         return new Stack(
                           children: <Widget>[
                             GestureDetector(
@@ -645,27 +694,52 @@ class _TopbarState extends State<Topbar> {
           Padding(
             padding: EdgeInsets.all(Dimensions.PADDING_SIZE_SMALL),
             child:
-            GestureDetector(
-              onTap: (){
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (builder) => SearchScreen()));
-              },
-              child: Container(
-                width: MediaQuery.of(context).size.width,
-                padding: EdgeInsets.all(3),
-                decoration: new BoxDecoration(color: Colors.white,border: Border.all(color:Primary,width: 2),borderRadius: BorderRadius.all(Radius.circular(5))),
-                child:  Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.max,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Icon(Icons.search_rounded,color: Colors.black,),
-                      SizedBox(width: 5,),
-                      Text(getTranslated("SEARCH_BY_TITLE", context)!, style: TextStyle(fontSize: 12),)
-                    ]),
-              ),
+            Row(
+              children: [
+                GestureDetector(
+                  onTap: (){
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (builder) => SearchScreen()));
+                  },
+                  child: Container(
+                    width: MediaQuery.of(context).size.width*0.60,
+                    padding: EdgeInsets.all(3),
+                    decoration: new BoxDecoration(color: Colors.white,border: Border.all(color:Primary,width: 2),borderRadius: BorderRadius.all(Radius.circular(5))),
+                    child:  Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.max,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Icon(Icons.search_rounded,color: Colors.black,),
+                          SizedBox(width: 5,),
+                          Text(getTranslated("SEARCH_BY_TITLE", context)!, style: TextStyle(fontSize: 12),)
+                        ]),
+                  ),
+                ),
+                SizedBox(width: 1),
+                GestureDetector(
+                  onTap: (){
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (builder) => SelectedJobCatScreen()));
+                  },
+                  child: Container(
+                    width: MediaQuery.of(context).size.width*0.25,
+                    //padding: EdgeInsets.all(3),
+                    decoration: new BoxDecoration(color: Colors.white,border: Border.all(color:Primary,width: 2),borderRadius: BorderRadius.all(Radius.circular(5))),
+                    child:  Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Text("Selected category", style: TextStyle(fontSize: MediaQuery.of(context).size.width*0.02)),
+                          Icon(Icons.download_for_offline_rounded,color: Colors.green,),
+                        ]),
+                  ),
+                ),
+              ],
             ),
             //BannersView(),
           ),
@@ -686,18 +760,34 @@ class _TopbarState extends State<Topbar> {
                   },
                   itemBuilder: (context, index) {
                     CategoryWithJob category = categoryProvider.NewcategoryList[index];
-                   
                     return
                       GestureDetector(
                           onTap: (){
-                         //   if(categoryProvider.TotalSelectedIndex<=5) {
-                              adcategory(category.id.toString(),category.perma.toString());
-                              categoryProvider.TotalSelectedIndex=categoryProvider.TotalSelectedIndex+1;
-                              Provider.of<CategoryProvider>(
-                                  context, listen: false)
-                                  .changeNewSelectedIndexColor(
-                                  index, category.selected, category);
-                           // }
+                            dev.log("${Provider.of<CategoryProvider>(context, listen: false).NewSelectedcategoryList.where((element) => element.id==category.id)}");
+                             // if(Provider.of<CategoryProvider>(context, listen: false).NewSelectedcategoryList.where((element) => element.id==category.id).isNotEmpty)
+                             //   CommonFunctions.showErrorDialog(category.name!, context);
+                             // else
+                             //   CommonFunctions.showErrorDialog(Provider.of<CategoryProvider>(context, listen: false).NewSelectedcategoryList.length.toString(), context);
+                            if(Provider.of<CategoryProvider>(context, listen: false).NewSelectedcategoryList.where((element) => element.id==category.id).isNotEmpty&&Provider.of<CategoryProvider>(context, listen: false).NewSelectedcategoryList.length==1)
+                            {
+                            showerror();
+                            }
+                           else if(Provider.of<CategoryProvider>(context, listen: false).NewSelectedcategoryList.where((element) => element.id==category.id).isNotEmpty)
+                              {
+                                dev.log("in contained");
+                              adcategory(category.id.toString(),category.perma.toString(),"remove",category);
+                              Provider.of<CategoryProvider>(context, listen: false).changeNewSelectedIndexColor(index, category.selected, category);
+                            } else if(Provider.of<CategoryProvider>(context, listen: false).NewSelectedcategoryList.length<5)
+                            {
+                              dev.log("in compare ${Provider.of<CategoryProvider>(context, listen: false).NewSelectedcategoryList.length.toString()}");
+                              adcategory(category.id.toString(),category.perma.toString(),"add",category);
+                              // categoryProvider.TotalSelectedIndex=categoryProvider.TotalSelectedIndex+1;
+                              Provider.of<CategoryProvider>(context, listen: false).changeNewSelectedIndexColor(index, category.selected, category);
+                            }
+                            else
+                              {
+                                showerror();
+                              }
                             },
                           child:Chip(
                             ///backgroundColor: isSelected? Colors.primaries[Random().nextInt(Colors.primaries.length)]:Colors.white,

@@ -15,11 +15,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class ConfigProvider extends ChangeNotifier {
   final ConfigRepo configRepo;
-
   ConfigProvider({required this.configRepo});
-
   ConfigModel? _configModel;
-  String? _packversion;
+  String? _packversion="36";
   ConfigModel? get configModel => _configModel;
   String? get packversion => _packversion;
 
@@ -27,14 +25,16 @@ class ConfigProvider extends ChangeNotifier {
     ApiResponse? apiResponse = await configRepo.getConfig();
     if (apiResponse.response != null && apiResponse.response?.statusCode == 200) {
       _configModel = ConfigModel.fromJson(jsonDecode(apiResponse.response?.data));
-      configRepo.saveVersion(_configModel?.appVersion!??"0");
+      configRepo.saveVersion(_configModel?.appVersion!??"36");
       _packversion=Packversion;
+      notifyListeners();
       return true;
     } else {
-      ApiChecker.checkApi(context, apiResponse);
+    //  ApiChecker.checkApi(context, apiResponse);
+      notifyListeners();
       return false;
     }
-    notifyListeners();
+
   }
 
   String getAppVersion() {

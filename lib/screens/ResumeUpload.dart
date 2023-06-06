@@ -47,9 +47,10 @@ class _ResumeUploadState extends State<ResumeUpload> {
   var education = ['Select Your Education','10th or Below 10th','12th Passed','Diploma','ITI','Graduate',
     'Post Graduate'
   ];
+  var degreelist = ['Select Your Education Details','10th','12th','ITI Diploma','B.A.','B.Com','B.Sc.','B.Tech','B.Pharma','B.Ed','M.A.','M.Com','M.Sc.','M.Tech','M.Pharma','M.Ed','Other'];
   String eduvalue = 'Select Your Education';
-  var shift = ['Select Prefered workshift','Day Shift','Night Shift','Any'
-  ];
+  String degreevalue = 'Select Your Education Details';
+  var shift = ['Select Prefered workshift','Day Shift','Night Shift','Any'];
   String shiftvalue = 'Select Prefered workshift';
   final _formKey = GlobalKey<FormState>();
   @override
@@ -93,11 +94,10 @@ class _ResumeUploadState extends State<ResumeUpload> {
 
   Future<void> _savestep4() async {
     final sharedPreferences = await SharedPreferences.getInstance();
-    if(eduvalue!='Select Your Education')
+    if(eduvalue!='Select Your Education'&&degreevalue!='Select Your Education Details')
       {
-        degree=degreeController.text.trim();
         String university=collegenameController.text.trim();
-            if(degree.isNotEmpty&&university.isNotEmpty&&eduvalue.isNotEmpty)
+            if(university.isNotEmpty&&eduvalue.isNotEmpty)
               {
                 if(shiftvalue!='Select Prefered workshift') {
                   sharedPreferences!.setString("pref_shift",shiftvalue);
@@ -125,7 +125,7 @@ class _ResumeUploadState extends State<ResumeUpload> {
       }
     else
       {
-        CommonFunctions.showInfoDialog("Please Select Your Education.", context);
+        CommonFunctions.showInfoDialog("Please Select Your Education and Detail.", context);
         setState(() {
           _isLoading = false;
         });
@@ -213,8 +213,7 @@ class _ResumeUploadState extends State<ResumeUpload> {
               SizedBox(width: 5,),
               Container(
                 width: MediaQuery.of(context).size.width*0.6,
-                child: Text(Provider.of<AuthProvider>(context, listen: false).getEmail(),maxLines:2,style: TextStyle(color: Colors.white,fontSize: 12,fontWeight: FontWeight.bold),
-
+                child: Text(Provider.of<AuthProvider>(context, listen: false).getMobile(),maxLines:2,style: TextStyle(color: Colors.white,fontSize: 12,fontWeight: FontWeight.bold),
                 ),
               ),
             ]
@@ -376,7 +375,7 @@ class _ResumeUploadState extends State<ResumeUpload> {
                                   Container(
                                       width: deviceSize.width*0.4,
                                       child:
-                                      Text(degreeController.text ,style: TextStyle(fontSize: 12,color: Primary))
+                                      Text(degreevalue=='Select Your Education Details'?"":degreevalue,style: TextStyle(fontSize: 12,color: Primary))
 
                                   ),
                                 ]
@@ -497,41 +496,70 @@ class _ResumeUploadState extends State<ResumeUpload> {
                     mainAxisSize: MainAxisSize.max,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: <Widget>[
-                      TextFormField(
-                        style: new TextStyle(fontSize: 12),
-                        decoration: InputDecoration(
-                            isDense: true,
-                            filled: true,
-                            fillColor: Colors.white,
-                            labelText: 'Course Name/Stream Name/Subject Name',
-                            focusColor: Colors.white// myIcon is a 48px-wide widget.
+            //           TextFormField(
+            //             style: new TextStyle(fontSize: 12),
+            //             decoration: InputDecoration(
+            //                 isDense: true,
+            //                 filled: true,
+            //                 fillColor: Colors.white,
+            //                 labelText: 'Course Name/Stream Name/Subject Name',
+            //                 focusColor: Colors.white// myIcon is a 48px-wide widget.
+            //             ),
+            //             keyboardType: TextInputType.text,
+            //             controller: degreeController,
+            //       validator: (value) {
+            // if (value == null || value.isEmpty) {
+            // return 'Please Enter Course Name/Stream Name/Subject Name';
+            // }
+            // return null;
+            // },
+            //           ),
+                      Container(
+                        padding: EdgeInsets.only(left: 20,),
+                        decoration: new BoxDecoration(color: Colors.white),
+                        width: deviceSize.width * 0.8,
+                        child:
+                        DropdownButton(
+                          focusColor: Colors.white,
+                          value: degreevalue,
+                          // Down Arrow Icon
+                          icon: const Icon(Icons.keyboard_arrow_down),
+                          // Array list of items
+                          items: degreelist.map((String items) {
+                            return DropdownMenuItem(
+                              value: items,
+                              child: Text(items),
+                            );
+                          }).toList(),
+                          // After selecting the desired option,it will
+                          // change button value to selected value
+                          onChanged: (value) {
+                            setState(() {
+                              degreevalue= value!;
+                            });
+                          },
                         ),
-                        keyboardType: TextInputType.text,
-                        controller: degreeController,
-                  validator: (value) {
-            if (value == null || value.isEmpty) {
-            return 'Please Enter Course Name/Stream Name/Subject Name';
-            }
-            return null;
-            },
                       ),
-                      TextFormField(
-                        style: new TextStyle(fontSize: 14),
-                        decoration: InputDecoration(
-                            isDense: true,
-                            filled: true,
-                            fillColor: Colors.white,
-                            labelText: 'Board/University/Institute Name',
-                            focusColor: Colors.white// myIcon is a 48px-wide widget.
+                      Padding(
+                        padding: const EdgeInsets.only(top: 10.0,left: 3,right: 3),
+                        child: TextFormField(
+                          style: new TextStyle(fontSize: 14),
+                          decoration: InputDecoration(
+                              isDense: true,
+                              filled: true,
+                              fillColor: Colors.white,
+                              labelText: 'Board/University/Institute Name',
+                              focusColor: Colors.white// myIcon is a 48px-wide widget.
+                          ),
+                          keyboardType: TextInputType.text,
+                          controller: collegenameController,
+                          validator: (value) {
+                            if (value == null || value.isEmpty||value!.length<4) {
+                              return 'Please Enter Board/University/Institute Name';
+                            }
+                            return null;
+                          },
                         ),
-                        keyboardType: TextInputType.text,
-                        controller: collegenameController,
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Please Enter Board/University/Institute Name';
-                          }
-                          return null;
-                        },
                       ),
                     ]
                 ),

@@ -20,6 +20,7 @@ class AdsProvider extends ChangeNotifier {
 
   Future<bool> getAds(BuildContext context) async {
     ApiResponse apiResponse = await adsRepo!.getAds();
+
     if (apiResponse.response != null && apiResponse.response!.statusCode == 200) {
       _adsModel = AdsModel.fromJson(jsonDecode(apiResponse.response!.data));
       return true;
@@ -27,7 +28,7 @@ class AdsProvider extends ChangeNotifier {
       ApiChecker.checkApi(context, apiResponse);
       return false;
     }
-    notifyListeners();
+
   }
 
 }

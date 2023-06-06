@@ -26,6 +26,8 @@ import 'package:dio/dio.dart';
 import 'package:Aap_job/utill/app_constants.dart';
 import 'package:http/http.dart' as http;
 
+import '../providers/cities_provider.dart';
+
 
 class EditProfileDetails extends StatefulWidget {
   EditProfileDetails({Key? key}) : super(key: key);
@@ -59,6 +61,7 @@ class _EditProfileDetailsState extends State<EditProfileDetails> {
   SharedPreferences? sharedPreferences;
 
   TextEditingController _nameController = TextEditingController();
+  TextEditingController _emailController = TextEditingController();
   TextEditingController _companyNameController = TextEditingController();
   TextEditingController _jobcityController = TextEditingController();
   TextEditingController _jobloczController = TextEditingController();
@@ -152,7 +155,7 @@ class _EditProfileDetailsState extends State<EditProfileDetails> {
     initializePreference().whenComplete((){
       setState(() {
         _profileuploaded=false;
-        getcities();
+       // getcities();
         button=Colors.amber;
         _nameController.text=Name;
         _jobcityController.text=jobcity;
@@ -160,7 +163,7 @@ class _EditProfileDetailsState extends State<EditProfileDetails> {
         _companyNameController.text=companyname;
         _localityController.text=locality;
         _websiteController.text=website;
-
+        _emailController.text=emaile;
       });
     });
 
@@ -169,13 +172,14 @@ class _EditProfileDetailsState extends State<EditProfileDetails> {
 
   Future<void> initializePreference() async{
     this.sharedPreferences = await SharedPreferences.getInstance();
-    emaile= sharedPreferences!.getString("email")?? "no mail";
+    emaile= sharedPreferences!.getString("email")?? "No Email";
     Name= sharedPreferences!.getString("HrName")?? "no mail";
     jobcity= sharedPreferences!.getString("HrCity")?? "no mail";
     address= sharedPreferences!.getString("HrAddress")?? "no mail";
     companyname= sharedPreferences!.getString("HrCompanyName")?? "no mail";
     locality= sharedPreferences!.getString("HrLocality")?? "no mail";
     website= sharedPreferences!.getString("HrWebsite")?? "no mail";
+    duplicateItems.addAll(Provider.of<CitiesProvider>(context, listen: false).cityModelList);
   }
 
 
@@ -190,17 +194,19 @@ class _EditProfileDetailsState extends State<EditProfileDetails> {
     String _companyname = _companyNameController.text.trim();
     String _locality = _localityController.text.trim();
     String _website = _websiteController.text.trim();
+    String _email = _emailController.text.trim();
+
 
     if (_Name.isEmpty||_jobcity.isEmpty||_address.isEmpty||_companyname.isEmpty||_locality.isEmpty)
     {
-      CommonFunctions.showErrorDialog("Please fill All Details 2", context);
+      CommonFunctions.showErrorDialog("Please fill All Details ", context);
       setState(() {
         _isLoading=false;
       });
     }
     else{
 
-      http.StreamedResponse response =  await updateHrProfileDetails(_website,_address,_Name,_companyname,_jobcity,_locality);
+      http.StreamedResponse response =  await updateHrProfileDetails(_website,_address,_Name,_companyname,_jobcity,_locality,_email);
 
     }
 
@@ -209,7 +215,7 @@ class _EditProfileDetailsState extends State<EditProfileDetails> {
 
 
 
-  Future<http.StreamedResponse> updateHrProfileDetails(String HrWebsite,String HrAddress,String HrName,String HrCompanyName,String HrCity,String HrLocality) async {
+  Future<http.StreamedResponse> updateHrProfileDetails(String HrWebsite,String HrAddress,String HrName,String HrCompanyName,String HrCity,String HrLocality, String Email) async {
     http.MultipartRequest request = http.MultipartRequest('POST', Uri.parse('${AppConstants.BASE_URL}${AppConstants.SAVE_HR_PROFILE_DETAIL_DATA_URI}'));
     int userid=sharedPreferences!.getInt("userid")?? 0;
     Map<String, String> _fields = Map();
@@ -220,7 +226,8 @@ class _EditProfileDetailsState extends State<EditProfileDetails> {
       'HrName':HrName,
       'HrCompanyName':HrCompanyName,
       'HrCity':HrCity,
-      'HrLocality':HrLocality
+      'HrLocality':HrLocality,
+      'email':Email,
     });
     request.fields.addAll(_fields);
     http.StreamedResponse response = await request.send();
@@ -240,6 +247,7 @@ class _EditProfileDetailsState extends State<EditProfileDetails> {
           sharedPreferences!.setString("HrCompanyName", HrCompanyName);
           sharedPreferences!.setString("HrLocality", HrLocality);
           sharedPreferences!.setString("HrWebsite", HrWebsite);
+          sharedPreferences!.setString("email", Email);
           // Navigator.of(context).pop();
           Navigator.pushReplacement(context,  MaterialPageRoute(builder: (context)=> HrHomePage()));
         }
@@ -290,7 +298,7 @@ class _EditProfileDetailsState extends State<EditProfileDetails> {
     _hasData = duplicateItems.length > 1;
     final CityModel result = await Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => CitySelectionScreen(duplicate: duplicateItems,hasdata: _hasData,)),
+      MaterialPageRoute(builder: (context) => CitySelectionScreen()),
     );
 
     if (result !=null)
@@ -360,7 +368,7 @@ class _EditProfileDetailsState extends State<EditProfileDetails> {
                   SizedBox(width: 10,),
                   Container(
                     width: MediaQuery.of(context).size.width*0.6,
-                    child: Text(getTranslated('EDIT_PROFILE_VIDEO', context)!,maxLines:2,style: TextStyle(color: Colors.white,fontSize: 16,fontWeight: FontWeight.bold),
+                    child: Text("Edit Profile",maxLines:2,style: TextStyle(color: Colors.white,fontSize: 16,fontWeight: FontWeight.bold),
 
                     ),
                   ),
@@ -395,6 +403,7 @@ class _EditProfileDetailsState extends State<EditProfileDetails> {
                                   textInputType: TextInputType.text,
                                   isOtp: false,
                                   maxLine: 1,
+                                  isName: true,
                                   capitalization: TextCapitalization.words,
                                   controller: _nameController,
                                 )),
@@ -415,8 +424,30 @@ class _EditProfileDetailsState extends State<EditProfileDetails> {
                                   textInputType: TextInputType.text,
                                   isOtp: false,
                                   maxLine: 1,
+                                  isName: true,
                                   capitalization: TextCapitalization.words,
                                   controller: _companyNameController,
+                                )),
+                          ]
+                      ),
+                      padding: const EdgeInsets.all(5.0),
+                    ),
+                    new Padding(
+                      child:
+                      new Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          mainAxisSize: MainAxisSize.max,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: <Widget>[
+                            Expanded(
+                                child: CustomTextField(
+                                  hintText: "Enter Email Id",
+                                  textInputType: TextInputType.emailAddress,
+                                  isName: false,
+                                  isOtp: false,
+                                  maxLine: 1,
+                                  capitalization: TextCapitalization.none,
+                                  controller: _emailController,
                                 )),
                           ]
                       ),
@@ -536,6 +567,7 @@ class _EditProfileDetailsState extends State<EditProfileDetails> {
                                   hintText: "Full Company Address",
                                   textInputType: TextInputType.text,
                                    focusNode: addressnode,
+                                  isName: false,
                                   // nextNode: _box2Focus,
                                   isOtp: false,
                                   maxLine: 1,
@@ -558,6 +590,7 @@ class _EditProfileDetailsState extends State<EditProfileDetails> {
                                 child: CustomTextField(
                                   hintText: "Website (Optional)",
                                   textInputType: TextInputType.text,
+                                  isName: false,
                                   // focusNode: _box1Focus,
                                   // nextNode: _box2Focus,
                                   isOtp: false,

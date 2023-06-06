@@ -13,9 +13,11 @@ import 'package:Aap_job/screens/hr_save_profile.dart';
 import 'package:Aap_job/screens/hrhomepage.dart';
 import 'package:Aap_job/screens/hrloginscreen.dart';
 import 'package:Aap_job/screens/loginscreen.dart';
+import 'package:Aap_job/screens/myloginscreen.dart';
 import 'package:Aap_job/screens/profile_exp.dart';
 import 'package:Aap_job/screens/save_profile.dart';
 import 'package:Aap_job/screens/selectOptionScreen.dart';
+import 'package:Aap_job/screens/splashscreen.dart';
 import 'package:Aap_job/screens/testing.dart';
 import 'package:Aap_job/utill/app_constants.dart';
 import 'package:Aap_job/utill/authentification.dart';
@@ -29,11 +31,13 @@ import 'package:Aap_job/providers/ads_provider.dart';
 // import 'package:Aap_job/screens/videoApp.dart';
 import 'package:Aap_job/screens/widget/adsView.dart';
 import 'package:Aap_job/utill/colors.dart';
+import 'package:flutter/services.dart';
 import 'package:google_language_fonts/google_language_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:google_sign_in/google_sign_in.dart';
+// import 'package:google_sign_in/google_sign_in.dart';
 
+import '../main.dart';
 import '../providers/auth_provider.dart';
 import 'mainloginScreen.dart';
 
@@ -47,7 +51,7 @@ class SelectLanguage extends StatefulWidget {
 class _SelectLanguageState extends State<SelectLanguage> {
   final selectedIndexNotifier = ValueNotifier<int>(0);
   bool? languageselected;
-  String? acctype, status;
+  String? status;
   SharedPreferences? sharedPreferences;
   var _isLoading = false;
   int selectedIndex=0;
@@ -56,9 +60,8 @@ class _SelectLanguageState extends State<SelectLanguage> {
     initializePreference().whenComplete((){
       setState(() {
         languageselected=false;
-        acctype= sharedPreferences!.getString("accounttype")?? "candidate";
-        status=sharedPreferences!.getString("status")?? "0";
 
+        status=sharedPreferences!.getString("status")?? "0";
       });
     });
     super.initState();
@@ -72,9 +75,9 @@ class _SelectLanguageState extends State<SelectLanguage> {
     this.sharedPreferences = await SharedPreferences.getInstance();
   }
 
-  Future<void> signOut() async {
-    await Authentification().signOut();
-  }
+  // Future<void> signOut() async {
+  //   await Authentification().signOut();
+  // }
 
   saveUserDataToFirebase() async {
     Provider.of<ChatAuthRepository>(context, listen: false).saveUserInfoToFirestore(
@@ -94,8 +97,9 @@ class _SelectLanguageState extends State<SelectLanguage> {
       AppConstants.languages[selectedIndexNotifier.value-1].countryCode,
     ));
     print("SelectedInd->${selectedIndexNotifier.value-1}");
-    final sharedPreferences = await SharedPreferences.getInstance();
-    sharedPreferences!.setBool("step1", true);
+    int sele=selectedIndexNotifier.value-1;
+    sharedp.setBool("step1", true);
+    sharedp.setString("language",sele.toString());
    // print("clicked");
     route();
   }
@@ -111,7 +115,7 @@ class _SelectLanguageState extends State<SelectLanguage> {
 
 
   route() async {
-    if(acctype=="hr")
+    if(Provider.of<AuthProvider>(context, listen: false).getacctype()=="hr")
     {
       if(widget.isHome)
       {
@@ -246,13 +250,13 @@ class _SelectLanguageState extends State<SelectLanguage> {
       onWillPop: () async{
         widget.isHome
             ?
-        acctype=="hr"
+        Provider.of<AuthProvider>(context, listen: false).getacctype()=="hr"
             ?
         Navigator.pushReplacement( context,  MaterialPageRoute(builder: (context) => HrHomePage()),)
             :
         Navigator.pushReplacement( context,  MaterialPageRoute(builder: (context) => HomePage()),)
             :
-        Navigator.pushReplacement( context,  MaterialPageRoute(builder: (context) => SelectOptionScreen()),);
+        SystemNavigator.pop();
         return true;
       },
       child:
@@ -287,6 +291,7 @@ class _SelectLanguageState extends State<SelectLanguage> {
                         ),
                         padding: const EdgeInsets.all(15.0),
                       ),
+                      widget.isHome? Container():
                       new Padding(
                         child:
                         new Row(
@@ -294,7 +299,7 @@ class _SelectLanguageState extends State<SelectLanguage> {
                             mainAxisSize: MainAxisSize.max,
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: <Widget>[
-                              Text(Provider.of<AuthProvider>(context, listen: false).getEmail(),
+                              Text("+91-"+Provider.of<AuthProvider>(context, listen: false).getMobile(),
                                 style: new TextStyle(
                                     color: Colors.white, fontSize: 16),
                                 textAlign: TextAlign.center,),
@@ -303,7 +308,7 @@ class _SelectLanguageState extends State<SelectLanguage> {
                         ),
                         padding: const EdgeInsets.all(8.0),
                       ),
-
+                      widget.isHome? Container():
                       new Padding(
                         child:
                         new Row(
@@ -321,6 +326,7 @@ class _SelectLanguageState extends State<SelectLanguage> {
                         ),
                         padding: const EdgeInsets.all(1.0),
                       ),
+                      widget.isHome? Container():
                       new Padding(
                         child:
                         new Row(
@@ -333,8 +339,8 @@ class _SelectLanguageState extends State<SelectLanguage> {
                                 onTap: (){
                                   Provider.of<AuthProvider>(context, listen: false).clearSharedData().then((condition) {
                                     Provider.of<AuthProvider>(context,listen: false).clearSharedData();
-                                    signOut();
-                                    Navigator.pushReplacement( context,  MaterialPageRoute(builder: (context) => MainloginScreen()),);
+                                    //signOut();
+                                    Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (context) => SplashScreen()), (route) => false);
                                   });
                                 },
                                 child: Text(getTranslated("CLICK_HERE_TO_CHANGE_ACCOUNT", context)!,

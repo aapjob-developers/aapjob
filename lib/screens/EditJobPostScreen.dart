@@ -8,7 +8,7 @@ import 'package:Aap_job/screens/widget/JobCategorySelectionScreen.dart';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:Aap_job/models/CitiesModel.dart';
-import 'package:Aap_job/models/JobCategoryModel.dart';
+// 
 import 'package:Aap_job/models/JobTitleModel.dart';
 import 'package:Aap_job/models/LocationModel.dart';
 import 'package:Aap_job/models/common_functions.dart';
@@ -32,6 +32,8 @@ import 'package:dio/dio.dart';
 import 'package:Aap_job/utill/app_constants.dart';
 import 'package:google_language_fonts/google_language_fonts.dart';
 
+import '../providers/cities_provider.dart';
+
 class EditJobPostScreen extends StatefulWidget {
   EditJobPostScreen({Key? key,required this.job,required this.repost}) : super(key: key);
   JobsModel job;
@@ -49,7 +51,10 @@ class _EditJobPostScreenState extends State<EditJobPostScreen> {
   String jobtitle="",JobCategory="",jobtype="",joblocation="",jobcity="",edu="",openingssaved="",Jobcatid="",Jobcityid="";
   Future<void> initializePreference() async{
     this.sharedPreferences = await SharedPreferences.getInstance();
-    await Provider.of<JobtitleProvider>(context, listen: false).getJobTitleModelList(false, context);
+    setState(() {
+      duplicateItems.addAll(Provider.of<CitiesProvider>(context, listen: false).cityModelList);
+    });
+    //await Provider.of<JobtitleProvider>(context, listen: false).getJobTitleModelList(false, context);
   }
 
   @override
@@ -171,8 +176,6 @@ class _EditJobPostScreenState extends State<EditJobPostScreen> {
           _localityController.text=joblocation;
         }
         duplicateJobTitle= Provider.of<JobtitleProvider>(context, listen: false).jobtitleList;
-        getJobCategory();
-        getcities();
       });
     });
 
@@ -186,47 +189,6 @@ class _EditJobPostScreenState extends State<EditJobPostScreen> {
   TextEditingController _jobtitleController = TextEditingController();
 
   List<JobTitleModel> duplicateJobTitle = <JobTitleModel>[];
-
-  // getJobTitles() async {
-  //   duplicateJobTitle.clear();
-  //   try {
-  //     Response response = await _dio.get(_baseUrl + AppConstants.JOB_TITLE_URI);
-  //     apidata = response.data;
-  //     print('JobTitle : ${apidata}');
-  //     List<dynamic> data=json.decode(apidata);
-  //     if(data.toString()=="[]")
-  //     {
-  //       duplicateJobTitle=[];
-  //       setState(() {
-  //         _hasJobTitle = false;
-  //       });
-  //     }
-  //     else
-  //     {
-  //       data.forEach((location) =>
-  //           duplicateJobTitle.add(JobTitleModel.fromJson(location)));
-  //       setState(() {
-  //         _hasJobTitle=true;
-  //       });
-  //     }
-  //     print('Jobtitle List: ${duplicateJobTitle}');
-  //
-  //   } on DioError catch (e) {
-  //     // The request was made and the server responded with a status code
-  //     // that falls out of the range of 2xx and is also not 304.
-  //     if (e.response != null) {
-  //       print('Dio error!');
-  //       print('STATUS: ${e.response?.statusCode}');
-  //       print('DATA: ${e.response?.data}');
-  //       print('HEADERS: ${e.response?.headers}');
-  //     } else {
-  //       // Error due to setting up or sending the request
-  //       print('Error sending request!');
-  //       print(e.message);
-  //     }
-  //   }
-  //
-  // }
 
   _JobtitleDisplaySelection(BuildContext context) async {
     _hasJobTitle = duplicateJobTitle.length >= 1;
@@ -259,78 +221,6 @@ class _EditJobPostScreenState extends State<EditJobPostScreen> {
   bool _hasCategories=false;
   String jobcatid="0";
   TextEditingController _jobcategoryController = TextEditingController();
-
-  List<JobCategoryModel> duplicateJobCategory = <JobCategoryModel>[];
-
-  getJobCategory() async {
-    duplicateJobCategory.clear();
-    try {
-      Response response = await _dio.get(_baseUrl + AppConstants.CATEGORY_URI);
-      apidatacat = response.data;
-      print('JobCategory : ${apidatacat}');
-      List<dynamic> data=json.decode(apidatacat);
-      if(data.toString()=="[]")
-      {
-        duplicateJobCategory=[];
-        setState(() {
-          _hasCategories = false;
-        });
-      }
-      else
-      {
-        data.forEach((jobcat) =>
-            duplicateJobCategory.add(JobCategoryModel.fromJson(jobcat)));
-        setState(() {
-          _hasCategories=true;
-        });
-      }
-      print('JobCat List: ${duplicateJobCategory}');
-
-    } on DioError catch (e) {
-      // The request was made and the server responded with a status code
-      // that falls out of the range of 2xx and is also not 304.
-      if (e.response != null) {
-        print('Dio error!');
-        print('STATUS: ${e.response?.statusCode}');
-        print('DATA: ${e.response?.data}');
-        print('HEADERS: ${e.response?.headers}');
-      } else {
-        // Error due to setting up or sending the request
-        print('Error sending request!');
-        print(e.message);
-      }
-    }
-
-  }
-
-  _JobcategoryDisplaySelection(BuildContext context) async {
-    _hasJobTitle = duplicateJobCategory.length >= 1;
-    if(_hasJobTitle) {
-      final JobCategoryModel result = await Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) =>
-            JobCategorySelectionScreen(
-              duplicate: duplicateJobCategory, hasdata: _hasJobTitle,)),
-      );
-      if (result !=null)
-      {
-        _jobcategoryController.text=result.name;
-        jobcatid=result.id;
-        //addressnode.requestFocus();
-      }
-    }
-    else
-    {
-      CommonFunctions.showInfoDialog("No data in List", context);
-    }
-
-
-
-  }
-
-///////////////////////////////////////////////////////
-
-/////////////////Job Type
   bool showfulltime=true,showparttime=true;
   bool selectedfulltime=false,selectedparttime=false;
 String Jobtype="";
@@ -364,40 +254,7 @@ String Jobtype="";
 
   List<CityModel> duplicateItems = <CityModel>[];
   List<LocationModel> duplicatelocation = <LocationModel>[];
-  getcities() async {
-    try {
-      Response response = await _dio.get(_baseUrl + AppConstants.CITIES_URI);
-      apidatacity= response.data;
-      print('City List: ${apidatacity}');
-      List<dynamic> data=json.decode(apidatacity);
 
-      if(data.toString()=="[]")
-      {
-        duplicateItems=[];
-      }
-      else
-      {
-        data.forEach((city) =>
-            duplicateItems.add(CityModel.fromJson(city)));
-      }
-      print('City List: ${duplicateItems}');
-
-    } on DioError catch (e) {
-      // The request was made and the server responded with a status code
-      // that falls out of the range of 2xx and is also not 304.
-      if (e.response != null) {
-        print('Dio error!');
-        print('STATUS: ${e.response?.statusCode}');
-        print('DATA: ${e.response?.data}');
-        print('HEADERS: ${e.response?.headers}');
-      } else {
-        // Error due to setting up or sending the request
-        print('Error sending request!');
-        print(e.message);
-      }
-    }
-
-  }
   getlocation() async {
     duplicatelocation.clear();
     try {
@@ -443,7 +300,7 @@ String Jobtype="";
     _hasData = duplicateItems.length > 1;
     final CityModel result = await Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => CitySelectionScreen(duplicate: duplicateItems,hasdata: _hasData,)),
+      MaterialPageRoute(builder: (context) => CitySelectionScreen()),
     );
 
     if (result !=null)

@@ -50,7 +50,7 @@ class _PaymentPageScreenState extends State<PaymentPageScreen> {
         HrWebsite= sharedPreferences!.getString("HrWebsite")?? "no Job Title";
         HrName=sharedPreferences!.getString("HrName")?? "no Job Title";
         phone=sharedPreferences!.getString("phone")?? "no Job Title";
-        emaile=sharedPreferences!.getString("email")?? "no Job Title";
+        emaile=sharedPreferences!.getString("email")?? "No Email";
       });
     });
     super.initState();

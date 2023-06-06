@@ -10,7 +10,7 @@ import 'package:Aap_job/screens/loginscreen.dart';
 import 'package:Aap_job/screens/mainloginScreen.dart';
 import 'package:Aap_job/utill/colors.dart';
 import 'package:Aap_job/utill/dimensions.dart';
-import 'package:google_sign_in/google_sign_in.dart';
+// import 'package:google_sign_in/google_sign_in.dart';
 
 class PermissionDialog extends StatelessWidget {
 

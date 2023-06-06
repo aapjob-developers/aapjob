@@ -48,6 +48,11 @@ class SplashProvider extends ChangeNotifier {
   bool getloggedin() {
     return splashRepo.getloggedin();
   }
+
+  String getlanguage() {
+    return splashRepo.getlanguage();
+  }
+
   bool getacctype() {
     return splashRepo.getacctype();  }
 

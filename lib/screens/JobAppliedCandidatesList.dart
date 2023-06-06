@@ -1082,17 +1082,6 @@ class _JobAppliedCandidatesListState extends State<JobAppliedCandidatesList> {
                                                 children: <Widget>[
                                                   ElevatedButton(
                                                     child:
-                                                    // new Row(
-                                                    //     mainAxisAlignment: MainAxisAlignment.center,
-                                                    //     mainAxisSize: MainAxisSize.max,
-                                                    //     crossAxisAlignment: CrossAxisAlignment.center,
-                                                    //     children: <Widget>[
-                                                    //       SizedBox(width: 5,),
-                                                    //       Icon(Icons.phone_android_rounded,size: 15,color: Colors.white,),
-                                                    //       SizedBox(width: 5,),
-                                                    //       Text(" Call" ,style: LatinFonts.aBeeZee(color:Colors.white,fontSize: 12 ),)
-                                                    //     ]
-                                                    // ),
                                                     Row(
                                                       mainAxisAlignment: MainAxisAlignment.center,
                                                       children: [
@@ -1102,8 +1091,7 @@ class _JobAppliedCandidatesListState extends State<JobAppliedCandidatesList> {
                                                           width: MediaQuery.of(context).size.width*0.05,
                                                           animate: true,),
                                                         SizedBox(width: 10,),
-                                                        Text(getTranslated('CALL_HR', context)!),
-
+                                                        Text("Call"),
                                                       ],),
 
                                                     onPressed: _hasCallSupport
@@ -1124,18 +1112,6 @@ class _JobAppliedCandidatesListState extends State<JobAppliedCandidatesList> {
                                                   SizedBox(width: 10,),
                                                   ElevatedButton(
                                                     child:
-                                                    // new Row(
-                                                    //     mainAxisAlignment: MainAxisAlignment.center,
-                                                    //     mainAxisSize: MainAxisSize.max,
-                                                    //     crossAxisAlignment: CrossAxisAlignment.center,
-                                                    //     children: <Widget>[
-                                                    //       SizedBox(width: 5,),
-                                                    //       Icon(Icons.whatsapp_sharp,size: 15,color: Colors.white,),
-                                                    //       SizedBox(width: 5,),
-                                                    //       Text(" WhatsApp" ,style: LatinFonts.aBeeZee(color:Colors.white,fontSize: 12 ),)
-                                                    //     ]
-                                                    // ),
-
                                                     Row(
                                                       mainAxisAlignment: MainAxisAlignment.center,
                                                       children: [

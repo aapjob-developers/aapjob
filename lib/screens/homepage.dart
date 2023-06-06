@@ -18,10 +18,9 @@ import 'package:get/get.dart';
 
 class HomePage extends StatelessWidget {
   final HomePageController dashboard = Get.put(HomePageController());
+
   @override
   Widget build(BuildContext context) {
-    print(Provider.of<ConfigProvider>(context, listen: false).packversion!.substring(0,2).toString());
-    print(Provider.of<ConfigProvider>(context, listen: false).getAppVersion());
     dashboard.version.value=Provider.of<ConfigProvider>(context, listen: false).packversion!.substring(0,2).toString()!=Provider.of<ConfigProvider>(context, listen: false).getAppVersion();
     return
       Stack(

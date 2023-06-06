@@ -7,11 +7,14 @@
 // import 'package:firebase_core/firebase_core.dart';
 // import 'firebase_options.dart';
 
+import 'dart:developer';
+
 import 'package:Aap_job/data/chat/ContactsRepository.dart';
 import 'package:Aap_job/data/chat/chat_auth_repository.dart';
 import 'package:Aap_job/data/chat/chat_repository.dart';
 import 'package:Aap_job/data/chat/firebase_storage_repository.dart';
 import 'package:Aap_job/localization/app_localization.dart';
+import 'package:Aap_job/notification/NotificationServices.dart';
 import 'package:Aap_job/providers/HrJobs_provider.dart';
 import 'package:Aap_job/providers/Jobs_provider.dart';
 import 'package:Aap_job/providers/ads_provider.dart';
@@ -30,6 +33,7 @@ import 'package:Aap_job/providers/splash_provider.dart';
 import 'package:Aap_job/screens/CameraScreen.dart';
 import 'package:Aap_job/screens/JobAppliedCandidates.dart';
 import 'package:Aap_job/screens/NotificationScreen.dart';
+import 'package:Aap_job/screens/TermsAccept.dart';
 import 'package:Aap_job/screens/getjobdetails.dart';
 import 'package:Aap_job/screens/notification/notification_screen.dart';
 import 'package:Aap_job/screens/splashscreen.dart';
@@ -45,6 +49,7 @@ import 'package:flutter_downloader/flutter_downloader.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'firebase_options.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:go_router/go_router.dart';
@@ -54,46 +59,19 @@ import 'di_container.dart' as di;
 import 'helper/AppleSignInAvailable.dart';
 import 'helper/custom_delegate.dart';
 
-
 final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
-
+late SharedPreferences sharedp;
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-   await Firebase.initializeApp(
-     options: DefaultFirebaseOptions.currentPlatform,
-   );
+  sharedp= await SharedPreferences.getInstance();
   await FlutterDownloader.initialize(debug: true, ignoreSsl: true);
   await di.init();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
 
-  Map<Permission, PermissionStatus> statuses = await [
-    Permission.location,
-    Permission.camera,
-    Permission.storage,
-    Permission.mediaLibrary,
-    Permission.accessMediaLocation,
-    //add more permission to request here.
-  ].request();
 
-  final NotificationAppLaunchDetails? notificationAppLaunchDetails = await flutterLocalNotificationsPlugin.getNotificationAppLaunchDetails();
-  String? payload;
-  if (notificationAppLaunchDetails?.didNotificationLaunchApp ?? false) {
-    payload = (notificationAppLaunchDetails!.payload != null && notificationAppLaunchDetails!.payload!.isNotEmpty)
-        ? notificationAppLaunchDetails.payload : "";
-    notificationAppLaunchDetails!.payload?.replaceAll(payload!, "blank");
-  }
-  else
-    {
-      payload="";
-    }
-  
-  print('=================notification------$payload---===========');
-  final RemoteMessage? remoteMessage = await FirebaseMessaging.instance.getInitialMessage();
-  if (remoteMessage != null) {
-    payload = remoteMessage.notification!.titleLocKey != null ? remoteMessage.notification!.titleLocKey: "";
-  }
-  await MyNotification.initialize(flutterLocalNotificationsPlugin);
-  FirebaseMessaging.onBackgroundMessage(myBackgroundMessageHandler);
-  final appleSignInAvailable = await AppleSignInAvailable.check();
+  // final appleSignInAvailable = await AppleSignInAvailable.check();
   ErrorWidget.builder = (FlutterErrorDetails details) {
     return Container(
       color: Colors.white,
@@ -144,20 +122,19 @@ Future<void> main() async {
       ChangeNotifierProvider(create: (context) => di.sl<ContactsRepository>()),
       ChangeNotifierProvider(create: (context) => di.sl<ChatAuthRepository>()),
       ChangeNotifierProvider(create: (context) => di.sl<ChatRepository>()),
-      Provider<AppleSignInAvailable>.value(value: appleSignInAvailable,),
+      //Provider<AppleSignInAvailable>.value(value: appleSignInAvailable,),
     ],
     child: MyApp(),
   ));
 }
 
+
 class MyApp extends StatelessWidget {
-  MyApp({Key? key,this.Data}) : super(key: key);
-  String? Data;
+  MyApp({Key? key}) : super(key: key);
   static final navigatorKey = new GlobalKey<NavigatorState>();
   bool _isLoading=true;
-
 // This widget is the root of your application.
-
+bool istermsaccepted=sharedp.getBool("IsTermsAccepted")??false;
   @override
   Widget build(BuildContext context) {
     List<Locale> _locals = [];
@@ -178,10 +155,11 @@ class MyApp extends StatelessWidget {
       supportedLocales: _locals,
       title: 'Aap Job',
       theme: ThemeData(
-        primarySwatch: Colors.blue,
+        primarySwatch: Colors.purple,
       ),
       // home:Data==null?SplashScreen(): NotificationScreen(Userid: Provider.of<AuthProvider>(context, listen: false).getUserid()),
-      home:Data==null||Data=="blank"?SplashScreen():Provider.of<AuthProvider>(context, listen: false).getacctype()=="candidate"?Data=="no"?NotificationScreen(isBacButtonExist: false,Userid: Provider.of<AuthProvider>(context, listen: false).getUserid()):GetJobDetailSceen(jobid:Data!):Provider.of<AuthProvider>(context, listen: false).getacctype()=="hr"?Data=="no"?NotificationScreen2(isBacButtonExist: false,Userid: Provider.of<AuthProvider>(context, listen: false).getUserid()):JobAppliedCandidates(jobid: Data!):SplashScreen(),
+//      home:istermsaccepted?Data==null||Data=="blank"?SplashScreen():Provider.of<AuthProvider>(context, listen: false).getacctype()=="candidate"?Data=="no"?NotificationScreen(isBacButtonExist: false,Userid: Provider.of<AuthProvider>(context, listen: false).getUserid()):GetJobDetailSceen(jobid:Data!):Provider.of<AuthProvider>(context, listen: false).getacctype()=="hr"?Data=="no"?NotificationScreen2(isBacButtonExist: false,Userid: Provider.of<AuthProvider>(context, listen: false).getUserid()):JobAppliedCandidates(jobid: Data!):SplashScreen():TermsAccept(),
+      home:istermsaccepted?SplashScreen():TermsAccept(),
     );
   }
 }

@@ -16,6 +16,7 @@ import 'package:Aap_job/models/register_model.dart';
 import 'package:Aap_job/models/response/api_response.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../main.dart';
 import '../../utill/app_constants.dart';
 import 'package:http/http.dart' as http;
 
@@ -33,6 +34,29 @@ class AuthRepo {
       return ApiResponse.withError(ApiErrorHandler.getMessage(e));
     }
   }
+
+  Future<ApiResponse> sendmyotp(String phone, String otp,String signature) async {
+    try {
+      Response response = await dioClient.post(AppConstants.SEND_MY_OTP_URI, data: {"phone": phone,"otp":otp,"signature":signature});
+      return ApiResponse.withSuccess(response);
+    } catch (e) {
+      return ApiResponse.withError(ApiErrorHandler.getMessage(e));
+    }
+  }
+
+  Future<ApiResponse> mylogin(String acctype,String accesstoken, String phone) async {
+    if(acctype=="hr")
+      FirebaseMessaging.instance.subscribeToTopic(AppConstants.HRTOPIC);
+    else  if(acctype=="candidate")
+      FirebaseMessaging.instance.subscribeToTopic(AppConstants.TOPIC);
+    try {
+      Response response = await dioClient.post(AppConstants.MY_LOGIN_URI, data: {"acctype":acctype,"AccessToken":accesstoken,"mobile": phone});
+      return ApiResponse.withSuccess(response);
+    } catch (e) {
+      return ApiResponse.withError(ApiErrorHandler.getMessage(e));
+    }
+  }
+
 
   Future<ApiResponse> login(String userid, String phone) async {
     try {
@@ -60,6 +84,19 @@ class AuthRepo {
       FirebaseMessaging.instance.subscribeToTopic(AppConstants.TOPIC);
     try {
       Response response = await dioClient.post(AppConstants.CHECKACC_URI, data: {"acctype": acctype,"email":email,"AccessToken":_deviceToken});
+      return ApiResponse.withSuccess(response);
+    } catch (e) {
+      return ApiResponse.withError(ApiErrorHandler.getMessage(e));
+    }
+  }
+
+  Future<ApiResponse> checkacc2(String acctype, String mobile,String AccessToken) async {
+    if(acctype=="hr")
+      FirebaseMessaging.instance.subscribeToTopic(AppConstants.HRTOPIC);
+    else if(acctype=="candidate")
+      FirebaseMessaging.instance.subscribeToTopic(AppConstants.TOPIC);
+    try {
+      Response response = await dioClient.post(AppConstants.CHECKACCC_URI, data: {"acctype": acctype,"mobile":mobile,"AccessToken":AccessToken});
       return ApiResponse.withSuccess(response);
     } catch (e) {
       return ApiResponse.withError(ApiErrorHandler.getMessage(e));
@@ -96,11 +133,21 @@ class AuthRepo {
 
   Future<void> saveMobileOtp(String phone, String otp,String signature) async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      // await sharedPreferences!.setString("phone", phone);
-      prefs.setString('phone', phone);
-      prefs.setString('otp', otp);
-      prefs.setString('signa', signature);
+      sharedp.setString('phone', phone);
+      sharedp.setString('otp', otp);
+      sharedp.setString('signa', signature);
+      sharedp.getString("accounttype");
+    } catch (e) {
+      throw e;
+    }
+  }
+
+  Future<void> saveMyMobileOtp(String phone, String otp,String signature, String acctype) async {
+    try {
+      sharedp.setString('phone', phone);
+      sharedp.setString('otp', otp);
+      sharedp.setString('signa', signature);
+      sharedp.setString("accounttype",acctype);
     } catch (e) {
       throw e;
     }
@@ -141,6 +188,7 @@ class AuthRepo {
       final prefs = await SharedPreferences.getInstance();
       prefs.setInt('userid', int.parse(user.id));
       sharedPreferences!.setString("fullsubmited", user.fullsubmited);
+      sharedPreferences!.setString("email", user.email);
       sharedPreferences!.setString("route", route);
       if(user.fullsubmited=="1") {
         sharedPreferences!.setBool("step1", true);
@@ -148,8 +196,9 @@ class AuthRepo {
         sharedPreferences!.setBool("step3", true);
         sharedPreferences!.setBool("step4", true);
         sharedPreferences!.setBool("step5", true);
-        sharedPreferences!.setBool("loggedin", true);
       }
+      sharedPreferences!.setBool("loggedin", true);
+      sharedPreferences!.setString("shift", user.languageId==""?"Any":user.languageId);
       sharedPreferences!.setString("status", user.status==""?"0":user.status);
       sharedPreferences!.setString("joblocation",user.address==""?"No JobLocation":user.address);
       if(user.profileImage!="uploads/users/1.png")
@@ -215,7 +264,7 @@ class AuthRepo {
       final prefs = await SharedPreferences.getInstance();
       prefs.setInt('userid', int.parse(user.id));
       prefs.setString("fullsubmited", user.fullsubmited);
-      //   print("I am In ->"+user.status +" plan ->"+planModel.planType.toString()+" route->"+route.toString());
+      sharedPreferences!.setString("email",user.email);
       if(planModel.planType=="r")
       {
         RecruiterPackage Rplan=planModel.package;
@@ -260,9 +309,9 @@ class AuthRepo {
         sharedPreferences!.setBool("step3", true);
         sharedPreferences!.setBool("step4", true);
         sharedPreferences!.setBool("step5", true);
-        sharedPreferences!.setBool("loggedin", true);
-      }
 
+      }
+      sharedPreferences!.setBool("loggedin", true);
       sharedPreferences!.setString("route", route);
       sharedPreferences!.setString("HrWebsite", user.passkey==""?"no website":user.passkey);
       sharedPreferences!.setString("HrAddress", user.address==""?"no address":user.address);
@@ -310,7 +359,6 @@ class AuthRepo {
     }
   }
 
-//  Future<http.StreamedResponse> updateProfile(String name, String gender, String jobcity,String joblocation, String userid, File file,bool myexp ,String jobtitle,String companyname,String totalexp,String currentsalary,String education,String degree,String university, File resumefile, String jobtypelist,File videofile) async {
   Future<http.StreamedResponse> updateProfile(String userid, bool myexp ,String jobtitle,String companyname,String totalexp,String currentsalary,String education,String degree,String university, String jobtypelist, String candidateSkillList, String shift) async {
     http.MultipartRequest request = http.MultipartRequest('POST', Uri.parse('${AppConstants.BASE_URL}${AppConstants.SAVE_PROFILE_DATA_URI}'));
     // request.files.add(http.MultipartFile('image', file.readAsBytes().asStream(), file.lengthSync(), filename: file.path.split('/').last));
@@ -344,6 +392,45 @@ class AuthRepo {
     });
     return response;
   }
+
+  Future<http.StreamedResponse> updateUserExperience(String userid, bool myexp ,String jobtitle,String companyname,String totalexp,String currentsalary, String candidateSkillList) async {
+    http.MultipartRequest request = http.MultipartRequest('POST', Uri.parse('${AppConstants.BASE_URL}${AppConstants.SAVE_EXP_DATA_URI}'));
+    Map<String, String> _fields = Map();
+    _fields.addAll(<String, String>{
+      'userid':userid,
+      'myexp' : myexp.toString(),
+      'jobtitle':  jobtitle,
+      'companyname':companyname,
+      'totalexp':totalexp,
+      'currentsalary': currentsalary,
+      'candidateSkillList':candidateSkillList,
+    });
+    request.fields.addAll(_fields);
+    http.StreamedResponse response = await request.send();
+    response.stream.transform(utf8.decoder).listen((value) {
+      //    print("Profile Save Response from API : "+value);
+    });
+    return response;
+  }
+
+  Future<http.StreamedResponse> updateUserEducation(String userid,String education,String degree,String university, String shift) async {
+    http.MultipartRequest request = http.MultipartRequest('POST', Uri.parse('${AppConstants.BASE_URL}${AppConstants.SAVE_EDUCATION_DATA_URI}'));
+    Map<String, String> _fields = Map();
+    _fields.addAll(<String, String>{
+      'userid':userid,
+      'shift': shift,
+      'education': education,
+      'degree':degree,
+      'university':university,
+    });
+    request.fields.addAll(_fields);
+    http.StreamedResponse response = await request.send();
+    response.stream.transform(utf8.decoder).listen((value) {
+      //    print("Profile Save Response from API : "+value);
+    });
+    return response;
+  }
+
 
   Future<http.StreamedResponse> updateHrProfile(String HrGst,String email,String userid) async {
     http.MultipartRequest request = http.MultipartRequest('POST', Uri.parse('${AppConstants.BASE_URL}${AppConstants.SAVE_HR_PROFILE_DATA_URI}'));
@@ -418,7 +505,7 @@ class AuthRepo {
   }
 
   String getEmail() {
-    return sharedPreferences!.getString("email") ?? "";
+    return sharedPreferences!.getString("email") ?? "No Email";
   }
 
   String getAccessToken() {
@@ -460,6 +547,35 @@ class AuthRepo {
 
   String getJobtitle() {
     return sharedPreferences!.getString("jobtitle") ?? "fresher";
+  }
+  String getCompany() {
+    return sharedPreferences!.getString("companyname") ?? "no Company";
+  }
+  String getCurrentSalary() {
+    return sharedPreferences!.getString("currentsalary") ?? "no Salary";
+  }
+
+
+  String getEducation() {
+    return sharedPreferences!.getString("education") ?? "no education";
+  }
+
+  String getDegree() {
+    return sharedPreferences!.getString("degree") ?? " ";
+  }
+  String getuniversity() {
+    return sharedPreferences!.getString("university") ?? "no University";
+  }
+
+  String getshift() {
+    return sharedPreferences!.getString("shift") ?? "Any";
+  }
+
+  String gettotalexp() {
+    return sharedPreferences!.getString("totalexp") ?? "no Experience";
+  }
+  bool getmyexp() {
+    return sharedPreferences!.getBool("myexp") ?? false;
   }
 
   String getResumeString() {

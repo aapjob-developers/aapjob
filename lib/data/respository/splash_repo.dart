@@ -30,6 +30,9 @@ class SplashRepo {
   bool getloggedin() {
     return sharedPreferences!.getBool("loggedin")??false;
   }
+  String getlanguage() {
+    return sharedPreferences!.getString("language")??"no";
+  }
   bool getacctype() {
     return sharedPreferences!.getBool("acctype")??false;
   }

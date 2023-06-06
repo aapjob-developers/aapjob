@@ -166,8 +166,8 @@ class _JobListOfCategorySceenState extends State<JobListOfCategorySceen> {
             children: <Widget>[
               Padding(
                 padding: EdgeInsets.only(top: 10,left: 5,right: 5,bottom: 10),
-                child: Jobslist!=null ?
-                Jobslist.length!=0?
+                child: Jobslist.length!=null ?
+                Jobslist.isNotEmpty?
                 Container(
                   padding: EdgeInsets.only(top: 10,left: 5,right: 5,bottom: deviceSize.height*0.15),
                   height: MediaQuery.of(context).size.height,

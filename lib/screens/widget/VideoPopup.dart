@@ -38,7 +38,8 @@ class _PopupCall extends StatefulWidget {
 }
 
 class _PopupCallState extends State<_PopupCall> {
-  VideoPlayerController controller=VideoPlayerController as VideoPlayerController;
+ // VideoPlayerController controller=VideoPlayerController;
+  late VideoPlayerController controller;
   @override
   void initState() {
     print("url->"+widget.title);

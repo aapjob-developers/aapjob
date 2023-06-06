@@ -68,6 +68,35 @@ class AuthProvider with ChangeNotifier {
       notifyListeners();
     }
   }
+
+
+  Future sendmyotp(String phone, String otp, String signature,Function callback) async {
+    _isLoading = true;
+    notifyListeners();
+    ApiResponse? apiResponse = await authRepo.sendmyotp(phone,otp,signature);
+    _isLoading = false;
+    if (apiResponse.response != null && apiResponse.response?.statusCode == 200) {
+      print(apiResponse.response?.data);
+      Map map = json.decode(apiResponse.response?.data);
+      String message = map["acctype"];
+        authRepo.saveMyMobileOtp(phone, otp, signature,message);
+        callback(true, message);
+      notifyListeners();
+    } else {
+      String errorMessage;
+      if (apiResponse.error is String) {
+        print(apiResponse.error.toString());
+        errorMessage = apiResponse.error.toString();
+      } else {
+        ErrorResponse errorResponse = apiResponse.error;
+        print(errorResponse.errors[0].message);
+        errorMessage = errorResponse.errors[0].message;
+      }
+      callback(false, errorMessage);
+      notifyListeners();
+    }
+  }
+
   Future login(String userid, String phone, Function callback) async {
     _isLoading = true;
     notifyListeners();
@@ -103,6 +132,94 @@ class AuthProvider with ChangeNotifier {
       notifyListeners();
     }
   }
+
+  Future mylogin(String acctype,String accesstoken,String phone, Function callback) async {
+    _isLoading = true;
+    notifyListeners();
+
+    print("Account type- ${acctype},access token-${accesstoken}, phone-${phone}");
+    ApiResponse apiResponse = await authRepo.mylogin(acctype,accesstoken,phone);
+    _isLoading = false;
+    if (apiResponse.response != null &&
+        apiResponse.response?.statusCode == 200) {
+      NewResponseModel responsemap = NewResponseModel.fromJson(json.decode(apiResponse.response?.data.toString()??""));
+      if(responsemap.success==true) {
+        print("Data for checkacc : ${apiResponse.response?.data.toString()??" "}");
+        if (acctype == "hr") {
+          HrModel map = HrModel.fromJson(
+              json.decode(apiResponse.response?.data.toString() ?? ""));
+          bool success = map.success;
+          String message = map.message;
+          String status = map.user.status;
+          if (success) {
+            String route = map.route;
+            if (map.user != null) {
+              // print("Hr data : "+map.user.idCardSrc);
+              if (map.planModel.planType == "r") {
+                _recruiterPackage = map.planModel.package;
+              }
+              else {
+                _consultancyPackage = map.planModel.package;
+              }
+
+              authRepo.saveHrData(map.user, map.planModel, route);
+            }
+            callback(success, route, status, message);
+            notifyListeners();
+          }
+          else {
+            callback(false, "no", false, message);
+            notifyListeners();
+          }
+        }
+        else if(acctype == "candidate"){
+          UserModel map = UserModel.fromJson(
+              json.decode(apiResponse.response?.data.toString() ?? ""));
+          bool success = map.success;
+          String message = map.message;
+          String status = map.user.status;
+          if (success) {
+            String route = map.route;
+            if (map.user != null) {
+              authRepo.saveUserData(map.user, route);
+            }
+            callback(success, route, status, message);
+            notifyListeners();
+          }
+          else {
+            callback(false, "no", false, message);
+            notifyListeners();
+          }
+        }
+        else if(acctype == "new")
+          {
+            callback(true, "Register", "success","Register");
+          }
+        else {
+          callback(false, "no","failed", responsemap.message);
+          notifyListeners();
+        }
+      }
+      else
+      {
+        callback(false, "no","failed", responsemap.message);
+        notifyListeners();
+      }
+    } else {
+      String errorMessage;
+      if (apiResponse.error is String) {
+        print(apiResponse.error.toString());
+        errorMessage = apiResponse.error.toString();
+      } else {
+        ErrorResponse errorResponse = apiResponse.error;
+        print(errorResponse.errors[0].message);
+        errorMessage = errorResponse.errors[0].message;
+      }
+      callback(false,"no","0", errorMessage);
+      notifyListeners();
+    }
+  }
+
 
   Future hrlogin(String userid, String phone, Function callback) async {
     _isLoading = true;
@@ -218,6 +335,83 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
+  Future checkaccount2(String acctype,String mobile, String AccessToken, Function callback) async {
+    _isLoading = true;
+    notifyListeners();
+    ApiResponse apiResponse = await authRepo.checkacc2(acctype, mobile,AccessToken);
+    _isLoading = false;
+    if (apiResponse.response != null &&
+        apiResponse.response?.statusCode == 200) {
+      print("Data for checkacc : ${apiResponse.response?.data.toString()??" "}");
+      NewResponseModel responsemap = NewResponseModel.fromJson(json.decode(apiResponse.response?.data.toString()??""));
+      if(responsemap.success==true) {
+        if (acctype == "hr") {
+          HrModel map = HrModel.fromJson(
+              json.decode(apiResponse.response?.data.toString() ?? ""));
+          bool success = map.success;
+          String message = map.message;
+          String status = map.user.status;
+          if (success) {
+            String route = map.route;
+            if (map.user != null) {
+              // print("Hr data : "+map.user.idCardSrc);
+              if (map.planModel.planType == "r") {
+                _recruiterPackage = map.planModel.package;
+              }
+              else {
+                _consultancyPackage = map.planModel.package;
+              }
+
+              authRepo.saveHrData(map.user, map.planModel, route);
+            }
+            callback(success, route, status, message,"hr");
+            notifyListeners();
+          }
+          else {
+            callback(false, "no", false, message,"hr");
+            notifyListeners();
+          }
+        }
+        else {
+          UserModel map = UserModel.fromJson(
+              json.decode(apiResponse.response?.data.toString() ?? ""));
+          bool success = map.success;
+          String message = map.message;
+          String status = map.user.status;
+          if (success) {
+            String route = map.route;
+            if (map.user != null) {
+              authRepo.saveUserData(map.user, route);
+            }
+            callback(success, route, status, message,"candidate");
+            notifyListeners();
+          }
+          else {
+            callback(false, "no", false, message,"candidate");
+            notifyListeners();
+          }
+        }
+      }
+      else
+      {
+        callback(false, "no","failed", responsemap.message,"new");
+        notifyListeners();
+      }
+    } else {
+      String errorMessage;
+      if (apiResponse.error is String) {
+        print(apiResponse.error.toString());
+        errorMessage = apiResponse.error.toString();
+      } else {
+        ErrorResponse errorResponse = apiResponse.error;
+        print(errorResponse.errors[0].message);
+        errorMessage = errorResponse.errors[0].message;
+      }
+      callback(false,"no","0", errorMessage,"new");
+      notifyListeners();
+    }
+  }
+
   Future<bool> clearSharedData() async {
     return await authRepo.clearSharedData();
   }
@@ -277,6 +471,35 @@ class AuthProvider with ChangeNotifier {
 
   String getJobtitle() {
     return authRepo.getJobtitle();
+  }
+  String getCompany() {
+    return authRepo.getCompany();
+  }
+
+  String getCurrentSalary() {
+    return authRepo.getCurrentSalary();
+  }
+
+  String getDegree() {
+    return authRepo.getDegree();
+  }
+
+  String getuniversity() {
+    return authRepo.getuniversity();
+  }
+  String getshift() {
+    return authRepo.getshift();
+  }
+
+  String gettotalexp() {
+    return authRepo.gettotalexp();
+  }
+  bool getmyexp() {
+    return authRepo.getmyexp();
+  }
+
+  String getEducation() {
+    return authRepo.getEducation();
   }
 
   String getHrplanName() {

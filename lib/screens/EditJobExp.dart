@@ -7,7 +7,6 @@ import 'package:Aap_job/models/JobskillModel.dart';
 import 'package:Aap_job/providers/auth_provider.dart';
 import 'package:Aap_job/providers/jobtitle_provider.dart';
 import 'package:Aap_job/screens/widget/JobTitleSelectionScreen.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:Aap_job/models/common_functions.dart';
 
@@ -26,54 +25,38 @@ import 'package:dio/dio.dart';
 import 'package:Aap_job/utill/app_constants.dart';
 import 'package:google_language_fonts/google_language_fonts.dart';
 
-class ProfileExp extends StatefulWidget {
-  ProfileExp({Key? key}) : super(key: key);
+import '../main.dart';
+
+class EditJobExp extends StatefulWidget {
+  EditJobExp({Key? key}) : super(key: key);
   @override
-  _ProfileExpState createState() => new _ProfileExpState();
+  _EditJobExpState createState() => new _EditJobExpState();
 }
 
-class _ProfileExpState extends State<ProfileExp> {
+class _EditJobExpState extends State<EditJobExp> {
   bool exp=false, test=false;
   String Name="", jobcity="", joblocation="",jobtitle="";
-  SharedPreferences? sharedPreferences;
   Color yesbutton=Colors.amber,nobutton=Colors.amber;
-  String pt="";
+  String pt="",emaile="";
   File? file;
 
   void initState() {
     super.initState();
     initializePreference().whenComplete((){
       setState(() {
-        exp=false;
+        exp=Provider.of<AuthProvider>(context, listen: false).getmyexp();
         yesbutton=Colors.amber;
         nobutton=Colors.amber;
       });
-      uploadFile();
+
     });
   }
 
   Future<void> initializePreference() async{
-    this.sharedPreferences = await SharedPreferences.getInstance();
-   // await Provider.of<JobtitleProvider>(context, listen: false).getJobTitleModelList(false, context);
-
   }
-
-  uploadFile() async {
-    if(!Provider.of<AuthProvider>(context, listen: false).getprofileImage().contains("uploads")) {
-      file = File(
-          Provider.of<AuthProvider>(context, listen: false).getprofileImage());
-      String taskId = await BackgroundUploader.uploadEnqueue(
-          AppConstants.SAVE_HR_PROFILE_IMAGE_DATA_URI, file!,
-          Provider.of<AuthProvider>(context, listen: false).getUserid(),
-          "candidate", "image");
-      if (taskId != null) {} else {
-        BackgroundUploader.uploader.cancelAll();
-      }
-    }
-  }
+  
 
   Future<void> _savestep3() async {
-    final sharedPreferences = await SharedPreferences.getInstance();
     if(exp)
       {
       }
@@ -82,8 +65,8 @@ class _ProfileExpState extends State<ProfileExp> {
         CommonFunctions.showInfoDialog("Please Select Yes Or No to Continue", context);
       }
       else {
-        sharedPreferences!.setBool("myexp", false);
-        sharedPreferences!.setBool("step4", true);
+        sharedp!.setBool("myexp", false);
+        sharedp!.setBool("step4", true);
         Navigator.pushAndRemoveUntil(
             context, MaterialPageRoute(builder: (context) => ResumeUpload()), (
             route) => false);
@@ -105,8 +88,7 @@ class _ProfileExpState extends State<ProfileExp> {
         leading: IconButton(icon: Icon(Icons.arrow_back_ios,color: Colors.white,),
           onPressed:()
               {
-                sharedPreferences!.setBool("step3", false);
-              Navigator.pushReplacement( context,  MaterialPageRoute(builder: (context) => SaveProfile(path:"")),);}
+              Navigator.pop(context);}
         ),
         automaticallyImplyLeading: true,
         centerTitle: true,
@@ -127,7 +109,7 @@ class _ProfileExpState extends State<ProfileExp> {
               SizedBox(width: 10,),
               Container(
                 width: MediaQuery.of(context).size.width*0.6,
-                child: Text(Provider.of<AuthProvider>(context, listen: false).getMobile(),maxLines:2,style: TextStyle(color: Colors.white,fontSize: 12,fontWeight: FontWeight.bold),
+                child: Text("Update Latest Job Experience",maxLines:2,style: TextStyle(color: Colors.white,fontSize: 12,fontWeight: FontWeight.bold),
 
                 ),
               ),
@@ -143,50 +125,6 @@ class _ProfileExpState extends State<ProfileExp> {
         mainAxisSize: MainAxisSize.max,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: <Widget>[
-          new Container(
-            padding: const EdgeInsets.all(15.0),
-            margin: EdgeInsets.only(left: 10.0,top: 5.0,right: 10.0,bottom: 5.0),
-            decoration: new BoxDecoration(boxShadow: [new BoxShadow(
-              color: Colors.white,
-              blurRadius: 5.0,
-            ),],color: Colors.white,borderRadius: BorderRadius.all(Radius.circular(5.0))),
-            child:
-            new Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                mainAxisSize: MainAxisSize.max,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                //  Profilebox(path:Provider.of<ProfileProvider>(context, listen: false).getProfileString()==null? AppConstants.BASE_URL+'uploads/ads/smallest_video4.mp4': Provider.of<ProfileProvider>(context, listen: false).getProfileString(),),
-                  imageProfile(Provider.of<AuthProvider>(context, listen: false).getprofileImage()),
-                    new Column(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        mainAxisSize: MainAxisSize.max,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: <Widget>[
-                          new Row(
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              mainAxisSize: MainAxisSize.max,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: <Widget>[
-                                Text(Provider.of<AuthProvider>(context, listen: false).getName(),style: TextStyle(fontSize: 24,color: Primary,fontWeight: FontWeight.w900),),
-                              ]
-                          ),
-                          new Row(
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              mainAxisSize: MainAxisSize.max,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: <Widget>[
-                                Icon(Icons.pin_drop_sharp,size: 20,),
-                                Text("  "+Provider.of<AuthProvider>(context, listen: false).getJobCity(),style: TextStyle(fontSize: 16,color: Primary),),
-                              ]
-                          ),
-                          ]
-                    ),
-                ]
-            ),
-
-          ),
-
           new Padding(
             child:
             new Row(
@@ -207,7 +145,7 @@ class _ProfileExpState extends State<ProfileExp> {
                   Text(getTranslated('DO_YOU_HAVE_EXP', context)!,style: TextStyle(fontSize: 16,color: Colors.white),)
                 ]
             ),
-            new Row(
+            !exp?new Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 mainAxisSize: MainAxisSize.max,
                 crossAxisAlignment: CrossAxisAlignment.center,
@@ -268,8 +206,7 @@ class _ProfileExpState extends State<ProfileExp> {
                   ),
 
                 ]
-            ),
-
+            ):Container(),
           new Padding(
             child:
             new Row(
@@ -337,12 +274,7 @@ class _ProfileExpState extends State<ProfileExp> {
           radius: 50.0,
           backgroundImage: AssetImage("assets/appicon.png"),
         )
-    : _imageFile.contains("uploads")?
-      CircleAvatar(
-        radius: 80.0,
-        backgroundImage: CachedNetworkImageProvider(AppConstants.BASE_URL+_imageFile!),
-      )
-          :
+    :
     CircleAvatar(
     radius: 50.0,
     backgroundImage: FileImage(File(_imageFile)),
@@ -392,63 +324,88 @@ class _ExpBoxState extends State<ExpBox> {
     'More than Rs. 1,50,0000',
   ];
 
-
-  @override
-  void initState() {
-    super.initState();
-    duplicateJobTitle= Provider.of<JobtitleProvider>(context, listen: false).jobtitleList;
-    setState(() {
-      expselected=false;
-    });
-  }
-///////////////////////////////////job titles ////////////////////
-
   bool _hasJobTitle=false;
 
   TextEditingController _jobtitleController = TextEditingController();
 
   List<JobTitleModel> duplicateJobTitle = <JobTitleModel>[];
 
-  // getJobTitles() async {
-  //   duplicateJobTitle.clear();
-  //   try {
-  //     Response response = await _dio.get(_baseUrl + AppConstants.JOB_TITLE_URI);
-  //     apidata = response.data;
-  //     print('JobTitle : ${apidata}');
-  //     List<dynamic> data=json.decode(apidata);
-  //     if(data.toString()=="[]")
-  //     {
-  //       duplicateJobTitle=[];
-  //       setState(() {
-  //         _hasJobTitle = false;
-  //       });
-  //     }
-  //     else
-  //     {
-  //       data.forEach((location) =>
-  //           duplicateJobTitle.add(JobTitleModel.fromJson(location)));
-  //       setState(() {
-  //         _hasJobTitle=true;
-  //       });
-  //     }
-  //     print('Jobtitle List: ${duplicateJobTitle}');
-  //
-  //   } on DioError catch (e) {
-  //     // The request was made and the server responded with a status code
-  //     // that falls out of the range of 2xx and is also not 304.
-  //     if (e.response != null) {
-  //       print('Dio error!');
-  //       print('STATUS: ${e.response?.statusCode}');
-  //       print('DATA: ${e.response?.data}');
-  //       print('HEADERS: ${e.response?.headers}');
-  //     } else {
-  //       // Error due to setting up or sending the request
-  //       print('Error sending request!');
-  //       print(e.message);
-  //     }
-  //   }
-  //
-  // }
+  @override
+  void initState() {
+    super.initState();
+    duplicateJobTitle= Provider.of<JobtitleProvider>(context, listen: false).jobtitleList;
+    setState(() {
+      expselected=Provider.of<AuthProvider>(context, listen: false).getmyexp();
+      if(Provider.of<AuthProvider>(context, listen: false).getmyexp()) {
+        _jobtitleController.text =
+            Provider.of<AuthProvider>(context, listen: false).getJobtitle();
+        companynameController.text =
+            Provider.of<AuthProvider>(context, listen: false).getCompany();
+        switch (Provider.of<AuthProvider>(context, listen: false).gettotalexp())
+        {
+          case '<1 year':
+            totalexp=' < 1 ';
+            selectedIndexNotifier.value=1;
+            break;
+          case '1-3 year':
+            totalexp='1-3 ';
+            selectedIndexNotifier.value=2;
+            break;
+          case '3-5 year':
+            totalexp='3-5 ';
+            selectedIndexNotifier.value=3;
+            break;
+          case '5-10 year':
+            totalexp='5-10 ';
+            selectedIndexNotifier.value=4;
+            break;
+          case '10+ year':
+            totalexp=' 10+ ';
+            selectedIndexNotifier.value=5;
+            break;
+        }
+        switch (Provider.of<AuthProvider>(context, listen: false).getCurrentSalary())
+        {
+      case '0-10,000':
+      dropdownvalue='0- Rs. 10,000';
+        break;
+      case '10,000 - 15,000':
+      dropdownvalue='Rs. 10,000- Rs. 15,000';
+      break;
+      case '15,000 - 20,000':
+      dropdownvalue='Rs. 15,000- Rs. 20,000';
+      break;
+      case '20,000 - 30,000':
+      dropdownvalue='Rs. 20,000- Rs. 30,000';
+      break;
+      case '30,000 - 40,000':
+      dropdownvalue='Rs. 30,000- Rs. 40,000';
+      break;
+      case '40,000 - 50,000':
+      dropdownvalue='Rs. 40,000- Rs. 50,000';
+      break;
+      case '50,000 - 70,000':
+      dropdownvalue='Rs. 50,000- Rs. 70,000';
+      break;
+      case '70,000 - 1,00,000':
+      dropdownvalue='Rs. 70,000- Rs. 1,00,000';
+      break;
+      case '1,00,000 - 1,25,000':
+      dropdownvalue='Rs. 1,00,000- Rs. 1,25,000';
+      break;
+      case '1,25,000 - 1,50,000':
+      dropdownvalue='Rs. 1,25,000- Rs. 1,50,000';
+      break;
+      case '1,50,000 +':
+      dropdownvalue='More than Rs. 1,50,0000';
+      break;
+    }
+        }
+
+    });
+  }
+///////////////////////////////////job titles ////////////////////
+
 
   _JobtitleDisplaySelection(BuildContext context) async {
     _hasJobTitle = duplicateJobTitle.length >= 1;
@@ -476,7 +433,6 @@ class _ExpBoxState extends State<ExpBox> {
 ///////////////////////////////////////////////////////
 
   Future<void> _savestep3() async {
-      final sharedPreferences = await SharedPreferences.getInstance();
       String _Jobtitle = _jobtitleController.text.trim();
       String _companyname = companynameController.text.trim();
       if (_Jobtitle.isEmpty || _companyname.isEmpty || totalexp == "none") {
@@ -487,16 +443,22 @@ class _ExpBoxState extends State<ExpBox> {
           CommonFunctions.showInfoDialog("Please select your Salary", context);
         }
       else {
-        sharedPreferences!.setBool("myexp", true);
-        sharedPreferences!.setString("jobtitle", _Jobtitle);
-        sharedPreferences!.setString("companyname", _companyname);
-        sharedPreferences!.setString("totalexp", totalexp);
-        sharedPreferences!.setString("currentsalary", dropdownvalue);
-        sharedPreferences!.setString("candidateskills", selectedIndexes.toString());
-        sharedPreferences!.setBool("step4", true);
-        Navigator.pushAndRemoveUntil(
-            context, MaterialPageRoute(builder: (context) => ResumeUpload()), (
-            route) => false);
+
+        await Provider.of<ProfileProvider>(context, listen: false)
+            .updateUserExperience(true,_Jobtitle, _companyname,totalexp,dropdownvalue,selectedIndexes.toString())
+            .then((response) {
+          if (response.isSuccess) {
+            sharedp!.setBool("myexp", true);
+            sharedp!.setString("jobtitle", _Jobtitle);
+            sharedp!.setString("companyname", _companyname);
+            sharedp!.setString("totalexp", totalexp);
+            sharedp!.setString("currentsalary", dropdownvalue);
+            sharedp!.setString("candidateskills", selectedIndexes.toString());
+            Navigator.pushReplacement( context,  MaterialPageRoute(builder: (context) => HomePage()),);
+          } else {
+            CommonFunctions.showErrorDialog(response.message, context);
+          }
+        });
       }
 
 
@@ -510,7 +472,6 @@ class _ExpBoxState extends State<ExpBox> {
 
   List<JobskillModel> duplicateJobSkill = <JobskillModel>[];
   bool _hasJobSkill=false;
-
 
   getJobSkills(String jobtitleid) async {
     duplicateJobSkill.clear();
@@ -552,12 +513,9 @@ class _ExpBoxState extends State<ExpBox> {
     }
 
   }
-
-
   @override
   Widget build(BuildContext context) {
     final deviceSize = MediaQuery.of(context).size;
-
     return  Container(
       width: deviceSize.width-40,
       padding: EdgeInsets.all(5.0),
@@ -567,29 +525,6 @@ class _ExpBoxState extends State<ExpBox> {
         key: _formKey,
         child: Column(
           children: [
-            // Container(
-            //   padding: EdgeInsets.only(bottom: 5),
-            //   width: deviceSize.width * 0.8,
-            //   // padding: EdgeInsets.all(16.0),
-            //   child:
-            //   TextFormField(
-            //     style: new TextStyle(fontSize: 14),
-            //     decoration: InputDecoration(
-            //       isDense: true,
-            //         filled: true,
-            //         fillColor: Colors.white,
-            //         labelText: 'job Title',
-            //         focusColor: Colors.white// myIcon is a 48px-wide widget.
-            //     ),
-            //     keyboardType: TextInputType.text,
-            //     validator: (value) {
-            //       if (value.isEmpty) {
-            //         return 'Please Enter your job title';
-            //       }
-            //     },
-            //     controller: jobtitleController,
-            //   ),
-            // ),
             new Padding(
               child:
               Container(
@@ -642,10 +577,10 @@ class _ExpBoxState extends State<ExpBox> {
                     focusColor: Colors.white// myIcon is a 48px-wide widget.
                 ),
                 keyboardType: TextInputType.text,
-                inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9a-zA-Z\s]'))],
-                validator: (value) {
-                  if (value!.isEmpty||value!.length<5) {
-                    return 'Please Enter Valid Company Name';
+    inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9a-zA-Z\s]'))],
+    validator: (value) {
+    if (value!.isEmpty||value!.length<5) {
+                    return 'Please Enter your Company Name';
                   }
                 },
                controller: companynameController,

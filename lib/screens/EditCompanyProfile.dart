@@ -502,6 +502,7 @@ class _EditCompanyProfileState extends State<EditCompanyProfile> {
                                 child: CustomTextField(
                                   hintText: "Company Name",
                                   textInputType: TextInputType.text,
+                                  isName: true,
                                   isOtp: false,
                                   maxLine: 1,
                                   capitalization: TextCapitalization.words,
@@ -1225,6 +1226,7 @@ class _EditCompanyProfileState extends State<EditCompanyProfile> {
                                     textInputType: TextInputType.text,
                                     isOtp: false,
                                     maxLine: 1,
+                                    isName: false,
                                     capitalization: TextCapitalization.characters,
                                     controller: _gstController,
                                     // textInputAction: TextInputAction.next,

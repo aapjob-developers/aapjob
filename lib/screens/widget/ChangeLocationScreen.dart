@@ -1,75 +1,54 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:Aap_job/localization/language_constrants.dart';
 import 'package:Aap_job/models/common_functions.dart';
-import 'package:Aap_job/providers/category_provider.dart';
 import 'package:Aap_job/screens/LocationSelectionScreen.dart';
 import 'package:Aap_job/screens/homepage.dart';
 import 'package:Aap_job/screens/widget/CitySelectionScreen.dart';
-import 'package:Aap_job/widgets/show_loading_dialog.dart';
 import 'package:Aap_job/widgets/show_location_dialog.dart';
 import 'package:flutter/material.dart';
-import 'package:Aap_job/data/datasource/remote/dio/dio_client.dart';
 import 'package:dio/dio.dart';
 import 'package:Aap_job/models/CitiesModel.dart';
 import 'package:Aap_job/utill/app_constants.dart';
 import 'package:Aap_job/utill/colors.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:google_language_fonts/google_language_fonts.dart';
 import 'package:provider/provider.dart';
 import '../../models/LocationModel.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:dio/dio.dart';
-import 'package:Aap_job/utill/app_constants.dart';
 import 'package:http/http.dart' as http;
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:Aap_job/helper/LocationManager.dart';
 import 'package:Aap_job/helper/SharedManager.dart';
-//import 'package:geocoder/geocoder.dart';
 import 'package:lottie/lottie.dart';
+import '../../providers/auth_provider.dart';
+import '../../providers/cities_provider.dart';
 import '../hrhomepage.dart';
 import 'package:geocoding/geocoding.dart';
 
 
 class ChangeLocationScreen extends StatefulWidget {
   ChangeLocationScreen({Key? key,required this.CurrentCity, required this.CurrentLocation,required this.usertype}) : super(key: key);
-  String CurrentCity ;
-  String CurrentLocation;
-  String usertype;
+  final String CurrentCity ;
+  final String CurrentLocation;
+  final String usertype;
   @override
   _ChangeLocationScreenState createState() => new _ChangeLocationScreenState();
 }
 
 class _ChangeLocationScreenState extends State<ChangeLocationScreen> {
-  int _value = 0;
-  String pt="",emaile="";
   Color button=Colors.amber;
   String cityid="";
-  bool _profileuploaded=false;
   final Dio _dio = Dio();
   final _baseUrl = AppConstants.BASE_URL;
   var apidata;
-  bool _hasData=false;
   bool _hasLocation=false;
-  String pathe="";
   var _isLoading=false;
   double latitude = 0;
   double longitude = 0;
   var addressline_2 = "";
   var city = "";
-
-  String Name = "";
   String jobcity = "";
-  String address = "";
-  String companyname = "";
   String locality = "";
-  String website = "";
-
-  String gender = "";
-  String dob = "";
-
-  final _formKey = GlobalKey<FormState>();
-
   SharedPreferences? sharedPreferences;
 
   TextEditingController _jobcityController = TextEditingController();
@@ -81,41 +60,13 @@ class _ChangeLocationScreenState extends State<ChangeLocationScreen> {
   List<CityModel> duplicateItems = <CityModel>[];
   List<LocationModel> duplicatelocation = <LocationModel>[];
 
-  getcities() async {
-    try {
-      Response response = await _dio.get(_baseUrl + AppConstants.CITIES_URI);
-      apidata = response.data;
-      print('City List: ${apidata}');
-      List<dynamic> data=json.decode(apidata);
+  @override
+  void initState() {
+    initializePreference().whenComplete((){
 
-      if(data.toString()=="[]")
-      {
-        duplicateItems=[];
-      }
-      else
-      {
-        data.forEach((city) =>
-            duplicateItems.add(CityModel.fromJson(city)));
-      }
-      print('City List: ${duplicateItems}');
-
-    } on DioError catch (e) {
-      // The request was made and the server responded with a status code
-      // that falls out of the range of 2xx and is also not 304.
-      if (e.response != null) {
-        print('Dio error!');
-        print('STATUS: ${e.response?.statusCode}');
-        print('DATA: ${e.response?.data}');
-        print('HEADERS: ${e.response?.headers}');
-      } else {
-        // Error due to setting up or sending the request
-        print('Error sending request!');
-        print(e.message);
-      }
-    }
-
+    });
+    super.initState();
   }
-
   getlocation() async {
     duplicatelocation.clear();
     try {
@@ -157,38 +108,19 @@ class _ChangeLocationScreenState extends State<ChangeLocationScreen> {
 
   }
 
-
   Future<void> initializePreference() async{
     this.sharedPreferences = await SharedPreferences.getInstance();
     _jobcityController.text=widget.CurrentCity;
     _localityController.text=widget.CurrentLocation;
-
-    if(widget.usertype=="HR") {
-      emaile = sharedPreferences!.getString("email") ?? "no mail";
-      Name = sharedPreferences!.getString("HrName") ?? "no mail";
-      jobcity = sharedPreferences!.getString("HrCity") ?? "no mail";
-      address = sharedPreferences!.getString("HrAddress") ?? "no mail";
-      companyname = sharedPreferences!.getString("HrCompanyName") ?? "no mail";
-      locality = sharedPreferences!.getString("HrLocality") ?? "no mail";
-      website = sharedPreferences!.getString("HrWebsite") ?? "no mail";
-    }
-    else
-      {
-        Name= sharedPreferences!.getString("name")?? "no Name";
-        jobcity= sharedPreferences!.getString("jobcity")?? "no jobcity";
-        locality= sharedPreferences!.getString("joblocation")?? "no joblocation";
-        gender= sharedPreferences!.getString("gender")?? "no gender";
-        dob= sharedPreferences!.getString("dob")?? "Enter Date of Birth";
-      }
-
-
+    duplicateItems.addAll(Provider.of<CitiesProvider>(context, listen: false).cityModelList);
+      jobcity = widget.CurrentCity;
+      locality = widget.CurrentLocation;
   }
 
   _navigateAndDisplaySelection(BuildContext context) async {
-    _hasData = duplicateItems.length > 1;
     final CityModel result = await Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => CitySelectionScreen(duplicate: duplicateItems,hasdata: _hasData,)),
+      MaterialPageRoute(builder: (context) => CitySelectionScreen()),
     );
 
     if (result !=null)
@@ -216,173 +148,188 @@ class _ChangeLocationScreenState extends State<ChangeLocationScreen> {
 
   }
 
-  @override
-  void initState() {
-    initializePreference().whenComplete((){
-      //LocationManager.shared.getCurrentLocation();
-      setState(() {
-        getcities();
-        button=Colors.amber;
-      });
-    });
-
-    super.initState();
-  }
-
-
-
   Future<void> _savestep2() async {
     setState(() {
       _isLoading = true;
     });
     if (widget.usertype == "HR") {
-      String _Name = Name;
       String _jobcity = _jobcityController.text.trim();
-      String _address = address;
-      String _companyname = companyname;
       String _locality = _localityController.text.trim();
-      String _website = website;
-      if (_Name.isEmpty || _jobcity.isEmpty || _address.isEmpty ||
-          _companyname.isEmpty || _locality.isEmpty) {
-        CommonFunctions.showInfoDialog("Please fill All Details", context);
+      if (_jobcity.isEmpty ||_locality.isEmpty) {
+        CommonFunctions.showInfoDialog("Please Select City and Location Both", context);
         setState(() {
           _isLoading = false;
         });
       }
       else {
-        http.StreamedResponse response = await updateHrProfileDetails(
-            _website, _address, _Name, _companyname, _jobcity, _locality);
+       // await updateHrProfileDetails(_jobcity, _locality);
+        FormData formData = new FormData.fromMap({'userid':Provider.of<AuthProvider>(context, listen: false).getUserid(),'HrCity':_jobcity, 'HrLocality':_locality});
+        try {
+          Response response = await _dio.post('${AppConstants.BASE_URL}${AppConstants.SAVE_HR_CITY_DATA_URI}',data:formData );
+          // apiresponse= response.data;
+          // print('Save Response: ${apiresponse}');
+          if(response.data.toString()=="updated")
+          {
+            setState(() {
+              _isLoading=false;
+            });
+            sharedPreferences!.setString("HrCity", _jobcity);
+            sharedPreferences!.setString("HrLocality", _locality);
+            Navigator.pushReplacement(context,  MaterialPageRoute(builder: (context)=> HrHomePage()));
+          }
+          else
+          {
+            CommonFunctions.showInfoDialog("Sorry! There is an error in saving prefered city", context);
+          }
+        }
+        on DioError catch (e)
+        {
+          if (e.response != null) {
+            print('Dio error!');
+            print('STATUS: ${e.response?.statusCode}');
+            print('DATA: ${e.response?.data}');
+            print('HEADERS: ${e.response?.headers}');
+          } else {
+            // Error due to setting up or sending the request
+            print('Error sending request!');
+            print(e.message);
+          }
+        }
       }
     }
     else {
-      String _Name = Name;
       String _jobcity = _jobcityController.text.trim();
       String _locality = _localityController.text.trim();
-      String _dob = dob;
-      String _gender = gender;
 
-      if (_Name.isEmpty || _jobcity.isEmpty || _locality.isEmpty) {
-        CommonFunctions.showInfoDialog("Please fill All Details", context);
-        setState(() {          _isLoading = false;        });
+      if (_jobcity.isEmpty || _locality.isEmpty) {
+        CommonFunctions.showInfoDialog("Please Select City and Location Both", context);
+        setState(() {  _isLoading = false; });
       }
       else {
-        http.StreamedResponse response = await updateProfileDetails(_Name, _jobcity, _locality, _gender, _dob);
+       // await updateProfileDetails(_jobcity, _locality);
+        FormData formData = new FormData.fromMap({'userid':Provider.of<AuthProvider>(context, listen: false).getUserid(), 'City':_jobcity,'Locality':_locality});
+                try {
+                  Response response = await _dio.post('${AppConstants.BASE_URL}${AppConstants.SAVE_CITY_DATA_URI}',data:formData );
+                  // apiresponse= response.data;
+                   print('Save Response: ${response.data.toString()}');
+                  if(response.data.toString()=="updated")
+                  {
+                    setState(() {
+                    _isLoading=false;
+                  });
+                  sharedPreferences!.setString("jobcity",_jobcity);
+                  sharedPreferences!.setString("joblocation", _locality);
+                  Navigator.pushAndRemoveUntil(context,  MaterialPageRoute(builder: (context)=> HomePage()),(route) => false);
+                  }
+                  else
+                  {
+                    CommonFunctions.showInfoDialog("Sorry! There is an error in saving prefered city", context);
+                  }
+                }
+                on DioError catch (e)
+                {
+                  if (e.response != null) {
+                    print('Dio error!');
+                    print('STATUS: ${e.response?.statusCode}');
+                    print('DATA: ${e.response?.data}');
+                    print('HEADERS: ${e.response?.headers}');
+                  } else {
+                    // Error due to setting up or sending the request
+                    print('Error sending request!');
+                    print(e.message);
+                  }
+                }
       }
     }
   }
 
-  Future<http.StreamedResponse> updateHrProfileDetails(String HrWebsite,String HrAddress,String HrName,String HrCompanyName,String HrCity,String HrLocality) async {
-    http.MultipartRequest request = http.MultipartRequest('POST', Uri.parse('${AppConstants.BASE_URL}${AppConstants.SAVE_HR_PROFILE_DETAIL_DATA_URI}'));
-    int userid=sharedPreferences!.getInt("userid")??0;
-    Map<String, String> _fields = Map();
-    _fields.addAll(<String, String>{
-      'userid':userid.toString(),
-      'HrWebsite':HrWebsite,
-      'HrAddress':HrAddress,
-      'HrName':HrName,
-      'HrCompanyName':HrCompanyName,
-      'HrCity':HrCity,
-      'HrLocality':HrLocality
-    });
-    request.fields.addAll(_fields);
-    http.StreamedResponse response = await request.send();
-    response.stream.transform(utf8.decoder).listen((value) {
-      print("response : "+value);
-
-      if (response.statusCode == 200) {
-        if(response.toString()!="Failed")
-        {
-          setState(() {
-            _profileuploaded=true;
-            _isLoading=false;
-          });
-          sharedPreferences!.setString("HrName", HrName);
-          sharedPreferences!.setString("HrCity", HrCity);
-          sharedPreferences!.setString("HrAddress", HrAddress);
-          sharedPreferences!.setString("HrCompanyName", HrCompanyName);
-          sharedPreferences!.setString("HrLocality", HrLocality);
-          sharedPreferences!.setString("HrWebsite", HrWebsite);
-          // Navigator.of(context).pop();
-         // Navigator.pushAndRemoveUntil(context,  MaterialPageRoute(builder: (context)=> HrHomePage()),(route) => false);
-          Navigator.pushReplacement(context,  MaterialPageRoute(builder: (context)=> HrHomePage()));
-        }
-        else
-        {
-          setState(() {
-            _profileuploaded=true;
-            _isLoading=false;
-            CommonFunctions.showInfoDialog("Error in Updating Details", context);
-          });
-        }
-
-      } else {
-
-        setState(() {
-          _isLoading=false;
-        });
-
-        print('${response.statusCode} ${response.reasonPhrase}');
-
-        CommonFunctions.showErrorDialog("Error in Connection", context);
-      }
-    });
-    return response;
-  }
-
-  Future<http.StreamedResponse> updateProfileDetails(String Name,String City,String Locality,String gender,String dob) async {
-    http.MultipartRequest request = http.MultipartRequest('POST', Uri.parse('${AppConstants.BASE_URL}${AppConstants.SAVE_PROFILE_DETAIL_DATA_URI}'));
-    int userid=sharedPreferences!.getInt("userid")?? 0;
-    Map<String, String> _fields = Map();
-    _fields.addAll(<String, String>{
-      'userid':userid.toString(),
-      'Name':Name,
-      'City':City,
-      'Locality':Locality,
-      'Gender':gender,
-      'dob':dob,
-    });
-    request.fields.addAll(_fields);
-    http.StreamedResponse response = await request.send();
-    response.stream.transform(utf8.decoder).listen((value) {
-      print("response : "+value);
-
-      if (response.statusCode == 200) {
-        if(response.toString()!="Failed")
-        {
-          setState(() {
-            _profileuploaded=true;
-            _isLoading=false;
-          });
-          sharedPreferences!.setString("name", Name);
-          sharedPreferences!.setString("jobcity",City);
-          sharedPreferences!.setString("joblocation", Locality);
-          sharedPreferences!.setString("gender", gender);
-          sharedPreferences!.setString("dob", dob);
-          // Navigator.of(context).pop();
-          Navigator.pushAndRemoveUntil(context,  MaterialPageRoute(builder: (context)=> HomePage()),(route) => false);
-        }
-        else
-        {
-          setState(() {
-            _profileuploaded=true;
-            _isLoading=false;
-            CommonFunctions.showErrorDialog("Error in Updating Details", context);
-          });
-        }
-
-      } else {
-
-        setState(() {
-          _isLoading=false;
-        });
-
-        print('${response.statusCode} ${response.reasonPhrase}');
-
-        CommonFunctions.showErrorDialog("Error in Connection", context);
-      }
-    });
-    return response;
-  }
+  // Future<http.StreamedResponse> updateHrProfileDetails(String HrCity,String HrLocality) async {
+  //   http.MultipartRequest request = http.MultipartRequest('POST', Uri.parse('${AppConstants.BASE_URL}${AppConstants.SAVE_HR_CITY_DATA_URI}'));
+  //   Map<String, String> _fields = Map();
+  //   _fields.addAll(<String, String>{
+  //     'userid':Provider.of<AuthProvider>(context, listen: false).getUserid(),
+  //     'HrCity':HrCity,
+  //     'HrLocality':HrLocality
+  //   });
+  //   request.fields.addAll(_fields);
+  //   http.StreamedResponse response = await request.send();
+  //   response.stream.transform(utf8.decoder).listen((value) {
+  //     print("response : "+value);
+  //     if (response.statusCode == 200) {
+  //       if(response.toString()!="Failed")
+  //       {
+  //         setState(() {
+  //           _isLoading=false;
+  //         });
+  //         sharedPreferences!.setString("HrCity", HrCity);
+  //         sharedPreferences!.setString("HrLocality", HrLocality);
+  //         Navigator.pushReplacement(context,  MaterialPageRoute(builder: (context)=> HrHomePage()));
+  //       }
+  //       else
+  //       {
+  //         setState(() {
+  //           _isLoading=false;
+  //           CommonFunctions.showInfoDialog("Error in Updating Details", context);
+  //         });
+  //       }
+  //
+  //     } else {
+  //
+  //       setState(() {
+  //         _isLoading=false;
+  //       });
+  //
+  //       print('${response.statusCode} ${response.reasonPhrase}');
+  //
+  //       CommonFunctions.showErrorDialog("Error in Connection", context);
+  //     }
+  //   });
+  //   return response;
+  // }
+  //
+  // Future<http.StreamedResponse> updateProfileDetails(String City,String Locality) async {
+  //   http.MultipartRequest request = http.MultipartRequest('POST', Uri.parse('${AppConstants.BASE_URL}${AppConstants.SAVE_CITY_DATA_URI}'));
+  //   Map<String, String> _fields = Map();
+  //   _fields.addAll(<String, String>{
+  //     'userid':Provider.of<AuthProvider>(context, listen: false).getUserid(),
+  //     'City':City,
+  //     'Locality':Locality,
+  //   });
+  //   request.fields.addAll(_fields);
+  //   http.StreamedResponse response = await request.send();
+  //   response.stream.transform(utf8.decoder).listen((value) {
+  //     print("response : "+value);
+  //
+  //     if (response.statusCode == 200) {
+  //       if(response.toString()!="Failed")
+  //       {
+  //         setState(() {
+  //           _isLoading=false;
+  //         });
+  //         sharedPreferences!.setString("jobcity",City);
+  //         sharedPreferences!.setString("joblocation", Locality);
+  //         Navigator.pushAndRemoveUntil(context,  MaterialPageRoute(builder: (context)=> HomePage()),(route) => false);
+  //       }
+  //       else
+  //       {
+  //         setState(() {
+  //           _isLoading=false;
+  //           CommonFunctions.showErrorDialog("Error in Updating Details", context);
+  //         });
+  //       }
+  //
+  //     } else {
+  //
+  //       setState(() {
+  //         _isLoading=false;
+  //       });
+  //       print('${response.statusCode} ${response.reasonPhrase}');
+  //       CommonFunctions.showErrorDialog("Error in Connection", context);
+  //     }
+  //   });
+  //   return response;
+  // }
+  //
 
 
   bool _checkdetails()
@@ -402,7 +349,6 @@ class _ChangeLocationScreenState extends State<ChangeLocationScreen> {
      this.latitude = coordinate.latitude;
      this.longitude = coordinate.longitude;
      _getAddressFromCurrentLocation(await SharedManager.shared.getLocationCoordinate());
-   // await _getCurrentPosition();
   }
 
   // String? _currentAddress;
@@ -468,14 +414,14 @@ class _ChangeLocationScreenState extends State<ChangeLocationScreen> {
     // print('subLocality: ${first.subLocality}');
     // print('subThoroughfare: ${first.subThoroughfare}');
     // print('thoroughfare: ${first.thoroughfare}');
-    if(first.locality!=null)
-      {
-        this.city = first.locality!;
-      }
-    if(this.addressline_2!=null)
-      {
-        this.addressline_2 = first.postalCode!;
-      }
+    // if(first.locality!=null)
+    //   {
+    //     this.city = first.locality!;
+    //   }
+    // if(this.addressline_2!=null)
+    //   {
+    //     this.addressline_2 = first.postalCode!;
+    //   }
     // setState(() {
     //   print("Final Address:---->$first");
     // });
@@ -494,14 +440,14 @@ class _ChangeLocationScreenState extends State<ChangeLocationScreen> {
     }
     if(cityname!=null) {
       _jobcityController.text = cityname;
-      CityModel? city = filterSearchResult(cityname);
+    //  CityModel? city = filterSearchResult(cityname);
 
-      if (city.id != "0"){
-        cityid = (city.id==null?city.id:"0")!;
-    }
-    else {
-      CommonFunctions.showInfoDialog("Your City is not in list. Please select a near by city from City List", context);
-      }
+    //   if (city.id != "0"){
+    //     cityid = (city.id==null?city.id:"0")!;
+    // }
+    // else {
+    //   CommonFunctions.showInfoDialog("Your City is not in list. Please select a near by city from City List", context);
+    //   }
 
     if(cityname!=first.locality&&first.locality!=null) {
       _localityController.text = first.locality!;
@@ -547,10 +493,6 @@ class _ChangeLocationScreenState extends State<ChangeLocationScreen> {
     final deviceSize = MediaQuery
         .of(context)
         .size;
-    final TextStyle? textStyle = Theme
-        .of(context)
-        .textTheme
-        .caption;
     return new Scaffold(
       appBar: new AppBar(
         backgroundColor: Primary,
@@ -566,6 +508,7 @@ class _ChangeLocationScreenState extends State<ChangeLocationScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: <Widget>[
+              Platform.isIOS ? Container():
               Padding(
                 padding: const EdgeInsets.all(8.0),
                 child:
@@ -744,10 +687,9 @@ class _ChangeLocationScreenState extends State<ChangeLocationScreen> {
                               },
                               //     Navigator.pushAndRemoveUntil(context,  MaterialPageRoute(builder: (context)=> ProfileExp()), (route) => false);
                               style: ElevatedButton.styleFrom(
-                                  minimumSize: new Size(deviceSize.width * 0.5,20),
+                                  minimumSize: new Size(deviceSize.width * 0.5,20), backgroundColor: Colors.amber,
                                   shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(16)),
-                                  primary: Colors.amber,
                                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
                                   textStyle:
                                   const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),

@@ -36,6 +36,8 @@ import 'package:lottie/lottie.dart';
 import 'package:dio/dio.dart';
 import 'package:Aap_job/utill/app_constants.dart';
 import 'package:google_language_fonts/google_language_fonts.dart';
+import '../main.dart';
+import '../providers/cities_provider.dart';
 import 'LocationSelectionScreen.dart';
 import '../models/ContentModel.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -76,7 +78,6 @@ class _SaveProfileState extends State<SaveProfile> {
   Connectivity connectivity=new Connectivity();
 
   String jobcityid="", status="0";
-  SharedPreferences? sharedPreferences;
 
   double latitude = 0;
   double longitude = 0;
@@ -101,12 +102,12 @@ class _SaveProfileState extends State<SaveProfile> {
     super.initState();
     initializePreference().whenComplete((){
       setState(() {
-        status=sharedPreferences!.getString("status")?? "0";
-        _nameController.text= sharedPreferences!.getString("name")=="no Name"?"":sharedPreferences!.getString("name")?? "";
-        _jobcityController.text= sharedPreferences!.getString("jobcity")=="no Jobcity"?"":sharedPreferences!.getString("jobcity")?? "";
-        _jobloczController.text= sharedPreferences!.getString("joblocation")=="no Jobcity"?"":sharedPreferences!.getString("joblocation")?? "";
-        Imagepath=sharedPreferences!.getString("profileImage")?? "";
-        pathe=sharedPreferences!.getString("profileVideo")?? "";
+        status=sharedp.getString("status")?? "0";
+        _nameController.text= sharedp.getString("name")=="no Name"?"":sharedp.getString("name")?? "";
+        _jobcityController.text= sharedp.getString("jobcity")=="no Jobcity"?"":sharedp.getString("jobcity")?? "";
+        _jobloczController.text= sharedp.getString("joblocation")=="no Jobcity"?"":sharedp.getString("joblocation")?? "";
+        Imagepath=sharedp.getString("profileImage")?? "";
+        pathe=sharedp.getString("profileVideo")?? "";
         if(Imagepath!="")
           {
                 if(Imagepath!="No profileImage")
@@ -124,7 +125,7 @@ class _SaveProfileState extends State<SaveProfile> {
         //         builder: (context) => HomePage()), (
         //         route) => false);
         //   }
-        getcities();
+        // getcities();
         button=Colors.amber;
         //LocationManager.shared.getCurrentLocation();
         if(pathe!="") {
@@ -140,7 +141,8 @@ class _SaveProfileState extends State<SaveProfile> {
   }
 
   Future<void> initializePreference() async{
-    this.sharedPreferences = await SharedPreferences.getInstance();
+    await  Provider.of<ContentProvider>(context, listen: false).getContent(context);
+    duplicateItems.addAll(Provider.of<CitiesProvider>(context, listen: false).cityModelList);
   }
 
 
@@ -149,40 +151,40 @@ class _SaveProfileState extends State<SaveProfile> {
 
   List<CityModel> duplicateItems = <CityModel>[];
   List<LocationModel> duplicatelocation = <LocationModel>[];
-  getcities() async {
-    try {
-      Response response = await _dio.get(_baseUrl + AppConstants.CITIES_URI);
-      apidatacity= response.data;
-      print('City List: ${apidatacity}');
-      List<dynamic> data=json.decode(apidatacity);
-
-      if(data.toString()=="[]")
-      {
-        duplicateItems=[];
-      }
-      else
-      {
-        data.forEach((city) =>
-            duplicateItems.add(CityModel.fromJson(city)));
-      }
-      print('City List: ${duplicateItems}');
-
-    } on DioError catch (e) {
-      // The request was made and the server responded with a status code
-      // that falls out of the range of 2xx and is also not 304.
-      if (e.response != null) {
-        print('Dio error!');
-        print('STATUS: ${e.response?.statusCode}');
-        print('DATA: ${e.response?.data}');
-        print('HEADERS: ${e.response?.headers}');
-      } else {
-        // Error due to setting up or sending the request
-        print('Error sending request!');
-        print(e.message);
-      }
-    }
-
-  }
+  // getcities() async {
+  //   try {
+  //     Response response = await _dio.get(_baseUrl + AppConstants.CITIES_URI);
+  //     apidatacity= response.data;
+  //     print('City List: ${apidatacity}');
+  //     List<dynamic> data=json.decode(apidatacity);
+  //
+  //     if(data.toString()=="[]")
+  //     {
+  //       duplicateItems=[];
+  //     }
+  //     else
+  //     {
+  //       data.forEach((city) =>
+  //           duplicateItems.add(CityModel.fromJson(city)));
+  //     }
+  //     print('City List: ${duplicateItems}');
+  //
+  //   } on DioError catch (e) {
+  //     // The request was made and the server responded with a status code
+  //     // that falls out of the range of 2xx and is also not 304.
+  //     if (e.response != null) {
+  //       print('Dio error!');
+  //       print('STATUS: ${e.response?.statusCode}');
+  //       print('DATA: ${e.response?.data}');
+  //       print('HEADERS: ${e.response?.headers}');
+  //     } else {
+  //       // Error due to setting up or sending the request
+  //       print('Error sending request!');
+  //       print(e.message);
+  //     }
+  //   }
+  //
+  // }
   getlocation() async {
     duplicatelocation.clear();
     try {
@@ -229,7 +231,6 @@ class _SaveProfileState extends State<SaveProfile> {
     this.latitude = coordinate.latitude;
     this.longitude = coordinate.longitude;
     _getAddressFromCurrentLocation( await SharedManager.shared.getLocationCoordinate());
-   // await _getCurrentPosition();
   }
   //
   // String? _currentAddress;
@@ -282,7 +283,7 @@ class _SaveProfileState extends State<SaveProfile> {
     _hasData = duplicateItems.length > 1;
     final CityModel result = await Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => CitySelectionScreen(duplicate: duplicateItems,hasdata: _hasData,)),
+      MaterialPageRoute(builder: (context) => CitySelectionScreen()),
     );
 
     if (result !=null)
@@ -313,7 +314,7 @@ class _SaveProfileState extends State<SaveProfile> {
 
   _getAddressFromCurrentLocation(LatLng coordinate) async {
    // var coordinate = await SharedManager.shared.getLocationCoordinate();
-    print("Stored Location:$coordinate");
+  //  print("Stored Location:$coordinate");
     var addresses=await placemarkFromCoordinates(coordinate.latitude, coordinate.longitude);
     Navigator.pop(context);
     var first = addresses.first;
@@ -325,26 +326,20 @@ class _SaveProfileState extends State<SaveProfile> {
     // print('subLocality: ${first.subLocality}');
     // print('subThoroughfare: ${first.subThoroughfare}');
     // print('thoroughfare: ${first.thoroughfare}');
-    if(first.locality!=null)
-    {
-      this.city = first.locality!;
-    }
-    if(this.addressline_2!=null)
-    {
-      this.addressline_2 = first.postalCode!;
-    }
-    setState(() {
-      print("Final Address:---->$first");
-    });
-    // ;
+    // if(first.locality!=null)
+    // {
+    //   this.city = first.locality!;
+    // }
+    // if(this.addressline_2!=null)
+    // {
+    //   this.addressline_2 = first.postalCode!;
+    // }
     String cityname="Delhi";
     if(first.subAdministrativeArea!=null) {
-
       String q=first.subAdministrativeArea!;
       if(q.contains("Division"))
         q=q.toString().trim().substring(0,q.toString().trim().length - 8);
       cityname=q.toString().trim();
-
     } else if(first.locality!=null)
     {
       cityname= first.locality!;
@@ -352,13 +347,13 @@ class _SaveProfileState extends State<SaveProfile> {
 
     if(cityname!=null) {
       _jobcityController.text = cityname;
-      CityModel city = filterSearchResult(cityname);
-      if (city.id != "0"){
-        cityid = (city.id==null?city.id:"0")!;
-      }
-      else {
-        CommonFunctions.showInfoDialog("Your City is not in list. Please select a near by city from City List", context);
-      }
+    //  CityModel city = filterSearchResult(cityname);
+    //   if (city.id != "0"){
+    //     cityid = (city.id==null?city.id:"0")!;
+    //   }
+    //   else {
+    //     CommonFunctions.showInfoDialog("Your City is not in list. Please select a near by city from City List", context);
+    //   }
 
       if(first.locality!=null)
       {
@@ -403,7 +398,7 @@ class _SaveProfileState extends State<SaveProfile> {
   _submit(String path) async {
     print(path);
     final sharedPreferences = await SharedPreferences.getInstance();
-    sharedPreferences!.setString("profileVideo", path);
+    sharedp.setString("profileVideo", path);
     setState(() {
       _profileuploaded=true;
       button=Colors.green;
@@ -439,7 +434,7 @@ class _SaveProfileState extends State<SaveProfile> {
         if (_CheckUpload()) {
           uploadFile();
            await updateProfileDetails(
-              _Name, _jobcity, _joblocation,
+              _Name,_jobcity, _joblocation,
               _value == 0 ? "Male" : "Female",
               _dob);
         }
@@ -456,6 +451,41 @@ class _SaveProfileState extends State<SaveProfile> {
     }
   }
 
+  Future<void> _iossavestep2() async {
+    setState(() {
+      _isLoading=true;
+    });
+    String _Name = _nameController.text.trim();
+    String _jobcity = _jobcityController.text.trim();
+    String _joblocation = _jobloczController.text.trim();
+    String _dob = "01-01-2000";
+
+    if (_Name.isEmpty||_jobcity.isEmpty||_joblocation.isEmpty||_dob.isEmpty||_dob=="Enter Date of Birth")
+    {
+      setState(() {
+        _isLoading=false;
+      });
+      CommonFunctions.showInfoDialog("Please Enter Date of Birth", context);
+    }
+    else{
+      if(pathe!="") {
+        if (_CheckUpload()) {
+          uploadFile();
+          await updateProfileDetails(
+              _Name,_jobcity, _joblocation, "Other", _dob);
+        }
+        else {
+          CommonFunctions.showInfoDialog(
+              "You have selected a video resume . Please Submit it first",
+              context);
+        }
+      }
+      else
+      {
+        await updateProfileDetails(_Name, _jobcity, _joblocation, "Other", _dob);
+      }
+    }
+  }
   Future<http.StreamedResponse> updateProfileDetails(String Name,String City,String Locality,String gender,String dob) async {
     http.MultipartRequest request = http.MultipartRequest('POST', Uri.parse('${AppConstants.BASE_URL}${AppConstants.SAVE_PROFILE_DETAIL_DATA_URI}'));
     Map<String, String> _fields = Map();
@@ -477,12 +507,13 @@ class _SaveProfileState extends State<SaveProfile> {
           setState(() {
             _profileuploaded=true;
           });
-          sharedPreferences!.setString("name", Name);
-          sharedPreferences!.setString("jobcity",City);
-          sharedPreferences!.setString("joblocation", Locality);
-          sharedPreferences!.setString("gender", gender);
-          sharedPreferences!.setString("dob", dob);
-          sharedPreferences!.setBool("step3", true);
+          sharedp.setString("name", Name);
+
+          sharedp.setString("jobcity",City);
+          sharedp.setString("joblocation", Locality);
+          sharedp.setString("gender", gender);
+          sharedp.setString("dob", dob);
+          sharedp.setBool("step3", true);
             setState(() {
               _isLoading = false;
             });
@@ -511,20 +542,6 @@ class _SaveProfileState extends State<SaveProfile> {
     return response;
   }
 
-  bool _checkdetails()
-  {
-    if(_nameController.text.isNotEmpty&&_jobcityController.text.isNotEmpty&&_jobloczController.text.isNotEmpty)
-    {
-      return true;
-    }
-    else
-    {
-      setState(() {
-        _isLoading=false;
-      });
-      return false;
-    }
-  }
   bool _CheckUpload()
   {
 
@@ -601,7 +618,7 @@ class _SaveProfileState extends State<SaveProfile> {
                   SizedBox(width: 10,),
                   Container(
                     width: MediaQuery.of(context).size.width*0.6,
-                    child: Text(Provider.of<AuthProvider>(context, listen: false).getEmail(),maxLines:2,style: TextStyle(color: Colors.white,fontSize: 12,fontWeight: FontWeight.bold),
+                    child: Text(Provider.of<AuthProvider>(context, listen: false).getMobile(),maxLines:2,style: TextStyle(color: Colors.white,fontSize: 12,fontWeight: FontWeight.bold),
                     ),
                   ),
                 ]
@@ -671,6 +688,7 @@ class _SaveProfileState extends State<SaveProfile> {
                                       hintText: "Full Name",
                                       textInputType: TextInputType.text,
                                       isOtp: false,
+                                      isName:true,
                                       maxLine: 1,
                                       capitalization: TextCapitalization.words,
                                       controller: _nameController,
@@ -681,6 +699,7 @@ class _SaveProfileState extends State<SaveProfile> {
                           ),
                           padding: const EdgeInsets.symmetric(vertical: 5.0,horizontal: 25.0),
                         ),
+                        Platform.isIOS ? Container():
                         Padding(
                           padding: const EdgeInsets.all(8.0),
                           child:
@@ -813,6 +832,9 @@ class _SaveProfileState extends State<SaveProfile> {
                           ),
                           padding: const EdgeInsets.all(5.0),
                         ),
+                        Platform.isIOS ?
+                            Container()
+                            :
                         new Padding(
                           child:
                           new Row(
@@ -869,34 +891,9 @@ class _SaveProfileState extends State<SaveProfile> {
                           ),
                           padding: const EdgeInsets.all(5.0),
                         ),
-
-                        // new Padding(
-                        //   child:
-                        //   new Row(
-                        //       mainAxisAlignment: MainAxisAlignment.center,
-                        //       mainAxisSize: MainAxisSize.max,
-                        //       crossAxisAlignment: CrossAxisAlignment.center,
-                        //       children: <Widget>[
-                        //         Expanded(
-                        //             child:
-                        //             Container(
-                        //               padding: EdgeInsets.all(5),
-                        //               width: deviceSize.width-20,
-                        //               decoration: BoxDecoration(
-                        //                 color: Colors.white,
-                        //                 borderRadius: BorderRadius.only(topRight: Radius.circular(6), topLeft: Radius.circular(6),bottomLeft:Radius.circular(6), bottomRight: Radius.circular(6) ),
-                        //                 boxShadow: [
-                        //                   BoxShadow(color: Colors.grey.withOpacity(0.1), spreadRadius: 1, blurRadius: 3, offset: Offset(0, 1)) // changes position of shadow
-                        //                 ],
-                        //               ),
-                        //               child:
-                        //
-                        //             )
-                        //         )
-                        //       ]
-                        //   ),
-                        //   padding: const EdgeInsets.all(5.0),
-                        // ),
+                        Platform.isIOS ?
+                        Container()
+                            :
                         new Padding(
                           child:
                           new Row(
@@ -953,20 +950,25 @@ class _SaveProfileState extends State<SaveProfile> {
                           ),
                           padding: const EdgeInsets.all(5.0),
                         ),
-                        new Padding(
-                          child:
-                          new Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              mainAxisSize: MainAxisSize.max,
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: <Widget>[
-                                Flexible(child:Text(getTranslated("UPLOAD_VIDEO_RESUME", context)!,style: TextStyle(color: Colors.white,fontSize: 14,fontWeight: FontWeight.bold),),
-                                ),
-                              ]
+                        Visibility(
+                          visible: false,
+                          child: new Padding(
+                            child:
+                            new Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                mainAxisSize: MainAxisSize.max,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: <Widget>[
+                                  Flexible(child:Text(getTranslated("UPLOAD_VIDEO_RESUME", context)!,style: TextStyle(color: Colors.white,fontSize: 14,fontWeight: FontWeight.bold),),
+                                  ),
+                                ]
+                            ),
+                            padding: const EdgeInsets.all(5.0),
                           ),
-                          padding: const EdgeInsets.all(5.0),
                         ),
-
+                  Visibility(
+                    visible: false,
+                    child:
                         new Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             mainAxisSize: MainAxisSize.max,
@@ -1037,7 +1039,10 @@ class _SaveProfileState extends State<SaveProfile> {
                                 ],
                               ),
                             ]
-                        ),
+                        ),),
+                  Visibility(
+                    visible: false,
+                    child:
                         pathe==""? Container(): new Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             mainAxisSize: MainAxisSize.max,
@@ -1098,7 +1103,7 @@ class _SaveProfileState extends State<SaveProfile> {
                                 ),
                               ),
                             ]
-                        ),
+                        ),),
 
                         new Row(
                             mainAxisAlignment: MainAxisAlignment.center,
@@ -1123,7 +1128,9 @@ class _SaveProfileState extends State<SaveProfile> {
                                             if (_formKey.currentState!.validate()) {
                                               _CheckImageUpload()
                                                   ?
-                                              _savestep2()
+                                              Platform.isIOS ?
+                                              _iossavestep2()
+                                                  : _savestep2()
                                                   :
                                               CommonFunctions.showInfoDialog('Please Submit Your Profile Image',context);
                                             }
@@ -1356,7 +1363,7 @@ class _SaveProfileState extends State<SaveProfile> {
           isselect=true;
           _videoFile = pickedFile;
           pathe=resumepath;
-          sharedPreferences!.setString("profileVideo", _videoFile!.path);
+          sharedp.setString("profileVideo", _videoFile!.path);
           if(pathe!="") {
             _controller = VideoPlayerController.file(File(pathe))
               ..initialize().then((_) {
@@ -1390,7 +1397,7 @@ class _SaveProfileState extends State<SaveProfile> {
       setState(() {
         if(croppedFile!=null) {
           _cropedFile = croppedFile;
-          sharedPreferences!.setString("profileImage", _cropedFile!.path);
+          sharedp.setString("profileImage", _cropedFile!.path);
           _profileImageuploaded=true;
           Navigator.pop(context);
         }

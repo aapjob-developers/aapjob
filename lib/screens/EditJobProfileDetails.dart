@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:Aap_job/localization/language_constrants.dart';
+import 'package:Aap_job/providers/cities_provider.dart';
 import 'package:Aap_job/screens/homepage.dart';
 import 'package:Aap_job/screens/hrhomepage.dart';
 import 'package:Aap_job/screens/select_language.dart';
@@ -75,6 +76,7 @@ class _EditJobProfileDetailsState extends State<EditJobProfileDetails> {
 
   SharedPreferences? sharedPreferences;
   TextEditingController _nameController = TextEditingController();
+  TextEditingController _emailController = TextEditingController();
   TextEditingController _dobController = TextEditingController();
   TextEditingController _jobcityController = TextEditingController();
   TextEditingController _localityController = TextEditingController();
@@ -85,41 +87,41 @@ class _EditJobProfileDetailsState extends State<EditJobProfileDetails> {
 
   List<CityModel> duplicateItems = <CityModel>[];
   List<LocationModel> duplicatelocation = <LocationModel>[];
-
-  getcities() async {
-    try {
-      Response response = await _dio.get(_baseUrl + AppConstants.CITIES_URI);
-      apidata = response.data;
-      print('City List: ${apidata}');
-      List<dynamic> data=json.decode(apidata);
-
-      if(data.toString()=="[]")
-      {
-        duplicateItems=[];
-      }
-      else
-      {
-        data.forEach((city) =>
-            duplicateItems.add(CityModel.fromJson(city)));
-      }
-      print('City List: ${duplicateItems}');
-
-    } on DioError catch (e) {
-      // The request was made and the server responded with a status code
-      // that falls out of the range of 2xx and is also not 304.
-      if (e.response != null) {
-        print('Dio error!');
-        print('STATUS: ${e.response?.statusCode}');
-        print('DATA: ${e.response?.data}');
-        print('HEADERS: ${e.response?.headers}');
-      } else {
-        // Error due to setting up or sending the request
-        print('Error sending request!');
-        print(e.message);
-      }
-    }
-
-  }
+  //
+  // getcities() async {
+  //   try {
+  //     Response response = await _dio.get(_baseUrl + AppConstants.CITIES_URI);
+  //     apidata = response.data;
+  //     print('City List: ${apidata}');
+  //     List<dynamic> data=json.decode(apidata);
+  //
+  //     if(data.toString()=="[]")
+  //     {
+  //       duplicateItems=[];
+  //     }
+  //     else
+  //     {
+  //       data.forEach((city) =>
+  //           duplicateItems.add(CityModel.fromJson(city)));
+  //     }
+  //     print('City List: ${duplicateItems}');
+  //
+  //   } on DioError catch (e) {
+  //     // The request was made and the server responded with a status code
+  //     // that falls out of the range of 2xx and is also not 304.
+  //     if (e.response != null) {
+  //       print('Dio error!');
+  //       print('STATUS: ${e.response?.statusCode}');
+  //       print('DATA: ${e.response?.data}');
+  //       print('HEADERS: ${e.response?.headers}');
+  //     } else {
+  //       // Error due to setting up or sending the request
+  //       print('Error sending request!');
+  //       print(e.message);
+  //     }
+  //   }
+  //
+  // }
 
   getlocation() async {
     duplicatelocation.clear();
@@ -167,7 +169,7 @@ class _EditJobProfileDetailsState extends State<EditJobProfileDetails> {
     initializePreference().whenComplete((){
       setState(() {
         _profileuploaded=false;
-        getcities();
+        //getcities();
         button=Colors.amber;
         _nameController.text=Name;
         _jobcityController.text=jobcity;
@@ -190,12 +192,13 @@ class _EditJobProfileDetailsState extends State<EditJobProfileDetails> {
 
   Future<void> initializePreference() async{
     this.sharedPreferences = await SharedPreferences.getInstance();
-    emaile= sharedPreferences!.getString("email")?? "no mail";
+    emaile= sharedPreferences!.getString("email")?? "No Email";
     Name= sharedPreferences!.getString("name")?? "no Name";
     jobcity= sharedPreferences!.getString("jobcity")?? "no jobcity";
     locality= sharedPreferences!.getString("joblocation")?? "no joblocation";
     gender= sharedPreferences!.getString("gender")?? "no gender";
     dob= sharedPreferences!.getString("dob")?? "Enter Date of Birth";
+    duplicateItems.addAll(Provider.of<CitiesProvider>(context, listen: false).cityModelList);
   }
 
 
@@ -208,10 +211,11 @@ class _EditJobProfileDetailsState extends State<EditJobProfileDetails> {
     String _jobcity = _jobcityController.text.trim();
     String _locality = _localityController.text.trim();
     String _dob = _dobController.text.trim();
+    String _email = _emailController.text.trim();
 
     if (_Name.isEmpty||_jobcity.isEmpty||_locality.isEmpty||_dob.isEmpty||_dob=="Enter Date of Birth")
     {
-      CommonFunctions.showInfoDialog("Please fill All Details 2", context);
+      CommonFunctions.showInfoDialog("Please fill All Details", context);
       setState(() {
         _isLoading=false;
       });
@@ -226,11 +230,11 @@ class _EditJobProfileDetailsState extends State<EditJobProfileDetails> {
       {
         gg= "Female";
       }
-      http.StreamedResponse response =  await updateProfileDetails(_Name,_jobcity,_locality,gg,_dob);
+      http.StreamedResponse response =  await updateProfileDetails(_Name,_jobcity,_locality,gg,_dob,_email);
     }
 
   }
-  Future<http.StreamedResponse> updateProfileDetails(String Name,String City,String Locality,String gender,String dob) async {
+  Future<http.StreamedResponse> updateProfileDetails(String Name,String City,String Locality,String gender,String dob,String email) async {
     http.MultipartRequest request = http.MultipartRequest('POST', Uri.parse('${AppConstants.BASE_URL}${AppConstants.SAVE_PROFILE_DETAIL_DATA_URI}'));
     int userid=sharedPreferences!.getInt("userid")?? 0;
     Map<String, String> _fields = Map();
@@ -241,6 +245,7 @@ class _EditJobProfileDetailsState extends State<EditJobProfileDetails> {
       'Locality':Locality,
       'Gender':gender,
       'dob':dob,
+      'email':email,
     });
     request.fields.addAll(_fields);
     http.StreamedResponse response = await request.send();
@@ -259,6 +264,7 @@ class _EditJobProfileDetailsState extends State<EditJobProfileDetails> {
           sharedPreferences!.setString("joblocation", Locality);
           sharedPreferences!.setString("gender", gender);
           sharedPreferences!.setString("dob", dob);
+          sharedPreferences!.setString("email", email);
           // Navigator.of(context).pop();
           Navigator.pushReplacement(context,  MaterialPageRoute(builder: (context)=> HomePage()));
         }
@@ -309,7 +315,7 @@ class _EditJobProfileDetailsState extends State<EditJobProfileDetails> {
     _hasData = duplicateItems.length > 1;
     final CityModel result = await Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => CitySelectionScreen(duplicate: duplicateItems,hasdata: _hasData,)),
+      MaterialPageRoute(builder: (context) => CitySelectionScreen()),
     );
 
     if (result !=null)
@@ -338,6 +344,7 @@ class _EditJobProfileDetailsState extends State<EditJobProfileDetails> {
   }
 
   _getLocation() async {
+
     final coordinate = await SharedManager.shared.getLocationCoordinate();
     this.latitude = coordinate.latitude;
     this.longitude = coordinate.longitude;
@@ -395,14 +402,6 @@ class _EditJobProfileDetailsState extends State<EditJobProfileDetails> {
     var addresses=await placemarkFromCoordinates(coordinate.latitude, coordinate.longitude);
     Navigator.pop(context);
     var first = addresses.first;
-    print('adminArea: ${first.administrativeArea}');
-    print('locality: ${first.locality}');
-    print('addressLine: ${first.name}');
-    print('featureName: ${first.street}');
-    print('subAdminArea: ${first.subAdministrativeArea}');
-    print('subLocality: ${first.subLocality}');
-    print('subThoroughfare: ${first.subThoroughfare}');
-    print('thoroughfare: ${first.thoroughfare}');
     if(first.locality!=null)
     {
       this.city = first.locality!;
@@ -417,7 +416,6 @@ class _EditJobProfileDetailsState extends State<EditJobProfileDetails> {
     // ;
     String cityname="Delhi";
     if(first.subAdministrativeArea!=null) {
-
       String q=first.subAdministrativeArea!;
       if(q.contains("Division"))
         q=q.toString().trim().substring(0,q.toString().trim().length - 8);
@@ -429,14 +427,14 @@ class _EditJobProfileDetailsState extends State<EditJobProfileDetails> {
     }
     if(cityname!=null) {
     _jobcityController.text = cityname;
-    CityModel city=filterSearchResult(cityname);
-
-    if (city.id != "0"){
-      cityid = (city.id==null?city.id:"0")!;
-    }
-    else {
-      CommonFunctions.showInfoDialog("Your City is not in list. Please select a near by city from City List", context);
-    }
+    // CityModel city=filterSearchResult(cityname);
+    //
+    // if (city.id != "0"){
+    //   cityid = (city.id==null?city.id:"0")!;
+    // }
+    // else {
+    //   CommonFunctions.showInfoDialog("Your City is not in list. Please select a near by city from City List", context);
+    // }
 
     if(cityname!=first.locality&&first.locality!=null) {
       _localityController.text = first.locality!;
@@ -473,7 +471,6 @@ class _EditJobProfileDetailsState extends State<EditJobProfileDetails> {
 
   @override
   Widget build(BuildContext context) {
-    print("gender :"+gender);
     final deviceSize = MediaQuery
         .of(context)
         .size;
@@ -563,6 +560,7 @@ class _EditJobProfileDetailsState extends State<EditJobProfileDetails> {
                                 child: CustomTextField(
                                   hintText: "Full Name",
                                   textInputType: TextInputType.text,
+                                  isName: true,
                                   isOtp: false,
                                   maxLine: 1,
                                   capitalization: TextCapitalization.words,
@@ -575,14 +573,48 @@ class _EditJobProfileDetailsState extends State<EditJobProfileDetails> {
                       padding: const EdgeInsets.all(5.0),
                     ),
                     new Padding(
+                      child:
+                      new Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          mainAxisSize: MainAxisSize.max,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: <Widget>[
+                            Container(
+                              width: deviceSize.width-50,
+                              child: Text("Email Id",style: LatinFonts.aBeeZee(color: Colors.white),),
+                            ),
+
+                          ]
+                      ),
+                      padding: const EdgeInsets.all(5.0),
+                    ),
+                    new Padding(
+                      child:
+                      new Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          mainAxisSize: MainAxisSize.max,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: <Widget>[
+                            Expanded(
+                                child: CustomTextField(
+                                  hintText: "Enter Email Id",
+                                  textInputType: TextInputType.emailAddress,
+                                  isName: false,
+                                  isOtp: false,
+                                  maxLine: 1,
+                                  capitalization: TextCapitalization.none,
+                                  controller: _emailController,
+                                )),
+                          ]
+                      ),
+                      padding: const EdgeInsets.all(5.0),
+                    ),
+    Platform.isIOS ? Container():
+                    new Padding(
                       padding: const EdgeInsets.all(8.0),
                       child:
                       GestureDetector(
                         onTap:(){
-                          // showLoadingDialog(
-                          //   context: context,
-                          //   message: "Getting Your Current Location. Please Wait.",
-                          // );
                           showLocationDialog(
                             context: context,
                             message: 'assets/lottie/location-permissions.json',

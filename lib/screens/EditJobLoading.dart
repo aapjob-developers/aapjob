@@ -9,7 +9,7 @@ import 'package:Aap_job/screens/EditJobPostScreen2.dart';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:Aap_job/models/CitiesModel.dart';
-import 'package:Aap_job/models/JobCategoryModel.dart';
+
 import 'package:Aap_job/models/JobTitleModel.dart';
 import 'package:Aap_job/models/LocationModel.dart';
 import 'package:Aap_job/models/common_functions.dart';

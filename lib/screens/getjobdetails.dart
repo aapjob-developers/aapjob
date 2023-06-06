@@ -35,7 +35,7 @@ class _GetJobDetailSceenState extends State<GetJobDetailSceen> {
   var apidata,apldata;
   bool applied=false, is_loading=false;
   bool _hasCallSupport = false;
-  late JobsModel jobsModel;
+  JobsModel? jobsModel;
   List<String> text=[];
   @override
   initState() {
@@ -46,8 +46,8 @@ class _GetJobDetailSceenState extends State<GetJobDetailSceen> {
           _hasCallSupport = result;
         });
       });
-      jobsModel.jobskills.length>0?
-      text = jobsModel.jobskills
+      jobsModel!.jobskills.length>0?
+      text = jobsModel!.jobskills
           :
       text.add("No Specific Skill Required")
       ;
@@ -64,22 +64,6 @@ class _GetJobDetailSceenState extends State<GetJobDetailSceen> {
       print('JobsModel : ${apidata}');
      // JobsModel data=json.decode(apidata);
       jobsModel = JobsModel.fromJson( json.decode(apidata));
-
-      // if(data.toString()=="[]")
-      // {
-      //   Jobslist=[];
-      //   setState(() {
-      //     _hasJobsModel = false;
-      //   });
-      // }
-      // else
-      // {
-      //   data.forEach((jobs) =>
-      //       Jobslist.add(JobsModel.fromJson(jobs)));
-      //   setState(() {
-      //     _hasJobsModel=true;
-      //   });
-      // }
       print('Jobdata: ${jobsModel}');
 
     } on DioError catch (e) {
@@ -106,7 +90,7 @@ class _GetJobDetailSceenState extends State<GetJobDetailSceen> {
 
   late Future<void> _launched;
   openwhatsapp() async {
-    String textmsg="*Hi, Here is a Job that i want ot share with you :\n Job Role : "+jobsModel.jobRole+"\n Job Company Name : "+jobsModel.jobRole+"\n Location : "+jobsModel.jobcity+"\n Download Aap Job Now and Apply :* shorturl.at/afmVZ";
+    String textmsg="*Hi, Here is a Job that i want ot share with you :\n Job Role : "+jobsModel!.jobRole+"\n Job Company Name : "+jobsModel!.jobRole+"\n Location : "+jobsModel!.jobcity+"\n Download Aap Job Now and Apply :* shorturl.at/afmVZ";
     var whatsappURl_android = "whatsapp://send?"+"&text="+textmsg;
     var whatappURL_ios = "https://wa.me?text=${Uri.parse("hello Sir")}";
     if (Platform.isIOS) {
@@ -139,7 +123,7 @@ class _GetJobDetailSceenState extends State<GetJobDetailSceen> {
         setState(() {
           applied=true;
           is_loading=false;
-          Navigator.pushReplacement(context,MaterialPageRoute(builder: (context)=> JobDetailSceen(jobsModel: jobsModel)));
+          Navigator.pushReplacement(context,MaterialPageRoute(builder: (context)=> JobDetailSceen(jobsModel: jobsModel!)));
         });
 
       }
@@ -169,7 +153,7 @@ class _GetJobDetailSceenState extends State<GetJobDetailSceen> {
   }
   checkapplied() async {
     try {
-      Response response = await _dio.get(_baseUrl + AppConstants.CHECK_APPLY_JOB_URI+jobsModel.id+"&candidateid="+Provider.of<AuthProvider>(context, listen: false).getUserid().toString());
+      Response response = await _dio.get(_baseUrl + AppConstants.CHECK_APPLY_JOB_URI+jobsModel!.id+"&candidateid="+Provider.of<AuthProvider>(context, listen: false).getUserid().toString());
       apldata = response.data;
       print('Applied check : ${apldata}');
       if(apldata=="Applied")
@@ -208,7 +192,6 @@ class _GetJobDetailSceenState extends State<GetJobDetailSceen> {
     final deviceSize = MediaQuery
         .of(context)
         .size;
-
     return
       WillPopScope(
         onWillPop: () async {
@@ -265,6 +248,7 @@ class _GetJobDetailSceenState extends State<GetJobDetailSceen> {
         body:
         SingleChildScrollView(
           child:
+              jobsModel!=null?
           Column(
             children: <Widget>[
               Container(
@@ -280,7 +264,7 @@ class _GetJobDetailSceenState extends State<GetJobDetailSceen> {
                               mainAxisSize: MainAxisSize.max,
                               crossAxisAlignment: CrossAxisAlignment.center,
                               children: <Widget>[
-                                Text(jobsModel.jobRole,style: LatinFonts.aBeeZee(color: Colors.white,fontSize: 24,fontWeight: FontWeight.bold),),
+                                Text(jobsModel!.jobRole,style: LatinFonts.aBeeZee(color: Colors.white,fontSize: 24,fontWeight: FontWeight.bold),),
                               ]
                           ),
                           padding: const EdgeInsets.only(top: 20,left: 20,bottom: 10)
@@ -292,7 +276,7 @@ class _GetJobDetailSceenState extends State<GetJobDetailSceen> {
                             mainAxisSize: MainAxisSize.max,
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: <Widget>[
-                              Text(jobsModel.companyName,style: LatinFonts.aBeeZee(color: Colors.white60,fontSize: 14,fontWeight: FontWeight.bold),),
+                              Text(jobsModel!.companyName,style: LatinFonts.aBeeZee(color: Colors.white60,fontSize: 14,fontWeight: FontWeight.bold),),
                             ]
                         ),
                         padding: const EdgeInsets.symmetric(vertical: 5,horizontal: 10),
@@ -311,7 +295,7 @@ class _GetJobDetailSceenState extends State<GetJobDetailSceen> {
                                 height: 20,
                                 width:20,
                               ),
-                              Text(getTranslated('NEAR', context)!+jobsModel.jobcity,style: LatinFonts.aBeeZee(color: Colors.white,fontSize: 14,fontWeight: FontWeight.bold),),
+                              Text(getTranslated('NEAR', context)!+jobsModel!.jobcity,style: LatinFonts.aBeeZee(color: Colors.white,fontSize: 14,fontWeight: FontWeight.bold),),
                             ]
                         ),
                         padding: const EdgeInsets.symmetric(vertical: 5,horizontal: 10),
@@ -332,7 +316,7 @@ class _GetJobDetailSceenState extends State<GetJobDetailSceen> {
                                   width:20,
                                 ),
                               ),
-                              Flexible(child: Text(getTranslated('NEAR', context)!+jobsModel.address,style: LatinFonts.aBeeZee(color: Colors.white,fontSize: 10,fontWeight: FontWeight.bold),maxLines: 2,)),
+                              Flexible(child: Text(getTranslated('NEAR', context)!+jobsModel!.address,style: LatinFonts.aBeeZee(color: Colors.white,fontSize: 10,fontWeight: FontWeight.bold),maxLines: 2,)),
                             ]
                         ),
                         padding: const EdgeInsets.symmetric(vertical: 5,horizontal: 10),
@@ -350,12 +334,12 @@ class _GetJobDetailSceenState extends State<GetJobDetailSceen> {
                                 height: 20,
                                 width:20,
                               ),
-                              Text(getTranslated('SALARY', context)!+"Rs. "+jobsModel.minSalary+" - Rs. "+jobsModel.maxSalary+" "+getTranslated('MONTHLY', context)!,style: LatinFonts.aBeeZee(color: Colors.white,fontSize: 14,fontWeight: FontWeight.bold),),
+                              Text(getTranslated('SALARY', context)!+"Rs. "+jobsModel!.minSalary+" - Rs. "+jobsModel!.maxSalary+" "+getTranslated('MONTHLY', context)!,style: LatinFonts.aBeeZee(color: Colors.white,fontSize: 14,fontWeight: FontWeight.bold),),
                             ]
                         ),
                         padding: const EdgeInsets.symmetric(vertical: 5,horizontal: 10),
                       ),
-                      jobsModel.incentive=="1"? Padding(
+                      jobsModel!.incentive=="1"? Padding(
                         child:
                         new Row(
                             mainAxisAlignment: MainAxisAlignment.start,
@@ -376,7 +360,7 @@ class _GetJobDetailSceenState extends State<GetJobDetailSceen> {
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: <Widget>[
                               Text(getTranslated('POSTED_BY', context)!,style: LatinFonts.aBeeZee(color: Colors.white54,fontSize: 12,fontWeight: FontWeight.bold),),
-                              Text(jobsModel.recruiterName,style: LatinFonts.aBeeZee(color: Colors.white,fontSize: 12,fontWeight: FontWeight.bold),),
+                              Text(jobsModel!.recruiterName,style: LatinFonts.aBeeZee(color: Colors.white,fontSize: 12,fontWeight: FontWeight.bold),),
                             ]
                         ),
                         padding: const EdgeInsets.symmetric(vertical: 5,horizontal: 10),
@@ -391,7 +375,7 @@ class _GetJobDetailSceenState extends State<GetJobDetailSceen> {
                               crossAxisAlignment: CrossAxisAlignment.center,
                               children: <Widget>[
                                 Text(" Total Openings : ",style: LatinFonts.aBeeZee(color:Primary,fontSize: 12,fontWeight: FontWeight.bold),),
-                                Text(jobsModel.openingsNo,style: LatinFonts.aBeeZee(color: Primary,fontSize: 12,fontWeight: FontWeight.bold),),
+                                Text(jobsModel!.openingsNo,style: LatinFonts.aBeeZee(color: Primary,fontSize: 12,fontWeight: FontWeight.bold),),
                               ]
                           ),
                           padding: const EdgeInsets.symmetric(vertical: 5,horizontal: 10),
@@ -404,7 +388,7 @@ class _GetJobDetailSceenState extends State<GetJobDetailSceen> {
                 child:
                 Column(
                     children: <Widget>[
-                      jobsModel.benefits.cab=="true"||jobsModel.benefits.meal=="true"||jobsModel.benefits.insurance=="true"||jobsModel.benefits.pf=="true"||jobsModel.benefits.medical=="true"||jobsModel.benefits.other=="true"?
+                      jobsModel!.benefits.cab=="true"||jobsModel!.benefits.meal=="true"||jobsModel!.benefits.insurance=="true"||jobsModel!.benefits.pf=="true"||jobsModel!.benefits.medical=="true"||jobsModel!.benefits.other=="true"?
                       new Padding(
                         child:
                         new Row(
@@ -420,7 +404,7 @@ class _GetJobDetailSceenState extends State<GetJobDetailSceen> {
                         ),
                         padding: const EdgeInsets.symmetric(vertical: 1,horizontal: 10),
                       ):Container(),
-                      jobsModel.benefits.cab=="true"?
+                      jobsModel!.benefits.cab=="true"?
                       new Row(
                           mainAxisAlignment: MainAxisAlignment.start,
                           mainAxisSize: MainAxisSize.max,
@@ -435,7 +419,7 @@ class _GetJobDetailSceenState extends State<GetJobDetailSceen> {
                           ]
                       ):Container(),
 
-                      jobsModel.benefits.meal=="true"?
+                      jobsModel!.benefits.meal=="true"?
                       new Row(
                           mainAxisAlignment: MainAxisAlignment.start,
                           mainAxisSize: MainAxisSize.max,
@@ -449,7 +433,7 @@ class _GetJobDetailSceenState extends State<GetJobDetailSceen> {
                           ]
                       ):Container(),
 
-                      jobsModel.benefits.insurance=="true"?
+                      jobsModel!.benefits.insurance=="true"?
                       new Row(
                           mainAxisAlignment: MainAxisAlignment.start,
                           mainAxisSize: MainAxisSize.max,
@@ -463,7 +447,7 @@ class _GetJobDetailSceenState extends State<GetJobDetailSceen> {
                           ]
                       ):Container(),
 
-                      jobsModel.benefits.pf=="true"?
+                      jobsModel!.benefits.pf=="true"?
                       new Row(
                           mainAxisAlignment: MainAxisAlignment.start,
                           mainAxisSize: MainAxisSize.max,
@@ -477,7 +461,7 @@ class _GetJobDetailSceenState extends State<GetJobDetailSceen> {
                           ]
                       ):Container(),
 
-                      jobsModel.benefits.medical=="true"?
+                      jobsModel!.benefits.medical=="true"?
                       new Row(
                           mainAxisAlignment: MainAxisAlignment.start,
                           mainAxisSize: MainAxisSize.max,
@@ -491,7 +475,7 @@ class _GetJobDetailSceenState extends State<GetJobDetailSceen> {
                           ]
                       ):Container(),
 
-                      jobsModel.benefits.other.isNotEmpty?
+                      jobsModel!.benefits.other.isNotEmpty?
                       new Row(
                           mainAxisAlignment: MainAxisAlignment.start,
                           mainAxisSize: MainAxisSize.max,
@@ -501,7 +485,7 @@ class _GetJobDetailSceenState extends State<GetJobDetailSceen> {
                               padding: const EdgeInsets.all(4.0),
                               child: Icon(Icons.add, color: Color.fromARGB(255, 6, 143, 255),  size: 20),
                             ),
-                            Text(jobsModel.benefits.other,style: LatinFonts.aBeeZee(color: Color.fromARGB(255, 79, 20, 76),fontSize: 12,fontWeight: FontWeight.bold),),
+                            Text(jobsModel!.benefits.other,style: LatinFonts.aBeeZee(color: Color.fromARGB(255, 79, 20, 76),fontSize: 12,fontWeight: FontWeight.bold),),
                           ]
                       ):Container(),
 
@@ -523,7 +507,7 @@ class _GetJobDetailSceenState extends State<GetJobDetailSceen> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(getTranslated("EXPERIENCE", context)!,style: LatinFonts.aBeeZee(color: Colors.grey,fontSize: 14,fontWeight: FontWeight.bold),),
-                                  Text(" Min. "+jobsModel.minExp+" Year "+" - Max. "+jobsModel.maxExp+" Year ",style: LatinFonts.aBeeZee(color: Color.fromARGB(255, 79, 20, 76),fontSize: 14,fontWeight: FontWeight.bold),),
+                                  Text(" Min. "+jobsModel!.minExp+" Year "+" - Max. "+jobsModel!.maxExp+" Year ",style: LatinFonts.aBeeZee(color: Color.fromARGB(255, 79, 20, 76),fontSize: 14,fontWeight: FontWeight.bold),),
                                 ],
                               ),
                             ]
@@ -547,7 +531,7 @@ class _GetJobDetailSceenState extends State<GetJobDetailSceen> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(" Minimum Education ",style: LatinFonts.aBeeZee(color: Colors.grey,fontSize: 14,fontWeight: FontWeight.bold),),
-                                  Text(" "+jobsModel.minQualification,style: LatinFonts.aBeeZee(color: Color.fromARGB(255, 79, 20, 76),fontSize: 14,fontWeight: FontWeight.bold),),
+                                  Text(" "+jobsModel!.minQualification,style: LatinFonts.aBeeZee(color: Color.fromARGB(255, 79, 20, 76),fontSize: 14,fontWeight: FontWeight.bold),),
                                 ],
                               ),
                             ]
@@ -571,7 +555,7 @@ class _GetJobDetailSceenState extends State<GetJobDetailSceen> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(" English Level ",style: LatinFonts.aBeeZee(color: Colors.grey,fontSize: 14,fontWeight: FontWeight.bold),),
-                                  Text(" "+jobsModel.englishLevel,style: LatinFonts.aBeeZee(color: Color.fromARGB(255, 79, 20, 76),fontSize: 14,fontWeight: FontWeight.bold),),
+                                  Text(" "+jobsModel!.englishLevel,style: LatinFonts.aBeeZee(color: Color.fromARGB(255, 79, 20, 76),fontSize: 14,fontWeight: FontWeight.bold),),
                                 ],
                               ),
                             ]
@@ -595,7 +579,7 @@ class _GetJobDetailSceenState extends State<GetJobDetailSceen> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(getTranslated('WHO_CAN_APPLY', context)!,style: LatinFonts.aBeeZee(color: Colors.grey,fontSize: 14,fontWeight: FontWeight.bold),),
-                                  Text(" "+jobsModel.gender,style: LatinFonts.aBeeZee(color: Color.fromARGB(255, 79, 20, 76),fontSize: 14,fontWeight: FontWeight.bold),),
+                                  Text(" "+jobsModel!.gender,style: LatinFonts.aBeeZee(color: Color.fromARGB(255, 79, 20, 76),fontSize: 14,fontWeight: FontWeight.bold),),
                                 ],
                               ),
                             ]
@@ -619,7 +603,7 @@ class _GetJobDetailSceenState extends State<GetJobDetailSceen> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(" Job Type ",style: LatinFonts.aBeeZee(color: Colors.grey,fontSize: 14,fontWeight: FontWeight.bold),),
-                                  Text(" "+jobsModel.typeOfJob,style: LatinFonts.aBeeZee(color: Color.fromARGB(255, 79, 20, 76),fontSize: 14,fontWeight: FontWeight.bold),),
+                                  Text(" "+jobsModel!.typeOfJob,style: LatinFonts.aBeeZee(color: Color.fromARGB(255, 79, 20, 76),fontSize: 14,fontWeight: FontWeight.bold),),
                                 ],
                               ),
                             ]
@@ -643,7 +627,7 @@ class _GetJobDetailSceenState extends State<GetJobDetailSceen> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(" Job Duration ",style: LatinFonts.aBeeZee(color: Colors.grey,fontSize: 14,fontWeight: FontWeight.bold),),
-                                  Text(" "+jobsModel.isContractJob,style: LatinFonts.aBeeZee(color: Color.fromARGB(255, 79, 20, 76),fontSize: 14,fontWeight: FontWeight.bold),),
+                                  Text(" "+jobsModel!.isContractJob,style: LatinFonts.aBeeZee(color: Color.fromARGB(255, 79, 20, 76),fontSize: 14,fontWeight: FontWeight.bold),),
                                 ],
                               ),
                             ]
@@ -667,7 +651,7 @@ class _GetJobDetailSceenState extends State<GetJobDetailSceen> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(" Job Shift ",style: LatinFonts.aBeeZee(color: Colors.grey,fontSize: 14,fontWeight: FontWeight.bold),),
-                                  Text(" "+jobsModel.shift,style: LatinFonts.aBeeZee(color: Color.fromARGB(255, 79, 20, 76),fontSize: 14,fontWeight: FontWeight.bold),),
+                                  Text(" "+jobsModel!.shift,style: LatinFonts.aBeeZee(color: Color.fromARGB(255, 79, 20, 76),fontSize: 14,fontWeight: FontWeight.bold),),
                                 ],
                               ),
                             ]
@@ -691,7 +675,7 @@ class _GetJobDetailSceenState extends State<GetJobDetailSceen> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(" Workplace ",style: LatinFonts.aBeeZee(color: Colors.grey,fontSize: 14,fontWeight: FontWeight.bold),),
-                                  Text(" "+ jobsModel.workplace!=null?jobsModel.workplace:"Office",style: LatinFonts.aBeeZee(color: Color.fromARGB(255, 79, 20, 76),fontSize: 14,fontWeight: FontWeight.bold),),
+                                  Text(" "+ jobsModel!.workplace!=null?jobsModel!.workplace:"Office",style: LatinFonts.aBeeZee(color: Color.fromARGB(255, 79, 20, 76),fontSize: 14,fontWeight: FontWeight.bold),),
                                 ],
                               ),
                             ]
@@ -741,7 +725,7 @@ class _GetJobDetailSceenState extends State<GetJobDetailSceen> {
                               mainAxisSize: MainAxisSize.max,
                               crossAxisAlignment: CrossAxisAlignment.center,
                               children: <Widget>[
-                                Container(width:deviceSize.width*0.8,child:Text(jobsModel.des,style: LatinFonts.aBeeZee(color: Colors.black,fontSize: 12,),maxLines: 10,)),
+                                Container(width:deviceSize.width*0.8,child:Text(jobsModel!.des,style: LatinFonts.aBeeZee(color: Colors.black,fontSize: 12,),maxLines: 10,)),
                               ]
                           ),
                           padding: const EdgeInsets.only(left: 10,bottom: 10)
@@ -768,7 +752,7 @@ class _GetJobDetailSceenState extends State<GetJobDetailSceen> {
                             mainAxisSize: MainAxisSize.max,
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(getTranslated("HR_RESPONDED_SINCE", context)!+jobsModel.createdAt.day.toString()+"-"+jobsModel.createdAt.month.toString()+"-"+jobsModel.createdAt.year.toString(),style: LatinFonts.aBeeZee(color: Colors.grey,fontSize: 10,fontWeight: FontWeight.bold),),
+                              Text(getTranslated("HR_RESPONDED_SINCE", context)!+jobsModel!.createdAt.day.toString()+"-"+jobsModel!.createdAt.month.toString()+"-"+jobsModel!.createdAt.year.toString(),style: LatinFonts.aBeeZee(color: Colors.grey,fontSize: 10,fontWeight: FontWeight.bold),),
                             ],
                           ),
                         ]
@@ -830,7 +814,7 @@ class _GetJobDetailSceenState extends State<GetJobDetailSceen> {
 
               ),
             ],
-          ),
+          ):Container(),
         ),
 
       ),

@@ -4,15 +4,17 @@ import 'package:flutter/material.dart';
 import 'package:Aap_job/data/datasource/remote/dio/dio_client.dart';
 import 'package:dio/dio.dart';
 import 'package:Aap_job/models/CitiesModel.dart';
-import 'package:Aap_job/models/JobCategoryModel.dart';
+
 import 'package:Aap_job/utill/app_constants.dart';
 import 'package:Aap_job/utill/colors.dart';
 import 'package:google_language_fonts/google_language_fonts.dart';
 
+import '../../models/categorymm.dart';
+
 
 class JobCategorySelectionScreen extends StatefulWidget {
   JobCategorySelectionScreen({Key? key,required this.duplicate, required this.hasdata}) : super(key: key);
-  List<JobCategoryModel> duplicate ;
+  List<CategoryModel> duplicate ;
   bool hasdata;
   @override
   _JobCategorySelectionScreenState createState() => new _JobCategorySelectionScreenState();
@@ -24,8 +26,8 @@ class _JobCategorySelectionScreenState extends State<JobCategorySelectionScreen>
   // var apidata;
  bool _hasData=false;
 
-  List<JobCategoryModel> duplicateItems = <JobCategoryModel>[];
-  var items = <JobCategoryModel>[];
+  List<CategoryModel> duplicateItems = <CategoryModel>[];
+  var items = <CategoryModel>[];
 
   TextEditingController editingController = TextEditingController();
 
@@ -38,10 +40,10 @@ class _JobCategorySelectionScreenState extends State<JobCategorySelectionScreen>
   }
 
   void filterSearchResults(String query) {
-    List<JobCategoryModel> dummySearchList = <JobCategoryModel>[];
+    List<CategoryModel> dummySearchList = <CategoryModel>[];
     dummySearchList.addAll(duplicateItems);
     if(query.isNotEmpty) {
-      List<JobCategoryModel> dummyListData = <JobCategoryModel>[];
+      List<CategoryModel> dummyListData = <CategoryModel>[];
       dummySearchList.forEach((item) {
         if(item.name.toUpperCase().contains(query.toUpperCase())) {
           dummyListData.add(item);

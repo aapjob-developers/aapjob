@@ -5,7 +5,7 @@ description: Aap job provide a vast experience for people who are looking for ri
 # pub.dev using `pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 
-version: 30.0.0
+version: 36.0.0
 
 environment:
   sdk: ">=2.18.0 <3.0.0"
@@ -33,22 +33,22 @@ dependencies:
   flutter_downloader: ^1.10.1+2
   path_provider: ^2.0.12
 #  location: ^4.4.0
-#  camera: ^0.10.3
   google_maps_flutter: ^2.2.3
-#  flutter_uploader: ^1.2.1
   files_uploader: ^0.1.1
   fluttertoast: ^8.1.2
   shared_preferences: ^2.0.13
-  flutter_local_notifications: 9.8.0+1
+#  flutter_local_notifications: ^9.8.0+1
+  flutter_local_notifications: ^14.0.0
   firebase_core: ^2.4.1 # Needed for Crashlytics below
   lottie: ^2.2.0
-  google_sign_in: ^5.4.4
+#  google_sign_in: ^5.4.4
   google_fonts: ^4.0.1
   firebase_auth: ^4.2.8
   camerawesome: ^1.2.1
 #  geocoder: ^0.2.1
   image_picker: ^0.8.6+2
   geocoding: ^2.1.0
+  facebook_app_events: ^0.18.3
 #  cached_video_player: ^2.0.4
 #  new
   flutter_rating_bar: ^4.0.1
@@ -69,15 +69,16 @@ dependencies:
   pdf_viewer_plugin: ^2.0.1
   sms_autofill: ^2.2.0
   image_cropper: ^3.0.2
-  internet_connection_checker: ^1.0.0+1
-  package_info_plus: ^1.3.0
+#  internet_connection_checker: ^1.0.0+1
+#  package_info_plus: ^1.3.0
   firebase_database: ^10.1.0
   flutter_contacts: ^1.1.6
   custom_clippers: ^2.0.0
   photo_manager: ^2.5.0
-  the_apple_sign_in: ^1.1.1
+#  the_apple_sign_in: ^1.1.1
+  app_settings: ^4.2.0
 
-dependency_overrides:
+#dependency_overrides:
 #  razorpay_flutter: ^1.3.4
 camera_android:
   git:
@@ -102,6 +103,8 @@ flutter:
   # To add assets to your application, add an assets section, like this:
   assets:
     - assets/images/appicon.png
+    - assets/images/termsbanner2.png
+    - assets/images/ssback.png
     - assets/images/applesignin.png
     - assets/images/facebookbtn.png
     - assets/images/googlebtn.png
@@ -136,6 +139,8 @@ flutter:
     - assets/lottie/login.json
     - assets/lottie/profile.json
     - assets/lottie/welcome.json
+    - assets/lottie/accept.json
+    - assets/lottie/decline.json
     - assets/lottie/bell.json
     - assets/lottie/support.json
     - assets/lottie/interview.json

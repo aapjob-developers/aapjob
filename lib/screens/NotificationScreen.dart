@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 import 'package:Aap_job/providers/auth_provider.dart';
 import 'package:Aap_job/providers/notification_provider.dart';
 import 'package:Aap_job/screens/basewidget/no_internet_screen.dart';
@@ -31,7 +32,7 @@ class NotificationScreen2 extends StatelessWidget {
       WillPopScope(
         onWillPop: ()async{
           if(Provider.of<AuthProvider>(context, listen: false).getacctype()=="hr")
-            Navigator.pushReplacement( context,  MaterialPageRoute(builder: (context) => SplashScreen()),);
+            Navigator.pushAndRemoveUntil( context,  MaterialPageRoute(builder: (context) => HrHomePage()),(route) => false);
         return false;
           },
         child:
@@ -54,6 +55,7 @@ class NotificationScreen2 extends StatelessWidget {
                   itemCount: Provider.of<NotificationProvider>(context).notificationList.length,
                   padding: EdgeInsets.symmetric(vertical: Dimensions.PADDING_SIZE_SMALL),
                   itemBuilder: (context, index) {
+                    log(AppConstants.BASE_URL+notification.notificationList[index].image);
                     return InkWell(
                       onTap: () => showDialog(context: context, builder: (context) => NotificationDialog(notificationModel: notification.notificationList[index])),
                       child: Container(
@@ -61,7 +63,7 @@ class NotificationScreen2 extends StatelessWidget {
                         decoration: BoxDecoration(color: Colors.white,boxShadow: [BoxShadow(color: Colors.grey.withOpacity(0.3), spreadRadius: 1, blurRadius: 5)],),
                         child: ListTile(
                           leading:
-                          notification.notificationList[index].image!=null?
+                          notification.notificationList[index].image!=""?
                           ClipOval(child: FadeInImage.assetNetwork(
                             placeholder: 'assets/images/appicon.png',
                             image: AppConstants.BASE_URL+notification.notificationList[index].image,

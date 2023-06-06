@@ -1,3 +1,5 @@
+import 'package:Aap_job/screens/myloginscreen.dart';
+import 'package:Aap_job/screens/splashscreen.dart';
 import 'package:Aap_job/utill/authentification.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/cupertino.dart';
@@ -8,13 +10,13 @@ import 'package:Aap_job/screens/loginscreen.dart';
 import 'package:Aap_job/screens/mainloginScreen.dart';
 import 'package:Aap_job/utill/colors.dart';
 import 'package:Aap_job/utill/dimensions.dart';
-import 'package:google_sign_in/google_sign_in.dart';
+// import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
 
 class SignOutConfirmationDialog extends StatelessWidget {
-  Future<void> signOut() async {
-    await Authentification().signOut();
-  }
+  // Future<void> signOut() async {
+  //   await Authentification().signOut();
+  // }
   //  getsubscribedTopics(String query) async {
   //   final url = Uri.parse(AppConstants.BASE_URL+ AppConstants.JOB_TITLE_URI);
   //   final response = await http.get(url);
@@ -54,8 +56,8 @@ class SignOutConfirmationDialog extends StatelessWidget {
                 FirebaseMessaging.instance.deleteToken();
                 Navigator.pop(context);
                 Provider.of<AuthProvider>(context,listen: false).clearSharedData();
-                signOut();
-                Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (context) => MainloginScreen()), (route) => false);
+               // signOut();
+                Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (context) => SplashScreen()), (route) => false);
               });
             },
             child: Container(

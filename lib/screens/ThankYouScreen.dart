@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
-import 'package:google_sign_in/google_sign_in.dart';
+// import 'package:google_sign_in/google_sign_in.dart';
 import 'package:Aap_job/data/respository/auth_repo.dart';
 import 'package:Aap_job/providers/auth_provider.dart';
 import 'package:Aap_job/screens/HrPlanSelect.dart';

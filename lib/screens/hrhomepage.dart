@@ -18,11 +18,8 @@ import 'package:get/get.dart';
 
 class HrHomePage extends StatelessWidget {
   final HrDashboardController dashboard = Get.put(HrDashboardController());
-  // final NotificationListingController noti=Get.put(NotificationListingController());
   @override
   Widget build(BuildContext context) {
-    print("Pack version ${Provider.of<ConfigProvider>(context, listen: false).packversion}");
-    print("app version ${Provider.of<ConfigProvider>(context, listen: false).getAppVersion()}");
     dashboard.version.value=Provider.of<ConfigProvider>(context, listen: false).packversion!.substring(0,2).toString()!=Provider.of<ConfigProvider>(context, listen: false).getAppVersion();
     return
       Stack(

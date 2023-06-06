@@ -55,10 +55,6 @@
     <string>Allow Aapjob to access your contacts so that you can easily find your friends on aapjob.</string>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
-		<key>NSLocationWhenInUseUsageDescription</key>
-    	<string>Need this for automatically detect city and location of user when user press user my loacation button</string>
-        <key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-        <string>Need this for automatically detect city and location of user when user press user my loacation button while searching for desired results</string>
 <key>FUMaximumConnectionsPerHost</key>
 <integer>3</integer>
 <key>FUMaximumUploadOperation</key>

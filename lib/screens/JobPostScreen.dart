@@ -9,7 +9,6 @@ import 'package:Aap_job/widgets/show_location_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:Aap_job/models/CitiesModel.dart';
-import 'package:Aap_job/models/JobCategoryModel.dart';
 import 'package:Aap_job/models/JobTitleModel.dart';
 import 'package:Aap_job/models/LocationModel.dart';
 import 'package:Aap_job/models/common_functions.dart';
@@ -25,6 +24,7 @@ import 'package:Aap_job/utill/colors.dart';
 import 'package:Aap_job/utill/dimensions.dart';
 import 'package:Aap_job/view/basewidget/animated_custom_dialog.dart';
 import 'package:Aap_job/view/basewidget/textfield/custom_textfield.dart';
+import 'package:flutter/services.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -37,6 +37,9 @@ import 'package:dio/dio.dart';
 import 'package:Aap_job/utill/app_constants.dart';
 import 'package:google_language_fonts/google_language_fonts.dart';
 
+import '../models/categorymm.dart';
+import '../providers/cities_provider.dart';
+import '../providers/jobselect_category_provider.dart';
 import 'widget/JobCategorySelectionScreen.dart';
 
 class JobPostScreen extends StatefulWidget {
@@ -54,7 +57,16 @@ class _JobPostScreenState extends State<JobPostScreen> {
   String jobtitle="",JobCategory="",jobtype="",joblocation="",jobcity="",edu="",openingssaved="",Jobcatid="",Jobcityid="";
   Future<void> initializePreference() async{
     this.sharedPreferences = await SharedPreferences.getInstance();
-    await Provider.of<JobtitleProvider>(context, listen: false).getJobTitleModelList(false, context);
+    setState(() {
+      duplicateItems.addAll(Provider
+          .of<CitiesProvider>(context, listen: false)
+          .cityModelList);
+      duplicateJobTitle.addAll(Provider
+          .of<JobtitleProvider>(context, listen: false)
+          .jobtitleList);
+      duplicateJobCategory.addAll(Provider.of<JobServiceCategoryProvider>(context, listen: false).jobcategoryList);
+    });
+    //await Provider.of<JobtitleProvider>(context, listen: false).getJobTitleModelList(false, context);
   }
   final _formKey = GlobalKey<FormState>();
   String address="n";
@@ -112,8 +124,8 @@ class _JobPostScreenState extends State<JobPostScreen> {
         }
         duplicateJobTitle= Provider.of<JobtitleProvider>(context, listen: false).jobtitleList;
         //getJobTitles();
-        getJobCategory();
-        getcities();
+       // getJobCategory();
+       // getcities();
       });
     });
 
@@ -136,7 +148,10 @@ class _JobPostScreenState extends State<JobPostScreen> {
   var city = "";
 
   _getLocation() async {
-    await _getCurrentPosition();
+    final coordinate = await SharedManager.shared.getLocationCoordinate();
+    this.latitude = coordinate.latitude;
+    this.longitude = coordinate.longitude;
+    _getAddressFromCurrentLocation(await SharedManager.shared.getLocationCoordinate());
   }
 
   String? _currentAddress;
@@ -187,7 +202,6 @@ class _JobPostScreenState extends State<JobPostScreen> {
 
   _getAddressFromCurrentLocation(LatLng coordinate) async {
    // var coordinate = await SharedManager.shared.getLocationCoordinate();
-    
         Navigator.pop(context);
     print("Stored Location:$coordinate");
     var addresses=await placemarkFromCoordinates(coordinate.latitude, coordinate.longitude);
@@ -208,18 +222,13 @@ class _JobPostScreenState extends State<JobPostScreen> {
     {
       this.addressline_2 = first.postalCode!;
     }
-    setState(() {
-      print("Final Address:---->$first");
-    });
     // ;
     String cityname="Delhi";
     if(first.subAdministrativeArea!=null) {
-
       String q=first.subAdministrativeArea!;
       if(q.contains("Division"))
         q=q.toString().trim().substring(0,q.toString().trim().length - 8);
       cityname=q.toString().trim();
-
     } else if(first.locality!=null)
     {
       cityname= first.locality!;
@@ -302,53 +311,53 @@ class _JobPostScreenState extends State<JobPostScreen> {
   String jobcatid="0";
   TextEditingController _jobcategoryController = TextEditingController();
 
-  List<JobCategoryModel> duplicateJobCategory = <JobCategoryModel>[];
-
-  getJobCategory() async {
-    duplicateJobCategory.clear();
-    try {
-      Response response = await _dio.get(_baseUrl + AppConstants.CATEGORY_URI);
-      apidatacat = response.data;
-      print('JobCategory : ${apidatacat}');
-      List<dynamic> data=json.decode(apidatacat);
-      if(data.toString()=="[]")
-      {
-        duplicateJobCategory=[];
-        setState(() {
-          _hasCategories = false;
-        });
-      }
-      else
-      {
-        data.forEach((jobcat) =>
-            duplicateJobCategory.add(JobCategoryModel.fromJson(jobcat)));
-        setState(() {
-          _hasCategories=true;
-        });
-      }
-      print('JobCat List: ${duplicateJobCategory}');
-
-    } on DioError catch (e) {
-      // The request was made and the server responded with a status code
-      // that falls out of the range of 2xx and is also not 304.
-      if (e.response != null) {
-        print('Dio error!');
-        print('STATUS: ${e.response?.statusCode}');
-        print('DATA: ${e.response?.data}');
-        print('HEADERS: ${e.response?.headers}');
-      } else {
-        // Error due to setting up or sending the request
-        print('Error sending request!');
-        print(e.message);
-      }
-    }
-
-  }
+  List<CategoryModel> duplicateJobCategory = <CategoryModel>[];
+  //
+  // getJobCategory() async {
+  //   duplicateJobCategory.clear();
+  //   try {
+  //     Response response = await _dio.get(_baseUrl + AppConstants.CATEGORY_URI);
+  //     apidatacat = response.data;
+  //     print('JobCategory : ${apidatacat}');
+  //     List<dynamic> data=json.decode(apidatacat);
+  //     if(data.toString()=="[]")
+  //     {
+  //       duplicateJobCategory=[];
+  //       setState(() {
+  //         _hasCategories = false;
+  //       });
+  //     }
+  //     else
+  //     {
+  //       data.forEach((jobcat) =>
+  //           duplicateJobCategory.add(JobCategoryModel.fromJson(jobcat)));
+  //       setState(() {
+  //         _hasCategories=true;
+  //       });
+  //     }
+  //     print('JobCat List: ${duplicateJobCategory}');
+  //
+  //   } on DioError catch (e) {
+  //     // The request was made and the server responded with a status code
+  //     // that falls out of the range of 2xx and is also not 304.
+  //     if (e.response != null) {
+  //       print('Dio error!');
+  //       print('STATUS: ${e.response?.statusCode}');
+  //       print('DATA: ${e.response?.data}');
+  //       print('HEADERS: ${e.response?.headers}');
+  //     } else {
+  //       // Error due to setting up or sending the request
+  //       print('Error sending request!');
+  //       print(e.message);
+  //     }
+  //   }
+  //
+  // }
 
   _JobcategoryDisplaySelection(BuildContext context) async {
     _hasJobTitle = duplicateJobCategory.length >= 1;
     if(_hasJobTitle) {
-      final JobCategoryModel result = await Navigator.push(
+      final CategoryModel result = await Navigator.push(
         context,
         MaterialPageRoute(builder: (context) =>
             JobCategorySelectionScreen(
@@ -491,7 +500,7 @@ String Jobtype="";
     _hasData = duplicateItems.length > 1;
     final CityModel result = await Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => CitySelectionScreen(duplicate: duplicateItems,hasdata: _hasData,)),
+      MaterialPageRoute(builder: (context) => CitySelectionScreen()),
     );
 
     if (result !=null)
@@ -791,7 +800,8 @@ String Jobtype="";
                           child:
                            TextFormField(
                              focusNode: opeingnode,
-                             validator: (value) {
+                          inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9]'))],
+    validator: (value) {
                                if (value == null || value.isEmpty) {
                                  opeingnode.requestFocus();
                                  return 'Please Enter Total No. of Jobs Openings';
@@ -1004,6 +1014,7 @@ String Jobtype="";
                           //Checkbox
                         ),
   ////////////////////// Job city and Location
+                        Platform.isIOS ? Container():
                         Padding(
                           padding: const EdgeInsets.all(8.0),
                           child:

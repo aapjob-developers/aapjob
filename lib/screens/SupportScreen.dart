@@ -398,7 +398,7 @@ class _SupportScreenState extends State<SupportScreen> {
                                 children: <Widget>[
                                   GestureDetector(onTap: _hasCallSupport
                                       ? () => setState(() {
-                                    _launched = _makePhoneCall("+916296335173");
+                                    _launched = _makePhoneCall("+916293959595");
                                   })
                                       : null,
                                     child:
@@ -410,7 +410,7 @@ class _SupportScreenState extends State<SupportScreen> {
                                   ),
                                   GestureDetector(onTap:   _hasCallSupport
                                       ? () => setState(() {
-                                    openwhatsapp("6296335173");
+                                    openwhatsapp("6293959595");
                                   })
                                       : null,
                                     child:
@@ -422,7 +422,7 @@ class _SupportScreenState extends State<SupportScreen> {
                                   ),
                                   GestureDetector(onTap:                         _hasCallSupport
                                       ? () => setState(() {
-                                    opentelegram("6296335173");
+                                    opentelegram("6293959595");
                                   })
                                       : null,child:
                                   Lottie.asset(

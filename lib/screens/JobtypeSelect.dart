@@ -44,7 +44,7 @@ class _JobTypeSelectState extends State<JobTypeSelect> {
   // int _categorySelectedIndex=0;
 
   Future<void> _loadData(BuildContext context, bool reload,) async {
-    await Provider.of<JobServiceCategoryProvider>(context, listen: false).getCategoryList(reload, context);
+  //  await Provider.of<JobServiceCategoryProvider>(context, listen: false).getCategoryList(reload, context);
     if(Provider.of<JobServiceCategoryProvider>(context, listen: false).jobcategoryList.isNotEmpty){
       setState(() {
         categorylist.addAll(Provider.of<JobServiceCategoryProvider>(context, listen: false).jobcategoryList);
@@ -104,7 +104,7 @@ class _JobTypeSelectState extends State<JobTypeSelect> {
 
   _submit() async {
     String acctype="candidate";
-      await Provider.of<AuthProvider>(context, listen: false).checkaccount(acctype,Provider.of<AuthProvider>(context, listen: false).getEmail(), Provider.of<AuthProvider>(context, listen: false).getAccessToken(), route);
+      await Provider.of<AuthProvider>(context, listen: false).checkaccount(acctype,Provider.of<AuthProvider>(context, listen: false).getMobile(), Provider.of<AuthProvider>(context, listen: false).getAccessToken(), route);
   }
 
   route(bool isRoute, String route,String status, String errorMessage) async {
@@ -121,53 +121,8 @@ class _JobTypeSelectState extends State<JobTypeSelect> {
         _isLoading = false;
       });
     }
-
   }
 
-
-  //
-  // getJobCategories() async {
-  //   categorylist.clear();
-  //   try {
-  //     Response response = await _dio.get(_baseUrl + AppConstants.CATEGORIES_URI+"?userid="+Provider.of<AuthProvider>(context, listen: false).getUserid());
-  //     apidata = response.data;
-  //     print('Job categories : ${apidata}');
-  //     List<dynamic> data=json.decode(apidata);
-  //     if(data.toString()=="[]")
-  //     {
-  //       categorylist=[];
-  //       setState(() {
-  //         _hasJobCat = false;
-  //       });
-  //     }
-  //     else
-  //     {
-  //       data.forEach((cat) =>
-  //           categorylist.add(CategoryModel.fromJson(cat)));
-  //       data.forEach((cat) =>
-  //           items.add(CategoryModel.fromJson(cat)));
-  //       setState(() {
-  //         _hasJobCat=true;
-  //       });
-  //     }
-  //     print('Job Category List: ${categorylist}');
-  //
-  //   } on DioError catch (e) {
-  //     // The request was made and the server responded with a status code
-  //     // that falls out of the range of 2xx and is also not 304.
-  //     if (e.response != null) {
-  //       print('Dio error!');
-  //       print('STATUS: ${e.response?.statusCode}');
-  //       print('DATA: ${e.response?.data}');
-  //       print('HEADERS: ${e.response?.headers}');
-  //     } else {
-  //       // Error due to setting up or sending the request
-  //       print('Error sending request!');
-  //       print(e.message);
-  //     }
-  //   }
-  //
-  // }
 
   @override
   void initState() {
@@ -179,8 +134,6 @@ class _JobTypeSelectState extends State<JobTypeSelect> {
     this.sharedPreferences = await SharedPreferences.getInstance();
     await _loadData(context,false,);
   }
-
-
   Future<void> _savejobtype() async {
     final sharedPreferences = await SharedPreferences.getInstance();
     sharedPreferences!.setString("jobtypelist",json.encode(_selectedCategoryList));

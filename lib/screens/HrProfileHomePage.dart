@@ -165,7 +165,7 @@ class _HrProfileHomeScreenState extends State<HrProfileHomeScreen> {
                                         new Container(
                                             width: deviceSize.width*0.7-10,
                                             child:
-                                            Text(Provider.of<AuthProvider>(context, listen: false).getEmail() ,style: LatinFonts.lato(color:Colors.white,fontSize: deviceSize.width*0.04 ),)
+                                            Text(Provider.of<AuthProvider>(context, listen: false).getEmail()==""?"No Email Id":Provider.of<AuthProvider>(context, listen: false).getEmail(),style: LatinFonts.lato(color:Colors.white,fontSize: deviceSize.width*0.04 ),)
                                         ),
                                       ]
                                   ),

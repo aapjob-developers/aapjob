@@ -10,11 +10,14 @@ import 'package:Aap_job/screens/EditJobLoading.dart';
 import 'package:Aap_job/screens/JobAppliedCandidatesList.dart';
 import 'package:Aap_job/screens/LiveDataScreen.dart';
 import 'package:Aap_job/screens/NotificationScreen.dart';
+import 'package:Aap_job/screens/myloginscreen.dart';
 import 'package:Aap_job/screens/selectPlansScreen.dart';
+import 'package:Aap_job/screens/splashscreen.dart';
 import 'package:Aap_job/screens/widget/ChangeLocationScreen.dart';
 import 'package:Aap_job/screens/widget/PlanDetailPopup.dart';
 import 'package:Aap_job/screens/widget/VideoPopup.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:intl/intl.dart';
 import 'package:Aap_job/models/common_functions.dart';
 import 'package:Aap_job/screens/EditJobPostScreen.dart';
@@ -31,6 +34,9 @@ import 'package:Aap_job/utill/app_constants.dart';
 import 'package:google_language_fonts/google_language_fonts.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import '../models/CurrentPlanModel.dart';
+import '../providers/cities_provider.dart';
+import '../providers/jobselect_category_provider.dart';
+import '../providers/jobtitle_provider.dart';
 import 'HrSupportScreen.dart';
 
 class HrHomeScreen extends StatefulWidget {
@@ -58,8 +64,7 @@ class _HrHomeScreenState extends State<HrHomeScreen> {
 
   void _onRefresh() async{
     // monitor network fetch
-    await Future.delayed(Duration(milliseconds: 5000));
-  //  await Provider.of<HrJobProvider>(context, listen: false).initgetHrHomeJobsList(Provider.of<AuthProvider>(context, listen: false).getUserid(), context);
+    await Future.delayed(Duration(milliseconds: 1000));
     _loadData(context, false);
     _refreshController.refreshCompleted();
   }
@@ -79,9 +84,7 @@ class _HrHomeScreenState extends State<HrHomeScreen> {
   initState() {
     initializePreference().whenComplete((){
       setState(() {
-
         planname= sharedPreferences!.getString("HrplanName")?? "Starter";
-
         plantype= sharedPreferences!.getString("HrplanType")?? "r";
         if(plantype=="r")
           {
@@ -113,9 +116,20 @@ class _HrHomeScreenState extends State<HrHomeScreen> {
       print('Applied check : ${response.data}');
       if (response.statusCode == 200)
       {
-        setState(() {
-          sharedPreferences!.setString("profilestatus",response.data.toString());
-        });
+        if(response.data.toString()=="5")
+          {
+            Provider.of<AuthProvider>(context, listen: false).clearSharedData().then((condition) {
+              FirebaseMessaging.instance.deleteToken();
+              Provider.of<AuthProvider>(context,listen: false).clearSharedData();
+              Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (context) => SplashScreen()), (route) => false);
+            });
+          }
+        else
+          {
+            setState(() {
+              sharedPreferences!.setString("profilestatus",response.data.toString());
+            });
+          }
       }
       else {
         print('${response.statusCode} ${response.data}');
@@ -154,11 +168,6 @@ class _HrHomeScreenState extends State<HrHomeScreen> {
       Provider.of<HrJobProvider>(context, listen: false).initgetReasonList(context);
       checkapplied();
     });
-
-    // Provider.of<ProfileProvider>(context, listen: false).GetHrProfileStatus();
-    // await Provider.of<BannerProvider>(context, listen: false).getBannerList(reload, context);
-    // Provider.of<BannerProvider>(context, listen: false).getFooterBannerList(context);
-    // Provider.of<BannerProvider>(context, listen: false).getMainSectionBanner(context);
   }
 ///////////////////////////////////
 
@@ -938,7 +947,6 @@ Container(
                           setState(() {
                             _isLoading=false;
                           });
-
                           postajob();
                         //  checkapplied();
                           //}
@@ -1025,22 +1033,6 @@ class Topbar extends StatelessWidget {
                       Text(Provider.of<AuthProvider>(context, listen: false).getHrName(),style: LatinFonts.aBeeZee(fontSize:10,fontWeight: FontWeight.bold),),
                     ]),
               ),
-              // Container(
-              //   padding: EdgeInsets.all(5.0),
-              //   width: MediaQuery.of(context).size.width*0.20,
-              //   child:
-              //   Column(
-              //       mainAxisAlignment: MainAxisAlignment.center,
-              //       mainAxisSize: MainAxisSize.max,
-              //       crossAxisAlignment: CrossAxisAlignment.center,
-              //       children:[
-              //         new Image.asset(
-              //           'assets/images/map.png',
-              //           fit:BoxFit.contain,
-              //           width: MediaQuery.of(context).size.width*0.09,
-              //         ),
-              //       ]),
-              // ),
               Container(
                 padding: EdgeInsets.all(5.0),
                 width: MediaQuery.of(context).size.width*0.4,
@@ -1135,77 +1127,12 @@ class Topbar extends StatelessWidget {
                           );
                         }
                     ),
-                    // StreamBuilder<int>(
-                    //     initialData: Provider.of<NotificationProvider>(context, listen: false).hr_noti_count,
-                    //     stream: getnotificationcount(),
-                    //     builder: (context, snapshot) {
-                    //       return new Stack(
-                    //         children: <Widget>[
-                    //           GestureDetector(
-                    //             onTap: (){
-                    //               Navigator.push(context,  MaterialPageRoute(builder: (context)=>NotificationScreen2(Userid: Provider.of<AuthProvider>(context, listen: false).getUserid())));
-                    //             },
-                    //             child:
-                    //             Lottie.asset(
-                    //               'assets/lottie/notification_bell.json',
-                    //               height: MediaQuery.of(context).size.width*0.1,
-                    //               width: MediaQuery.of(context).size.width*0.1,
-                    //               animate: true,),
-                    //           ),
-                    //               snapshot.data == Provider.of<AuthProvider>(context, listen: false).getCurrentNotificationCount()
-                    //                   ?
-                    //               new Container() :
-                    //               new Positioned(
-                    //                 right: 5,
-                    //                 top: 5,
-                    //                 child: new Container(
-                    //                   padding: EdgeInsets.all(2),
-                    //                   decoration: new BoxDecoration(
-                    //                     color: Colors.red,
-                    //                     borderRadius: BorderRadius.circular(6),
-                    //                   ),
-                    //                   constraints: BoxConstraints(
-                    //                     minWidth: 10,
-                    //                     minHeight: 10,
-                    //                   ),
-                    //                   child: Text(
-                    //       (snapshot.data-Provider.of<AuthProvider>(context, listen: false).getCurrentNotificationCount()).toString(),
-                    //                     style: TextStyle(
-                    //                       color: Colors.white,
-                    //                       fontSize: 6,
-                    //                     ),
-                    //                     textAlign: TextAlign.center,
-                    //                   ),
-                    //                 ),
-                    //               )
-                    //         ],
-                    //       );
-                    //     }
-                    // ),
-                    // new Image.asset(
-                    //   'assets/images/map.png',
-                    //   fit:BoxFit.contain,
-                    //   width: MediaQuery.of(context).size.width*0.08,
-                    // ),
+
                   ],
                 ),
               ),
             ],
           ),
-          // Row(
-          //   mainAxisAlignment: MainAxisAlignment.start,
-          //   mainAxisSize: MainAxisSize.max,
-          //   crossAxisAlignment: CrossAxisAlignment.center,
-          //   children: [
-          //     Container(
-          //       padding: EdgeInsets.all(5.0),
-          //       width: MediaQuery.of(context).size.width*0.8,
-          //       child:
-          //       Text(getTranslated("WELCOME", context)+widget.Name,style: LatinFonts.aBeeZee(fontSize:14,fontWeight: FontWeight.bold),),
-          //     ),
-          //   ]
-          // ),
-
         ],
       ),
     );

@@ -9,6 +9,7 @@ import 'package:Aap_job/models/JobsModel.dart';
 import 'package:Aap_job/models/common_functions.dart';
 import 'package:Aap_job/providers/auth_provider.dart';
 import 'package:Aap_job/providers/content_provider.dart';
+import 'package:Aap_job/screens/EditEducationExp.dart';
 import 'package:Aap_job/screens/EditJobProfileDetails.dart';
 import 'package:Aap_job/screens/EditProfileImage.dart';
 import 'package:Aap_job/screens/EditProfileVideo.dart';
@@ -38,6 +39,7 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'EditJobExp.dart';
 import 'EditProfileDetails.dart';
 import 'EditProfileVideo.dart';
 import 'package:dio/dio.dart';
@@ -55,8 +57,6 @@ class ProfileHomeScreen extends StatefulWidget {
 class _ProfileHomeScreenState extends State<ProfileHomeScreen> {
   final HomePageController dashboard = HomePageController();
   SharedPreferences? sharedPreferences;
-  String Name="", jobcity="", joblocation="", company="", expyears="", eduvalue="",collegename="",degree="", route="";
-  bool myexp=false;
   final ImagePicker _picker = ImagePicker();
   String jobtitle="Fresher";
   String filename="",filenn="";
@@ -80,20 +80,6 @@ class _ProfileHomeScreenState extends State<ProfileHomeScreen> {
   initState() {
     initializePreference().whenComplete((){
       setState(() {
-        Name= sharedPreferences!.getString("name")?? "no Name";
-        jobcity= sharedPreferences!.getString("jobcity")?? "no Name";
-        joblocation= sharedPreferences!.getString("joblocation")?? "no Name";
-        _imageFile=sharedPreferences!.getString("profileImage")?? "no Name";
-        myexp=sharedPreferences!.getBool("myexp")?? false;
-        if(myexp) {
-          jobtitle = sharedPreferences!.getString("jobtitle") ?? "no";
-          company = sharedPreferences!.getString("companyname") ?? "no";
-          expyears = sharedPreferences!.getString("totalexp") ?? "no";
-        }
-        eduvalue=sharedPreferences!.getString("education") ?? "no";
-        degree=sharedPreferences!.getString("degree") ?? " ";
-        collegename=sharedPreferences!.getString("university") ?? " ";
-        route=sharedPreferences!.getString("route") ?? "Register";
         numberofshortlist= sharedPreferences!.getInt("numberofshortlist")?? 0;
         if(Provider.of<ProfileProvider>(context, listen: false).getResumeString()==""||Provider.of<ProfileProvider>(context, listen: false).getResumeString()==null||Provider.of<ProfileProvider>(context, listen: false).getResumeString()=="uploads/candidate_resume/docs/SampleResume.pdf")
         {
@@ -343,25 +329,7 @@ class _ProfileHomeScreenState extends State<ProfileHomeScreen> {
           child:
               Column(
                 children: [
-                  // new Row(
-                  //     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  //     mainAxisSize: MainAxisSize.max,
-                  //     crossAxisAlignment: CrossAxisAlignment.start,
-                  //     children: <Widget>[
-                  //       Text("Change Profile Videos",style: LatinFonts.roboto(color:Colors.white),),
-                  //       GestureDetector(
-                  //         onTap: (){
-                  //           Navigator.push(
-                  //               context,
-                  //               MaterialPageRoute(
-                  //                   builder: (builder) => EditProfileVideo(path: "", usertype:"candidate")));
-                  //         },
-                  //         child:
-                  //         Icon(Icons.mode_edit,size: 25,color: Colors.white,),
-                  //       ),
-                  //
-                  //     ]
-                  // ),
+
                   new Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       mainAxisSize: MainAxisSize.max,
@@ -461,7 +429,8 @@ class _ProfileHomeScreenState extends State<ProfileHomeScreen> {
                                     mainAxisSize: MainAxisSize.max,
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: <Widget>[
-                                      Text(Name,style: LatinFonts.aclonica(color:Colors.white,fontSize: MediaQuery.of(context).size.width*0.05 ),),
+                                      Text(Provider.of<AuthProvider>(context, listen: false).getName(),style: LatinFonts.aclonica(color:Colors.white,fontSize: MediaQuery.of(context).size.width*0.05 ),),
+                                     // Text(Name,style: LatinFonts.aclonica(color:Colors.white,fontSize: MediaQuery.of(context).size.width*0.05 ),),
                                       GestureDetector(
                                         onTap: (){
                                           Navigator.push(
@@ -480,19 +449,86 @@ class _ProfileHomeScreenState extends State<ProfileHomeScreen> {
                                     mainAxisSize: MainAxisSize.max,
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: <Widget>[
-                                      Icon(Icons.account_circle,size: MediaQuery.of(context).size.width*0.04,color: Colors.white,),
+                                      Icon(Icons.account_box_rounded,size: MediaQuery.of(context).size.width*0.04,color: Colors.white,),
                                       SizedBox(width: MediaQuery.of(context).size.width*0.02,),
                                       new Container(
-                                        width: deviceSize.width*0.7-10,
+                                        width: deviceSize.width*0.35-5,
                                         child:
-                                        myexp?
-                                        Text(jobtitle+" at "+company ,style: LatinFonts.lato(color:Colors.white,fontSize: MediaQuery.of(context).size.width*0.03 ),):
-                                        Text(jobtitle,style: LatinFonts.lato(color:Colors.white,fontSize: MediaQuery.of(context).size.width*0.03 ),),
-
+                                        Text("Userid:# ${Provider.of<AuthProvider>(context, listen: false).getUserid()}",style: LatinFonts.lato(color:Colors.white,fontSize: MediaQuery.of(context).size.width*0.03 ),maxLines: 2,),
                                       ),
                                     ]
                                 ),
-                                SizedBox(height: MediaQuery.of(context).size.width*0.02,),
+                                SizedBox(height: MediaQuery.of(context).size.width*0.01,),
+                                new Row(
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    mainAxisSize: MainAxisSize.max,
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: <Widget>[
+                                      Icon(Icons.email,size: MediaQuery.of(context).size.width*0.04,color: Colors.white,),
+                                      SizedBox(width: MediaQuery.of(context).size.width*0.02,),
+                                      new Container(
+                                        width: deviceSize.width*0.7,
+                                        child:
+                                        Text(Provider.of<AuthProvider>(context, listen: false).getEmail()==""?"No Email id ":Provider.of<AuthProvider>(context, listen: false).getEmail(),style: LatinFonts.lato(color:Colors.white,fontSize: MediaQuery.of(context).size.width*0.03 ),maxLines: 2,),
+                                      ),
+                                    ]
+                                ),
+                                SizedBox(height: MediaQuery.of(context).size.width*0.01,),
+                                new Row(
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    mainAxisSize: MainAxisSize.max,
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: <Widget>[
+                                      Icon(Icons.phone_android,size: MediaQuery.of(context).size.width*0.04,color: Colors.white,),
+                                      SizedBox(width: MediaQuery.of(context).size.width*0.02,),
+                                      new Container(
+                                        width: deviceSize.width*0.35-5,
+                                        child:
+                                        Text(Provider.of<AuthProvider>(context, listen: false).getMobile(),style: LatinFonts.lato(color:Colors.white,fontSize: MediaQuery.of(context).size.width*0.03 ),maxLines: 2,),
+                                      ),
+                                    ]
+                                ),
+                                SizedBox(height: MediaQuery.of(context).size.width*0.01,),
+                                Container(
+                                  //  padding: EdgeInsets.symmetric(vertical: MediaQuery.of(context).size.width*0.02),
+                                  child: Divider(color: Colors.white,thickness: 2,),
+                                ),
+                                SizedBox(height: MediaQuery.of(context).size.width*0.01,),
+                                new Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    mainAxisSize: MainAxisSize.max,
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: <Widget>[
+                                      Column(children: [
+                                        new Row(
+                                            mainAxisAlignment: MainAxisAlignment.start,
+                                            mainAxisSize: MainAxisSize.max,
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: <Widget>[
+                                              Icon(Icons.account_circle,size: MediaQuery.of(context).size.width*0.04,color: Colors.white,),
+                                              SizedBox(width: MediaQuery.of(context).size.width*0.02,),
+                                              new Container(
+                                                width: deviceSize.width*0.7-10,
+                                                child:
+                                                Provider.of<AuthProvider>(context, listen: false).getmyexp()?
+                                                Text(Provider.of<AuthProvider>(context, listen: false).getJobtitle()+" at "+Provider.of<AuthProvider>(context, listen: false).getCompany() ,style: LatinFonts.lato(color:Colors.white,fontSize: MediaQuery.of(context).size.width*0.03 ),):
+                                                Text(Provider.of<AuthProvider>(context, listen: false).getJobtitle(),style: LatinFonts.lato(color:Colors.white,fontSize: MediaQuery.of(context).size.width*0.03 ),),
+
+                                              ),
+                                            ]
+                                        ),
+                                      ],),
+                                      GestureDetector(
+                                        onTap: (){
+                                          Navigator.push(context,  MaterialPageRoute(builder: (context)=> EditJobExp()));
+                                        },
+                                        child:
+                                        Icon(Icons.mode_edit,size: MediaQuery.of(context).size.width*0.05,color: Colors.white,),
+                                      ),
+                                    ]
+                                ),
+                                SizedBox(height: MediaQuery.of(context).size.width*0.01,),
+                                Provider.of<AuthProvider>(context, listen: false).getmyexp()?
                                 new Row(
                                     mainAxisAlignment: MainAxisAlignment.start,
                                     mainAxisSize: MainAxisSize.max,
@@ -508,15 +544,81 @@ class _ProfileHomeScreenState extends State<ProfileHomeScreen> {
                                           mainAxisSize: MainAxisSize.max,
                                           crossAxisAlignment: CrossAxisAlignment.start,
                                           children: [
-                                            Text(eduvalue,style: LatinFonts.lato(color:Colors.white,fontSize: MediaQuery.of(context).size.width*0.03,fontWeight: FontWeight.w600 ),),
-                                            myexp? Text("  |  "+ expyears +" Years experience",style: LatinFonts.lato(color:Colors.white,fontSize: MediaQuery.of(context).size.width*0.03 ),):Container(),
+                                            Text(Provider.of<AuthProvider>(context, listen: false).gettotalexp() +" experience",style: LatinFonts.lato(color:Colors.white,fontSize: MediaQuery.of(context).size.width*0.03 ),)
                                           ],
                                         ),
                                       ),
                                     ]
+                                ):Container(),
+                                SizedBox(height: MediaQuery.of(context).size.width*0.01,),
+                                Provider.of<AuthProvider>(context, listen: false).getmyexp()?
+                                new Row(
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    mainAxisSize: MainAxisSize.max,
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: <Widget>[
+                                      Icon(Icons.monetization_on,size: MediaQuery.of(context).size.width*0.04, color: Colors.white,),
+                                      SizedBox(width: MediaQuery.of(context).size.width*0.02,),
+                                      new Container(
+                                        width: deviceSize.width*0.7-10,
+                                        child:
+                                        Row(
+                                          mainAxisAlignment: MainAxisAlignment.start,
+                                          mainAxisSize: MainAxisSize.max,
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Text(Provider.of<AuthProvider>(context, listen: false).getCurrentSalary() +" Per Month",style: LatinFonts.lato(color:Colors.white,fontSize: MediaQuery.of(context).size.width*0.03 ),)
+                                          ],
+                                        ),
+                                      ),
+                                    ]
+                                ):Container(),
+                                SizedBox(height: MediaQuery.of(context).size.width*0.01,),
+                                Container(
+                                  //  padding: EdgeInsets.symmetric(vertical: MediaQuery.of(context).size.width*0.02),
+                                  child: Divider(color: Colors.white,thickness: 2,),
                                 ),
-                                SizedBox(height: MediaQuery.of(context).size.width*0.02,),
-                                degree!=" "?new Row(
+                                SizedBox(height: MediaQuery.of(context).size.width*0.01,),
+                                new Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    mainAxisSize: MainAxisSize.max,
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: <Widget>[
+                                      Column(children: [
+                                        new Row(
+                                            mainAxisAlignment: MainAxisAlignment.start,
+                                            mainAxisSize: MainAxisSize.max,
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: <Widget>[
+                                              Icon(Icons.school,size: MediaQuery.of(context).size.width*0.04, color: Colors.white,),
+                                              SizedBox(width: MediaQuery.of(context).size.width*0.02,),
+                                              new Container(
+                                                width: deviceSize.width*0.7-10,
+                                                child:
+                                                Row(
+                                                  mainAxisAlignment: MainAxisAlignment.start,
+                                                  mainAxisSize: MainAxisSize.max,
+                                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                                  children: [
+                                                    Text(Provider.of<AuthProvider>(context, listen: false).getEducation(),style: LatinFonts.lato(color:Colors.white,fontSize: MediaQuery.of(context).size.width*0.03,fontWeight: FontWeight.w600 ),),
+                                                  ],
+                                                ),
+                                              ),
+                                            ]
+                                        ),
+                                      ],),
+                                      GestureDetector(
+                                        onTap: (){
+                                          Navigator.push(context,  MaterialPageRoute(builder: (context)=> EditEducationExp()));
+                                        },
+                                        child:
+                                        Icon(Icons.mode_edit,size: MediaQuery.of(context).size.width*0.05,color: Colors.white,),
+                                      ),
+                                    ]
+                                ),
+                                SizedBox(height: MediaQuery.of(context).size.width*0.01,),
+                                Provider.of<AuthProvider>(context, listen: false).getDegree()!=" "?
+                                new Row(
                                     mainAxisAlignment: MainAxisAlignment.start,
                                     mainAxisSize: MainAxisSize.max,
                                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -526,10 +628,10 @@ class _ProfileHomeScreenState extends State<ProfileHomeScreen> {
                                       new Container(
                                         width: deviceSize.width*0.6,
                                         child:
-                                        Text(degree+" from "+collegename ,style: LatinFonts.lato(color:Colors.white,fontSize: MediaQuery.of(context).size.width*0.03 ),),
+                                        Text(Provider.of<AuthProvider>(context, listen: false).getDegree()+" from "+Provider.of<AuthProvider>(context, listen: false).getuniversity() ,style: LatinFonts.lato(color:Colors.white,fontSize: MediaQuery.of(context).size.width*0.03 ),),
                                       ),
                                     ]
-                                ):Container(),
+                                ) :Container(),
                                 Container(
                                 //  padding: EdgeInsets.symmetric(vertical: MediaQuery.of(context).size.width*0.02),
                                   child: Divider(color: Colors.white,thickness: 2,),
@@ -555,8 +657,8 @@ class _ProfileHomeScreenState extends State<ProfileHomeScreen> {
                                                 mainAxisSize: MainAxisSize.max,
                                                 crossAxisAlignment: CrossAxisAlignment.start,
                                                 children: [
-                                                  Text(joblocation,style: LatinFonts.lato(color:Colors.white,fontSize: MediaQuery.of(context).size.width*0.02 ),),
-                                                  Text(jobcity,style: LatinFonts.lato(color:Colors.white,fontSize: MediaQuery.of(context).size.width*0.03, ),)
+                                                  Text(Provider.of<AuthProvider>(context, listen: false).getJobLocation(),style: LatinFonts.lato(color:Colors.white,fontSize: MediaQuery.of(context).size.width*0.02 ),),
+                                                  Text(Provider.of<AuthProvider>(context, listen: false).getJobtitle(),style: LatinFonts.lato(color:Colors.white,fontSize: MediaQuery.of(context).size.width*0.03, ),)
                                                 ],
                                               ),
                                             ),

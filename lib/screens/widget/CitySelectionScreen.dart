@@ -1,8 +1,10 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:Aap_job/helper/LocationManager.dart';
 import 'package:Aap_job/helper/SharedManager.dart';
 import 'package:Aap_job/models/common_functions.dart';
+import 'package:Aap_job/providers/cities_provider.dart';
 import 'package:Aap_job/widgets/show_loading_dialog.dart';
 import 'package:Aap_job/widgets/show_location_dialog.dart';
 import 'package:flutter/material.dart';
@@ -18,21 +20,17 @@ import 'package:geolocator/geolocator.dart';
 import 'package:google_language_fonts/google_language_fonts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:lottie/lottie.dart';
+import 'package:provider/provider.dart';
 
 
 class CitySelectionScreen extends StatefulWidget {
-  CitySelectionScreen({Key? key,required this.duplicate, required this.hasdata}) : super(key: key);
-  List<CityModel> duplicate ;
-  bool hasdata;
+  CitySelectionScreen({Key? key}) : super(key: key);
   @override
   _CitySelectionScreenState createState() => new _CitySelectionScreenState();
 }
 
 class _CitySelectionScreenState extends State<CitySelectionScreen> {
-  // final Dio _dio = Dio();
-  // final _baseUrl = AppConstants.BASE_URL;
-  // var apidata;
- bool _hasData=false;
+
  double latitude = 0;
  double longitude = 0;
  var addressline_2 = "";
@@ -45,8 +43,7 @@ class _CitySelectionScreenState extends State<CitySelectionScreen> {
 
   @override
   void initState() {
-    duplicateItems=widget.duplicate;
-    _hasData=widget.hasdata;
+    duplicateItems.addAll(Provider.of<CitiesProvider>(context, listen: false).cityModelList);
     items.addAll(duplicateItems);
     //_getLocation();
      //LocationManager.shared.getCurrentLocation();
@@ -226,6 +223,7 @@ class _CitySelectionScreenState extends State<CitySelectionScreen> {
                         borderRadius: BorderRadius.all(Radius.circular(25.0)))),
               ),
             ),
+            Platform.isIOS ? Container():
             Padding(
               padding: const EdgeInsets.all(8.0),
               child:
@@ -266,7 +264,6 @@ class _CitySelectionScreenState extends State<CitySelectionScreen> {
                 ),
                   ),
             ),
-            _hasData?
             Expanded(
               child: ListView.separated(
                 shrinkWrap: true,
@@ -283,8 +280,7 @@ class _CitySelectionScreenState extends State<CitySelectionScreen> {
                   );
                 },
               ),
-            ):
-            CircularProgressIndicator(),
+            )
           ],
         ),
       ),

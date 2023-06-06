@@ -21,7 +21,7 @@ class JobskillModel {
 
   factory JobskillModel.fromJson(Map<String, dynamic> json) => JobskillModel(
     id: json["id"],
-    jobCatId: json["job_cat_id"],
+    jobCatId: json["job_title_id"]==null?json["job_cat_id"]:json["job_title_id"],
     name: json["name"],
   );
 

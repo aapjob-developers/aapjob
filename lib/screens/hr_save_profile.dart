@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:Aap_job/localization/language_constrants.dart';
+import 'package:Aap_job/main.dart';
 import 'package:Aap_job/providers/auth_provider.dart';
 import 'package:Aap_job/providers/content_provider.dart';
 import 'package:Aap_job/screens/HrVerificationScreen.dart';
@@ -41,6 +42,8 @@ import 'package:google_language_fonts/google_language_fonts.dart';
 import '../models/ContentModel.dart';
 import 'package:lottie/lottie.dart';
 import 'package:http/http.dart' as http;
+
+import '../providers/cities_provider.dart';
 
 class HrSaveProfile extends StatefulWidget {
   HrSaveProfile({Key? key, required this.path}) : super(key: key);
@@ -91,41 +94,41 @@ class _HrSaveProfileState extends State<HrSaveProfile> {
 
   List<CityModel> duplicateItems = <CityModel>[];
   List<LocationModel> duplicatelocation = <LocationModel>[];
-
-  getcities() async {
-    try {
-      Response response = await _dio.get(_baseUrl + AppConstants.CITIES_URI);
-      apidata = response.data;
-      print('City List: ${apidata}');
-      List<dynamic> data=json.decode(apidata);
-
-      if(data.toString()=="[]")
-      {
-        duplicateItems=[];
-      }
-      else
-      {
-        data.forEach((city) =>
-            duplicateItems.add(CityModel.fromJson(city)));
-      }
-      print('City List: ${duplicateItems}');
-
-    } on DioError catch (e) {
-      // The request was made and the server responded with a status code
-      // that falls out of the range of 2xx and is also not 304.
-      if (e.response != null) {
-        print('Dio error!');
-        print('STATUS: ${e.response?.statusCode}');
-        print('DATA: ${e.response?.data}');
-        print('HEADERS: ${e.response?.headers}');
-      } else {
-        // Error due to setting up or sending the request
-        print('Error sending request!');
-        print(e.message);
-      }
-    }
-
-  }
+  //
+  // getcities() async {
+  //   try {
+  //     Response response = await _dio.get(_baseUrl + AppConstants.CITIES_URI);
+  //     apidata = response.data;
+  //     print('City List: ${apidata}');
+  //     List<dynamic> data=json.decode(apidata);
+  //
+  //     if(data.toString()=="[]")
+  //     {
+  //       duplicateItems=[];
+  //     }
+  //     else
+  //     {
+  //       data.forEach((city) =>
+  //           duplicateItems.add(CityModel.fromJson(city)));
+  //     }
+  //     print('City List: ${duplicateItems}');
+  //
+  //   } on DioError catch (e) {
+  //     // The request was made and the server responded with a status code
+  //     // that falls out of the range of 2xx and is also not 304.
+  //     if (e.response != null) {
+  //       print('Dio error!');
+  //       print('STATUS: ${e.response?.statusCode}');
+  //       print('DATA: ${e.response?.data}');
+  //       print('HEADERS: ${e.response?.headers}');
+  //     } else {
+  //       // Error due to setting up or sending the request
+  //       print('Error sending request!');
+  //       print(e.message);
+  //     }
+  //   }
+  //
+  // }
 
   getlocation() async {
     duplicatelocation.clear();
@@ -330,7 +333,7 @@ class _HrSaveProfileState extends State<HrSaveProfile> {
           _profileuploaded=true;
         }
 
-        getcities();
+        //getcities();
         button=Colors.amber;
         //LocationManager.shared.getCurrentLocation();
         if(pathe!="") {
@@ -349,8 +352,10 @@ class _HrSaveProfileState extends State<HrSaveProfile> {
 
   Future<void> initializePreference() async{
     this.sharedPreferences = await SharedPreferences.getInstance();
+    await  Provider.of<ContentProvider>(context, listen: false).getContent(context);
     setState(() {
       pathe=widget.path;
+      duplicateItems.addAll(Provider.of<CitiesProvider>(context, listen: false).cityModelList);
     });
 
   }
@@ -437,7 +442,7 @@ class _HrSaveProfileState extends State<HrSaveProfile> {
       'HrName':HrName,
       'HrCompanyName':HrCompanyName,
       'HrCity':HrCity,
-      'HrLocality':HrLocality
+      'HrLocality':HrLocality,
     });
     request.fields.addAll(_fields);
     http.StreamedResponse response = await request.send();
@@ -517,7 +522,7 @@ class _HrSaveProfileState extends State<HrSaveProfile> {
     _hasData = duplicateItems.length > 1;
     final CityModel result = await Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => CitySelectionScreen(duplicate: duplicateItems,hasdata: _hasData,)),
+      MaterialPageRoute(builder: (context) => CitySelectionScreen()),
     );
 
     if (result !=null)
@@ -617,7 +622,7 @@ class _HrSaveProfileState extends State<HrSaveProfile> {
               SizedBox(width: 10,),
               Container(
                 width: MediaQuery.of(context).size.width*0.6,
-                child: Text(Provider.of<AuthProvider>(context, listen: false).getEmail(),maxLines:2,style: TextStyle(color: Colors.white,fontSize: 12,fontWeight: FontWeight.bold),
+                child: Text(Provider.of<AuthProvider>(context, listen: false).getMobile(),maxLines:2,style: TextStyle(color: Colors.white,fontSize: 12,fontWeight: FontWeight.bold),
 
                 ),
               ),
@@ -700,6 +705,7 @@ class _HrSaveProfileState extends State<HrSaveProfile> {
                                 child: CustomTextField(
                                   hintText: "Full Name",
                                   textInputType: TextInputType.text,
+                                  isName: true,
                                   isOtp: false,
                                   maxLine: 1,
                                   capitalization: TextCapitalization.words,
@@ -733,6 +739,7 @@ class _HrSaveProfileState extends State<HrSaveProfile> {
                       ),
                       padding: const EdgeInsets.all(5.0),
                     ),
+                    Platform.isIOS ? Container():
                     Padding(
                       padding: const EdgeInsets.all(8.0),
                       child:
@@ -911,151 +918,157 @@ class _HrSaveProfileState extends State<HrSaveProfile> {
                       ),
                       padding: const EdgeInsets.all(5.0),
                     ),
-                    new Padding(
-                      child:
-                      new Row(
+                    Visibility(
+                      visible: false,
+                      child: new Padding(
+                        child:
+                        new Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            mainAxisSize: MainAxisSize.max,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: <Widget>[
+                              Flexible(child:Text(getTranslated("UPLOAD_VIDEO_RESUME", context)!,style: TextStyle(color: Colors.white,fontSize: 14,fontWeight: FontWeight.bold),),
+                              ),
+                            ]
+                        ),
+                        padding: const EdgeInsets.all(5.0),
+                      ),
+                    ),
+                    Visibility(
+                      visible: false,
+                      child: new Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           mainAxisSize: MainAxisSize.max,
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: <Widget>[
-                            Flexible(child:Text(getTranslated("UPLOAD_VIDEO_RESUME", context)!,style: TextStyle(color: Colors.white,fontSize: 14,fontWeight: FontWeight.bold),),
-                            ),
-                          ]
-                      ),
-                      padding: const EdgeInsets.all(5.0),
-                    ),
-                    new Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        mainAxisSize: MainAxisSize.max,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: <Widget>[
-                          pathe==""?
-                          GestureDetector(
-                            onTap: () {
-                              //  _showSimpleDialog();
-                              showModalBottomSheet(
-                                context: context,
-                                builder: ((builder) => bottomSheet2()),
-                              );
-                            },
-                            child: Container(
-                                decoration: new BoxDecoration(color: Color.fromARGB(
-                                    255, 204, 204, 204)),
-                                width: deviceSize.width*0.8,
-                                height: deviceSize.width*0.8,
-                                padding: EdgeInsets.all(20.0),
-                                child:
-                                Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    mainAxisSize: MainAxisSize.max,
-                                    crossAxisAlignment: CrossAxisAlignment.center,
-                                    children: <Widget>[
-                                      Icon(Icons.upload,size: 50,color: Colors.white,),
-                                      Text(getTranslated("CLICK_TO_UPLOAD_VIDEO", context)!),
-                                    ]
-                                )
-                            ),
-                          ):
-                          Stack(
-                            children: [
-                              Container(
-                                width: deviceSize.width*0.7,
-                                height: deviceSize.width*0.7,
-                                child: _controller!.value.isInitialized
-                                    ? AspectRatio(
-                                  aspectRatio: _controller!.value.aspectRatio,
-                                  child: VideoPlayer(_controller!),
-                                )
-                                    : Container(),
+                            pathe==""?
+                            GestureDetector(
+                              onTap: () {
+                                //  _showSimpleDialog();
+                                showModalBottomSheet(
+                                  context: context,
+                                  builder: ((builder) => bottomSheet2()),
+                                );
+                              },
+                              child: Container(
+                                  decoration: new BoxDecoration(color: Color.fromARGB(
+                                      255, 204, 204, 204)),
+                                  width: deviceSize.width*0.8,
+                                  height: deviceSize.width*0.8,
+                                  padding: EdgeInsets.all(20.0),
+                                  child:
+                                  Column(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      mainAxisSize: MainAxisSize.max,
+                                      crossAxisAlignment: CrossAxisAlignment.center,
+                                      children: <Widget>[
+                                        Icon(Icons.upload,size: 50,color: Colors.white,),
+                                        Text(getTranslated("CLICK_TO_UPLOAD_VIDEO", context)!),
+                                      ]
+                                  )
                               ),
-                              Align(
-                                alignment: Alignment.center,
-                                child: InkWell(
-                                  onTap: () {
-                                    setState(() {
-                                      _controller!.value.isPlaying
-                                          ? _controller!.pause()
-                                          : _controller!.play();
-                                    });
-                                  },
-                                  child: CircleAvatar(
-                                    radius: 33,
-                                    backgroundColor: Colors.black38,
-                                    child: Icon(
-                                      _controller!.value.isPlaying
-                                          ? Icons.pause
-                                          : Icons.play_arrow,
-                                      color: Colors.white,
-                                      size: 50,
+                            ):
+                            Stack(
+                              children: [
+                                Container(
+                                  width: deviceSize.width*0.7,
+                                  height: deviceSize.width*0.7,
+                                  child: _controller!.value.isInitialized
+                                      ? AspectRatio(
+                                    aspectRatio: _controller!.value.aspectRatio,
+                                    child: VideoPlayer(_controller!),
+                                  )
+                                      : Container(),
+                                ),
+                                Align(
+                                  alignment: Alignment.center,
+                                  child: InkWell(
+                                    onTap: () {
+                                      setState(() {
+                                        _controller!.value.isPlaying
+                                            ? _controller!.pause()
+                                            : _controller!.play();
+                                      });
+                                    },
+                                    child: CircleAvatar(
+                                      radius: 33,
+                                      backgroundColor: Colors.black38,
+                                      child: Icon(
+                                        _controller!.value.isPlaying
+                                            ? Icons.pause
+                                            : Icons.play_arrow,
+                                        color: Colors.white,
+                                        size: 50,
+                                      ),
                                     ),
                                   ),
                                 ),
-                              ),
-                            ],
-                          ),
-                        ]
-                    ),
-                    pathe==""? Container(): new Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        mainAxisSize: MainAxisSize.max,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: <Widget>[
-                          Container(
-                            width: deviceSize.width-40,
-                            padding: EdgeInsets.all(3.0),
-                            child:
-                            new Padding(
-                              child:
-                              new Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                  mainAxisSize: MainAxisSize.max,
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  children: <Widget>[
-                                    _profileuploaded==true?
-                                    Container()
-                                        :
-                                    ElevatedButton(
-                                      child: const Text('Submit'),
-                                      onPressed: () {
-                                        _submit(pathe);
-                                      },
-                                      style: ElevatedButton.styleFrom(
-                                          minimumSize: new Size(deviceSize.width * 0.3,20),
-                                          shape: RoundedRectangleBorder(
-                                              borderRadius: BorderRadius.circular(16)),
-                                          primary: button,
-                                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-                                          textStyle:
-                                          const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
-
-                                    ),
-                                    ElevatedButton(
-                                      child: const Text('Re Enter'),
-                                      onPressed: () {
-                                        //  _showSimpleDialog();
-                                        showModalBottomSheet(
-                                          context: context,
-                                          builder: ((builder) => bottomSheet2()),
-                                        );
-                                      },
-                                      style: ElevatedButton.styleFrom(
-                                          minimumSize: new Size(deviceSize.width * 0.3,20),
-                                          shape: RoundedRectangleBorder(
-                                              borderRadius: BorderRadius.circular(16)),
-                                          primary: Colors.amber,
-                                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-                                          textStyle:
-                                          const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
-
-                                    ),
-                                  ]
-
-                              ),
-                              padding: const EdgeInsets.all(10.0),
+                              ],
                             ),
-                          ),
-                        ]
+                          ]
+                      ),
                     ),
+                    // pathe==""? Container(): new Row(
+                    //     mainAxisAlignment: MainAxisAlignment.center,
+                    //     mainAxisSize: MainAxisSize.max,
+                    //     crossAxisAlignment: CrossAxisAlignment.center,
+                    //     children: <Widget>[
+                    //       Container(
+                    //         width: deviceSize.width-40,
+                    //         padding: EdgeInsets.all(3.0),
+                    //         child:
+                    //         new Padding(
+                    //           child:
+                    //           new Row(
+                    //               mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    //               mainAxisSize: MainAxisSize.max,
+                    //               crossAxisAlignment: CrossAxisAlignment.center,
+                    //               children: <Widget>[
+                    //                 _profileuploaded==true?
+                    //                 Container()
+                    //                     :
+                    //                 ElevatedButton(
+                    //                   child: const Text('Submit'),
+                    //                   onPressed: () {
+                    //                     _submit(pathe);
+                    //                   },
+                    //                   style: ElevatedButton.styleFrom(
+                    //                       minimumSize: new Size(deviceSize.width * 0.3,20),
+                    //                       shape: RoundedRectangleBorder(
+                    //                           borderRadius: BorderRadius.circular(16)),
+                    //                       primary: button,
+                    //                       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                    //                       textStyle:
+                    //                       const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+                    //
+                    //                 ),
+                    //                 ElevatedButton(
+                    //                   child: const Text('Re Enter'),
+                    //                   onPressed: () {
+                    //                     //  _showSimpleDialog();
+                    //                     showModalBottomSheet(
+                    //                       context: context,
+                    //                       builder: ((builder) => bottomSheet2()),
+                    //                     );
+                    //                   },
+                    //                   style: ElevatedButton.styleFrom(
+                    //                       minimumSize: new Size(deviceSize.width * 0.3,20),
+                    //                       shape: RoundedRectangleBorder(
+                    //                           borderRadius: BorderRadius.circular(16)),
+                    //                       primary: Colors.amber,
+                    //                       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                    //                       textStyle:
+                    //                       const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+                    //
+                    //                 ),
+                    //               ]
+                    //
+                    //           ),
+                    //           padding: const EdgeInsets.all(10.0),
+                    //         ),
+                    //       ),
+                    //     ]
+                    // ),
                     new Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         mainAxisSize: MainAxisSize.max,
@@ -1115,10 +1128,57 @@ class _HrSaveProfileState extends State<HrSaveProfile> {
     );
   }
 
+  // Widget imageProfile() {
+  //   return Center(
+  //     child: Stack(children: <Widget>[
+  //       _cropedFile == null&&Imagepath==""
+  //           ?
+  //       Lottie.asset(
+  //         'assets/lottie/profilene.json',
+  //         height: 150,
+  //         width: 150,
+  //         animate: true,)
+  //           :
+  //       Imagepath=="no profileImage"?
+  //       Lottie.asset(
+  //         'assets/lottie/profilene.json',
+  //         height: 150,
+  //         width: 150,
+  //         animate: true,)
+  //           :
+  //       Imagepath==""?
+  //             _cropedFile == null ? CircleAvatar(radius: 80.0, backgroundImage: AssetImage("assets/appicon.png")):CircleAvatar(radius: 80.0, backgroundImage:FileImage(File(_cropedFile!.path)),)
+  //           :
+  //       CircleAvatar(
+  //         radius: 80.0,
+  //         backgroundImage: _cropedFile == null
+  //             ? FileImage(File(Imagepath))
+  //             : FileImage(File(_cropedFile!.path)),
+  //       ),
+  //       Positioned(
+  //         bottom: 20.0,
+  //         right: 20.0,
+  //         child: InkWell(
+  //           onTap: () {
+  //             showModalBottomSheet(
+  //               context: context,
+  //               builder: ((builder) => bottomSheet()),
+  //             );
+  //           },
+  //           child: Icon(
+  //             Icons.camera_alt,
+  //             color: Colors.teal,
+  //             size: 28.0,
+  //           ),
+  //         ),
+  //       ),
+  //     ]),
+  //   );
+  // }
   Widget imageProfile() {
     return Center(
       child: Stack(children: <Widget>[
-        _cropedFile == null&&Imagepath==""
+        _cropedFile == null&&Imagepath=="No profileImage"
             ?
         Lottie.asset(
           'assets/lottie/profilene.json',
@@ -1126,15 +1186,16 @@ class _HrSaveProfileState extends State<HrSaveProfile> {
           width: 150,
           animate: true,)
             :
-        Imagepath=="no profileImage"?
-        Lottie.asset(
-          'assets/lottie/profilene.json',
-          height: 150,
-          width: 150,
-          animate: true,)
-            :
-        Imagepath==""?
-              _cropedFile == null ? CircleAvatar(radius: 80.0, backgroundImage: AssetImage("assets/appicon.png")):CircleAvatar(radius: 80.0, backgroundImage:FileImage(File(_cropedFile!.path)),)
+        Imagepath=="No profileImage"?
+        _cropedFile == null ?
+        CircleAvatar(
+          radius: 80.0,
+          backgroundImage: AssetImage("assets/appicon.png"),
+        )
+            : CircleAvatar(
+          radius: 80.0,
+          backgroundImage: FileImage(File(_cropedFile!.path)),
+        )
             :
         CircleAvatar(
           radius: 80.0,
@@ -1142,6 +1203,12 @@ class _HrSaveProfileState extends State<HrSaveProfile> {
               ? FileImage(File(Imagepath))
               : FileImage(File(_cropedFile!.path)),
         ),
+        //Text(Imagepath),
+        // Lottie.asset(
+        //   'assets/lottie/profilene.json',
+        //   height: 150,
+        //   width: 150,
+        //   animate: true,),
         Positioned(
           bottom: 20.0,
           right: 20.0,
@@ -1278,6 +1345,29 @@ class _HrSaveProfileState extends State<HrSaveProfile> {
     );
   }
 
+  //
+  // void takePhoto(ImageSource source) async {
+  //   final sharedPreferences = await SharedPreferences.getInstance();
+  //   final pickedFile = await _picker.getImage(
+  //     source: source,
+  //   );
+  //   if(pickedFile!=null) {
+  //     final CroppedFile? croppedFile= await imageCropper.cropImage (
+  //       sourcePath: pickedFile.path,
+  //       cropStyle: CropStyle.circle,
+  //       compressQuality: 30,
+  //     );
+  //     setState(() {
+  //       if(croppedFile!=null) {
+  //         _cropedFile = croppedFile;
+  //         sharedPreferences!.setString("profileImage", _cropedFile!.path);
+  //         print(_cropedFile!.path);
+  //         _profileImageuploaded=true;
+  //         Navigator.pop(context);
+  //       }
+  //     });
+  //   }
+  // }
 
   void takePhoto(ImageSource source) async {
     final sharedPreferences = await SharedPreferences.getInstance();
@@ -1289,19 +1379,17 @@ class _HrSaveProfileState extends State<HrSaveProfile> {
         sourcePath: pickedFile.path,
         cropStyle: CropStyle.circle,
         compressQuality: 30,
-
       );
       setState(() {
         if(croppedFile!=null) {
           _cropedFile = croppedFile;
-          sharedPreferences!.setString("profileImage", _cropedFile!.path);
+          sharedp.setString("profileImage", _cropedFile!.path);
           _profileImageuploaded=true;
           Navigator.pop(context);
         }
       });
     }
   }
-
   void takeVideo(ImageSource source) async {
     final sharedPreferences = await SharedPreferences.getInstance();
     final pickedFile = await _picker.getVideo(

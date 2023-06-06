@@ -6,7 +6,7 @@ import 'package:Aap_job/providers/auth_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:Aap_job/models/CitiesModel.dart';
-import 'package:Aap_job/models/JobCategoryModel.dart';
+
 import 'package:Aap_job/models/JobTitleModel.dart';
 import 'package:Aap_job/models/JobskillModel.dart';
 import 'package:Aap_job/models/LocationModel.dart';

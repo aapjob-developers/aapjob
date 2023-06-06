@@ -26,7 +26,6 @@ class SharedManager {
   }
 
   Future<LatLng> getLocationCoordinate() async {
-    SharedPreferences? prefs = await SharedPreferences.getInstance();
     await LocationManager.shared.getCurrentLocation();
     this.latitude = await LocationManager.shared.latitude!;
     this.longitude = await LocationManager.shared.longitude!;

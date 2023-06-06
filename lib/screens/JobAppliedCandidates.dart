@@ -21,6 +21,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:google_language_fonts/google_language_fonts.dart';
 import 'package:intl/intl.dart';
+import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:dio/dio.dart';
@@ -348,7 +349,7 @@ class _JobAppliedCandidatesState extends State<JobAppliedCandidates> {
       WillPopScope(
         onWillPop: ()async{
       if(Provider.of<AuthProvider>(context, listen: false).getacctype()=="HR")
-        Navigator.pushReplacement( context,  MaterialPageRoute(builder: (context) => HrHomePage()),);
+        Navigator.pushAndRemoveUntil( context,  MaterialPageRoute(builder: (context) => HrHomePage()), (route) => false);
       return true;
     },
     child:
@@ -702,35 +703,6 @@ class _JobAppliedCandidatesState extends State<JobAppliedCandidates> {
                                                 mainAxisSize: MainAxisSize.max,
                                                 crossAxisAlignment: CrossAxisAlignment.start,
                                                 children: <Widget>[
-
-                                                  // ElevatedButton(
-                                                  //   child:
-                                                  //   new Row(
-                                                  //       mainAxisAlignment: MainAxisAlignment.center,
-                                                  //       mainAxisSize: MainAxisSize.max,
-                                                  //       crossAxisAlignment: CrossAxisAlignment.center,
-                                                  //       children: <Widget>[
-                                                  //         SizedBox(width: 5,),
-                                                  //         Icon(Icons.phone_android_rounded,size: 15,color: Colors.white,),
-                                                  //         SizedBox(width: 5,),
-                                                  //         Text(" Call" ,style: LatinFonts.aBeeZee(color:Colors.white,fontSize: 12 ),)
-                                                  //       ]
-                                                  //   ),
-                                                  //   onPressed: _hasCallSupport
-                                                  //       ? () => setState(() {
-                                                  //     _launched = _makePhoneCall(candi.mobile);
-                                                  //   })
-                                                  //       : null,
-                                                  //   style: ElevatedButton.styleFrom(
-                                                  //       minimumSize: new Size(deviceSize.width * 0.25,30),
-                                                  //       shape: RoundedRectangleBorder(
-                                                  //           borderRadius: BorderRadius.circular(16)),
-                                                  //       primary: Colors.green,
-                                                  //       padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 5),
-                                                  //       textStyle:
-                                                  //       const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
-                                                  //
-                                                  // ),
                                                   SizedBox(width: 10,),
                                                   ElevatedButton(
                                                     child:
@@ -1119,6 +1091,7 @@ class _JobAppliedCandidatesState extends State<JobAppliedCandidates> {
                                                 ]
                                             ),
                                             SizedBox(height: 10,),
+                                            SizedBox(height: 10,),
                                             new Row(
                                                 mainAxisAlignment: MainAxisAlignment.center,
                                                 mainAxisSize: MainAxisSize.max,
@@ -1126,17 +1099,17 @@ class _JobAppliedCandidatesState extends State<JobAppliedCandidates> {
                                                 children: <Widget>[
                                                   ElevatedButton(
                                                     child:
-                                                    new Row(
-                                                        mainAxisAlignment: MainAxisAlignment.center,
-                                                        mainAxisSize: MainAxisSize.max,
-                                                        crossAxisAlignment: CrossAxisAlignment.center,
-                                                        children: <Widget>[
-                                                          SizedBox(width: 5,),
-                                                          Icon(Icons.phone_android_rounded,size: 15,color: Colors.white,),
-                                                          SizedBox(width: 5,),
-                                                          Text(" Call" ,style: LatinFonts.aBeeZee(color:Colors.white,fontSize: 12 ),)
-                                                        ]
-                                                    ),
+                                                    Row(
+                                                      mainAxisAlignment: MainAxisAlignment.center,
+                                                      children: [
+                                                        Lottie.asset(
+                                                          'assets/lottie/callicon.json',
+                                                          height: MediaQuery.of(context).size.width*0.05,
+                                                          width: MediaQuery.of(context).size.width*0.05,
+                                                          animate: true,),
+                                                        SizedBox(width: 10,),
+                                                        Text("Call"),
+                                                      ],),
 
                                                     onPressed: _hasCallSupport
                                                         ? () => setState(() {
@@ -1156,62 +1129,26 @@ class _JobAppliedCandidatesState extends State<JobAppliedCandidates> {
                                                   SizedBox(width: 10,),
                                                   ElevatedButton(
                                                     child:
-                                                    new Row(
-                                                        mainAxisAlignment: MainAxisAlignment.center,
-                                                        mainAxisSize: MainAxisSize.max,
-                                                        crossAxisAlignment: CrossAxisAlignment.center,
-                                                        children: <Widget>[
-                                                          SizedBox(width: 5,),
-                                                          Icon(Icons.message,size: 15,color: Colors.white,),
-                                                          SizedBox(width: 5,),
-                                                          Text(" WhatsApp" ,style: LatinFonts.aBeeZee(color:Colors.white,fontSize: 12 ),)
-                                                        ]
-                                                    ),
-
-                                                    onPressed: _hasCallSupport
-                                                        ? () => setState(() {
-                                                      //_launched = _makePhoneCall(candi.mobile);
-                                                      openwhatsapp(candi.mobile!);
-                                                    })
-                                                        : null,
+                                                    Row(
+                                                      mainAxisAlignment: MainAxisAlignment.center,
+                                                      children: [
+                                                        Lottie.asset(
+                                                          'assets/lottie/whatsapp.json',
+                                                          height: MediaQuery.of(context).size.width*0.05,
+                                                          width: MediaQuery.of(context).size.width*0.05,
+                                                          animate: true,),
+                                                        SizedBox(width: 10,),
+                                                        Text("Whatsapp"),
+                                                      ],),
+                                                    onPressed: _hasCallSupport ? () => setState(() {openwhatsapp(candi.mobile!);  }) : null,
                                                     style: ElevatedButton.styleFrom(
-                                                        minimumSize: new Size(deviceSize.width * 0.25,30),
-                                                        shape: RoundedRectangleBorder(
-                                                            borderRadius: BorderRadius.circular(16)),
-                                                        primary: Colors.green,
-                                                        padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 5),
-                                                        textStyle:
-                                                        const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
-
+                                                      minimumSize: new Size(deviceSize.width * 0.25,30),
+                                                      shape: RoundedRectangleBorder(
+                                                          borderRadius: BorderRadius.circular(16)),
+                                                      primary: Colors.amber,
+                                                      padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 5),
+                                                    ),
                                                   ),
-                                                  // ElevatedButton(
-                                                  //   child:
-                                                  //   new Row(
-                                                  //       mainAxisAlignment: MainAxisAlignment.center,
-                                                  //       mainAxisSize: MainAxisSize.max,
-                                                  //       crossAxisAlignment: CrossAxisAlignment.center,
-                                                  //       children: <Widget>[
-                                                  //         SizedBox(width: 5,),
-                                                  //         Icon(Icons.check_circle,size: 15,color: Colors.white,),
-                                                  //         SizedBox(width: 5,),
-                                                  //         Text(" Shortlist for Interview" ,style: LatinFonts.aBeeZee(color:Colors.white,fontSize: 12 ),)
-                                                  //       ]
-                                                  //   ),
-                                                  //
-                                                  //   onPressed: () {
-                                                  //     selectedcandidate(candi.id);
-                                                  //   },
-                                                  //   style: ElevatedButton.styleFrom(
-                                                  //       minimumSize: new Size(deviceSize.width * 0.4,30),
-                                                  //       shape: RoundedRectangleBorder(
-                                                  //           borderRadius: BorderRadius.circular(16)),
-                                                  //       primary: Colors.deepPurple,
-                                                  //       padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 5),
-                                                  //       textStyle:
-                                                  //       const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
-                                                  //
-                                                  // ),
-
                                                 ]
                                             ),
                                           ]

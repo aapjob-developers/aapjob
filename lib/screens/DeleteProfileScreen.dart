@@ -44,6 +44,7 @@ class _DeleteProfileScreenState extends State<DeleteProfileScreen> {
   }
 
  Deleteprofile() async {
+   print('Dio send');
     try {
       Response response;
       if(Provider.of<AuthProvider>(context, listen: false).getacctype()=="hr"){
@@ -145,7 +146,7 @@ class _DeleteProfileScreenState extends State<DeleteProfileScreen> {
                   children: <Widget>[
                     ElevatedButton(
                       child: const Text('I Confirm to delete My Profile data'),
-                      onPressed: () => Deleteprofile,
+                      onPressed: () => Deleteprofile(),
                       style: ElevatedButton.styleFrom(
                           minimumSize: new Size(deviceSize.width * 0.5,20),
                           shape: RoundedRectangleBorder(

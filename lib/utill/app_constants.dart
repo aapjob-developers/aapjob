@@ -79,6 +79,8 @@ class AppConstants {
   static const String SAVE_PROFILE_DETAIL_DATA_URI = 'apii/saveprofileDetail';
   static const String SAVE_CITY_DATA_URI = 'apii/savecity';
   static const String UPDATE_VIEW_URI = 'apii/addview?jobid=';
+  static const String DELETE_HR_PROFILE = 'apii/deletehrprofile?userid=';
+  static const String DELETE_CANDIDATE_PROFILE = 'apii/deletecandidateprofile?userid=';
   static const String UPDATE_CATEGORY_URI = 'apii/addcategory?catid=';
   static const String APPLY_JOB_URI = 'apii/applyjob?jobid=';
   static const String CHECK_APPLY_JOB_URI = 'apii/checkapplied?jobid=';

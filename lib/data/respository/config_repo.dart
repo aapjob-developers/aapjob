@@ -24,7 +24,7 @@ class ConfigRepo {
 
   String getAppVersion()
   {
-    return sharedPreferences!.getString("AppVersion")??"36";
+    return sharedPreferences!.getString("AppVersion")??"37";
   }
 
   void saveVersion(String version)

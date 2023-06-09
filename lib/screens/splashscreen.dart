@@ -144,7 +144,7 @@ class _SplashScreenState extends State<SplashScreen>
 
   Future<bool> _loadData(BuildContext context, bool reload) async {
    //  PackageInfo packageInfo = await PackageInfo.fromPlatform();
-    await Provider.of<ConfigProvider>(context, listen: false).getConfig("36",context);
+    await Provider.of<ConfigProvider>(context, listen: false).getConfig("37",context);
    await  Provider.of<ContentProvider>(context, listen: false).getContent(context);
     if(Provider.of<CitiesProvider>(context, listen: false).cityModelList.isEmpty) {
       await Provider.of<CitiesProvider>(context, listen: false).getCities(context);

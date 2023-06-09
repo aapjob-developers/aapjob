@@ -113,7 +113,6 @@ class _JobTypeSelectState extends State<JobTypeSelect> {
     if (isRoute) {
       sharedPreferences!.setBool("loggedin", true);
       saveUserDataToFirebase();
-    //  await Future.delayed(Duration(milliseconds: 5000));
       Navigator.pushReplacement( context,  MaterialPageRoute(builder: (context) => HomePage()),);
     } else {
       CommonFunctions.showErrorDialog(errorMessage,context);

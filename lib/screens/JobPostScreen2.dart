@@ -24,6 +24,7 @@ import 'package:Aap_job/utill/colors.dart';
 import 'package:Aap_job/utill/dimensions.dart';
 import 'package:Aap_job/view/basewidget/animated_custom_dialog.dart';
 import 'package:Aap_job/view/basewidget/textfield/custom_textfield.dart';
+import 'package:lottie/lottie.dart';
 import 'package:video_player/video_player.dart';
 import 'package:Aap_job/providers/profile_provider.dart';
 import 'package:provider/provider.dart';
@@ -1680,7 +1681,19 @@ class _JobPostScreen2State extends State<JobPostScreen2> {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               ElevatedButton(
-                                child: const Text('Reset'),
+                                child:
+                                Row(
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text("Reset",style:TextStyle(fontWeight: FontWeight.w700)),
+                                    Lottie.asset(
+                                      'assets/lottie/resetb.json',
+                                      height: MediaQuery.of(context).size.width*0.06,
+                                      //width: MediaQuery.of(context).size.width*0.45,
+                                      animate: true,),
+                                  ],
+                                ),
                                 onPressed: () => showAnimatedDialog(context, JobResetConfirmationDialog(), isFlip: true),
                                 style: ElevatedButton.styleFrom(
                                     minimumSize: new Size(deviceSize.width * 0.4,20),

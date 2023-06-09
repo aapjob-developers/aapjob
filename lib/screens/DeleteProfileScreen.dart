@@ -1,5 +1,8 @@
 import 'dart:io';
 
+import 'package:Aap_job/providers/auth_provider.dart';
+import 'package:Aap_job/screens/splashscreen.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:Aap_job/models/JobsModel.dart';
 import 'package:Aap_job/models/common_functions.dart';
@@ -19,13 +22,13 @@ import 'package:lottie/lottie.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 
-class ShareAppScreen extends StatefulWidget {
-  ShareAppScreen({Key? key}) : super(key: key);
+class DeleteProfileScreen extends StatefulWidget {
+  DeleteProfileScreen({Key? key}) : super(key: key);
   @override
-  _ShareAppScreenState createState() => new _ShareAppScreenState();
+  _DeleteProfileScreenState createState() => new _DeleteProfileScreenState();
 }
 
-class _ShareAppScreenState extends State<ShareAppScreen> {
+class _DeleteProfileScreenState extends State<DeleteProfileScreen> {
 
   final Dio _dio = Dio();
   final _baseUrl = AppConstants.BASE_URL;
@@ -40,13 +43,37 @@ class _ShareAppScreenState extends State<ShareAppScreen> {
     super.initState();
   }
 
-  Future<void> share() async {
-    await FlutterShare.share(
-        title: 'Download Aap Job',
-        text: 'Hiring and Job Search to find full time jobs in India, entry level jobs, graduate jobs, fresher jobs, digital marketing jobs, back office jobs, sales jobs, office admin jobs, IT jobs, accounting jobs, operation jobs, retail jobs and marketing jobs vacancies in multiple fields.\n *Download Aap Job*',
-        linkUrl: 'https://play.google.com/store/apps/details?id=com.unick.aapjob',
-        chooserTitle: 'Please share Aap job'
-    );
+ Deleteprofile() async {
+    try {
+      Response response;
+      if(Provider.of<AuthProvider>(context, listen: false).getacctype()=="hr"){
+        response = await _dio.get(_baseUrl + AppConstants.DELETE_HR_PROFILE+Provider.of<AuthProvider>(context, listen: false).getUserid());}
+      else
+        {
+          response = await _dio.get(_baseUrl + AppConstants.DELETE_CANDIDATE_PROFILE+Provider.of<AuthProvider>(context, listen: false).getUserid());
+        }
+      apidata = response.data;
+          Provider.of<AuthProvider>(context, listen: false).clearSharedData().then((condition) {
+            FirebaseMessaging.instance.deleteToken();
+            Provider.of<AuthProvider>(context,listen: false).clearSharedData();
+            Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (context) => SplashScreen()), (route) => false);
+          });
+
+    } on DioError catch (e) {
+      // The request was made and the server responded with a status code
+      // that falls out of the range of 2xx and is also not 304.
+      if (e.response != null) {
+        print('Dio error!');
+        print('STATUS: ${e.response?.statusCode}');
+        print('DATA: ${e.response?.data}');
+        print('HEADERS: ${e.response?.headers}');
+      } else {
+        // Error due to setting up or sending the request
+        print('Error sending request!');
+        print(e.message);
+      }
+    }
+
   }
 
   @override
@@ -82,7 +109,7 @@ class _ShareAppScreenState extends State<ShareAppScreen> {
                 SizedBox(width: 10,),
                 Container(
                   width: MediaQuery.of(context).size.width*0.6,
-                  child: Text("Share App",maxLines:2,style: TextStyle(color: Colors.white,fontSize: 16,fontWeight: FontWeight.bold),
+                  child: Text("Delete Profile data",maxLines:2,style: TextStyle(color: Colors.white,fontSize: 16,fontWeight: FontWeight.bold),
                   ),
                 ),
               ]
@@ -94,12 +121,12 @@ class _ShareAppScreenState extends State<ShareAppScreen> {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: <Widget>[
                 Lottie.asset(
-                  'assets/lottie/shareapp.json',
+                  'assets/lottie/worried.json',
                   animate: true,
                 width: MediaQuery.of(context).size.width
                 ),
             Text(
-              "Do you like Aap Job?",
+              "Do you really want to delete your profile data? your can't recover that later",
               textAlign: TextAlign.center,
               style:LatinFonts.aclonica(color:Primary,fontSize: 16,fontWeight:FontWeight.w500 ),),
                 SizedBox(height: 20,),
@@ -108,28 +135,8 @@ class _ShareAppScreenState extends State<ShareAppScreen> {
                   mainAxisSize: MainAxisSize.max,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: <Widget>[
-                    ElevatedButton(
-                      child: const Text('Share App Now'),
-                      onPressed: () {
-                        share();
-                      },
-                      style: ElevatedButton.styleFrom(
-                          minimumSize: new Size(deviceSize.width * 0.5,20),
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(15)),
-                          primary: Colors.amber,
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-                          textStyle:
-                          const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-
-                    ),
+                    Text("If you delete your data you not able to use aap job services"),
                   ],),
-                SizedBox(height: 20,),
-                Lottie.asset(
-                    'assets/lottie/starss.json',
-                    animate: true,
-                    width: MediaQuery.of(context).size.width
-                ),
                 SizedBox(height: 20,),
                 new Row(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -137,11 +144,8 @@ class _ShareAppScreenState extends State<ShareAppScreen> {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: <Widget>[
                     ElevatedButton(
-                      child: const Text('Rate Us 5 Stars on Play Store'),
-                      onPressed: () => LaunchReview.launch(
-                        androidAppId: "com.unick.aapjob",
-                        iOSAppId: "585027354",
-                      ),
+                      child: const Text('I Confirm to delete My Profile data'),
+                      onPressed: () => Deleteprofile,
                       style: ElevatedButton.styleFrom(
                           minimumSize: new Size(deviceSize.width * 0.5,20),
                           shape: RoundedRectangleBorder(

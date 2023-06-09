@@ -1,5 +1,8 @@
+import 'dart:io';
+
 import 'package:Aap_job/localization/language_constrants.dart';
 import 'package:Aap_job/providers/content_provider.dart';
+import 'package:Aap_job/screens/DeleteProfileScreen.dart';
 import 'package:Aap_job/screens/EditCompanyProfile.dart';
 import 'package:Aap_job/screens/EditProfileDetails.dart';
 import 'package:Aap_job/screens/EditProfileImage.dart';
@@ -469,6 +472,29 @@ class _HrProfileHomeScreenState extends State<HrProfileHomeScreen> {
                 ),
               ),
             ),
+            Platform.isIOS ? Divider(
+              thickness: 1.2,
+            ):Container(),
+            Platform.isIOS ? InkWell(
+              onTap: () {
+                Navigator.push( context,  MaterialPageRoute(builder: (context) => DeleteProfileScreen()));
+              },
+              child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  mainAxisSize: MainAxisSize.max,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: <Widget>[
+                    Text("Delete My Profile",style: LatinFonts.aBeeZee(fontSize: 14,fontWeight: FontWeight.bold,color: Color.fromARGB(255,39, 170, 225))),
+                    Lottie.asset(
+                      'assets/lottie/arrowright.json',
+                      height: MediaQuery.of(context).size.width*0.08,
+                      width: MediaQuery.of(context).size.width*0.08,
+                      animate: true,),
+                  ]
+
+              ),
+
+            ):Container(),
             SizedBox(height: 30,),
             new Row(
               mainAxisAlignment: MainAxisAlignment.center,

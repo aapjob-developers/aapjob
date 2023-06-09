@@ -223,7 +223,7 @@ class _CitySelectionScreenState extends State<CitySelectionScreen> {
                         borderRadius: BorderRadius.all(Radius.circular(25.0)))),
               ),
             ),
-            Platform.isIOS ? Container():
+            Platform.isIOS?Container():
             Padding(
               padding: const EdgeInsets.all(8.0),
               child:

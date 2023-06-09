@@ -49,7 +49,7 @@ class HrHomePage extends StatelessWidget {
                 () => dashboard.widgetList.elementAt(dashboard.selectedIndex),
           ),
     ),
-          Obx(() => Visibility(
+          Platform.isIOS ?Container(): Obx(() => Visibility(
               child:
               Stack(
               children: [
@@ -90,7 +90,7 @@ class HrHomePage extends StatelessWidget {
               ),
               ]
               ),
-              visible: dashboard.show.value,
+              visible:dashboard.show.value,
             ),
           ),
           Obx(() => Visibility(

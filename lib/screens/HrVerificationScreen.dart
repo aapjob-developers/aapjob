@@ -81,10 +81,10 @@ File? file,videofile;
         Imagepath=sharedPreferences!.getString("profileImage")?? "no Name";
         email=sharedPreferences!.getString("email")?? "No Email";
         AccessToken=sharedPreferences!.getString("AccessToken")?? "nn";
-        videopath=sharedPreferences!.getString("profileVideo")?? "no Name";
+       // videopath=sharedPreferences!.getString("profileVideo")?? "no Name";
         getRecruiterlist();
          uploadProfileFile();
-         uploadFileVideo();
+         //uploadFileVideo();
       });
     });
   }
@@ -125,7 +125,6 @@ File? file,videofile;
   }
 
   Future<void> _savestep4() async {
-    final sharedPreferences = await SharedPreferences.getInstance();
     if(selectedgst) {
       if (_gstController.text
           .trim()
@@ -323,7 +322,6 @@ File? file,videofile;
     try {
       Response response = await _dio.get(_baseUrl + AppConstants.HR_RECRUITER_PLAN_URI);
       apidata = response.data;
-      print('JobsModelList : ${apidata}');
       List<dynamic> data=json.decode(apidata);
       if(data.toString()=="[]")
       {
@@ -340,7 +338,6 @@ File? file,videofile;
           _hasdataModel=true;
         });
       }
-      print('Jobtitle List: ${duplicateJobsModel}');
     } on DioError catch (e) {
       // The request was made and the server responded with a status code
       // that falls out of the range of 2xx and is also not 304.

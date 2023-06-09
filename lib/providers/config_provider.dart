@@ -17,7 +17,7 @@ class ConfigProvider extends ChangeNotifier {
   final ConfigRepo configRepo;
   ConfigProvider({required this.configRepo});
   ConfigModel? _configModel;
-  String? _packversion="36";
+  String? _packversion="37";
   ConfigModel? get configModel => _configModel;
   String? get packversion => _packversion;
 
@@ -25,7 +25,7 @@ class ConfigProvider extends ChangeNotifier {
     ApiResponse? apiResponse = await configRepo.getConfig();
     if (apiResponse.response != null && apiResponse.response?.statusCode == 200) {
       _configModel = ConfigModel.fromJson(jsonDecode(apiResponse.response?.data));
-      configRepo.saveVersion(_configModel?.appVersion!??"36");
+      configRepo.saveVersion(_configModel?.appVersion!??"37");
       _packversion=Packversion;
       notifyListeners();
       return true;

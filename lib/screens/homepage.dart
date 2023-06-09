@@ -58,7 +58,7 @@ class HomePage extends StatelessWidget {
             () => dashboard.widgetList.elementAt(dashboard.selectedIndex),
       ),
     ),
-            Obx(() => Visibility(
+            Platform.isIOS ?Container(): Obx(() => Visibility(
               child:
               Stack(
                   children: [

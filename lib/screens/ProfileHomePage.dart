@@ -9,6 +9,7 @@ import 'package:Aap_job/models/JobsModel.dart';
 import 'package:Aap_job/models/common_functions.dart';
 import 'package:Aap_job/providers/auth_provider.dart';
 import 'package:Aap_job/providers/content_provider.dart';
+import 'package:Aap_job/screens/DeleteProfileScreen.dart';
 import 'package:Aap_job/screens/EditEducationExp.dart';
 import 'package:Aap_job/screens/EditJobProfileDetails.dart';
 import 'package:Aap_job/screens/EditProfileImage.dart';
@@ -950,6 +951,30 @@ class _ProfileHomeScreenState extends State<ProfileHomeScreen> {
                       ),
                     ),
                   ),
+                  Platform.isIOS ? Divider(
+                    thickness: 1.2,
+                  ):Container(),
+                  Platform.isIOS ? InkWell(
+                    onTap: () {
+                      Navigator.push( context,  MaterialPageRoute(builder: (context) => DeleteProfileScreen()));
+                    },
+                    child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        mainAxisSize: MainAxisSize.max,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: <Widget>[
+                          Text("Delete My Profile",style: LatinFonts.aBeeZee(fontSize: 14,fontWeight: FontWeight.bold,color: Color.fromARGB(255,39, 170, 225))),
+                          Lottie.asset(
+                            'assets/lottie/arrowright.json',
+                            height: MediaQuery.of(context).size.width*0.08,
+                            width: MediaQuery.of(context).size.width*0.08,
+                            animate: true,),
+                        ]
+
+                    ),
+
+                  ):Container(),
+                  SizedBox(height: 30,),
                 ],
               ),
               ),

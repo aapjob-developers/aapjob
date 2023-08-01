@@ -714,7 +714,7 @@ class _TopbarState extends State<Topbar> {
                         children: [
                           Icon(Icons.search_rounded,color: Colors.black,),
                           SizedBox(width: 5,),
-                          Text(getTranslated("SEARCH_BY_TITLE", context)!, style: TextStyle(fontSize: 12),)
+                          Text(getTranslated("SEARCH_BY_TITLE", context)!, style: TextStyle(fontSize: 10),)
                         ]),
                   ),
                 ),

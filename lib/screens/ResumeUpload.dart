@@ -41,7 +41,7 @@ class _ResumeUploadState extends State<ResumeUpload> {
   String degree="";
   String Name="", jobcity="", joblocation="", company="", expyears="";
   TextEditingController degreeController = TextEditingController();
-  TextEditingController collegenameController = TextEditingController();
+  // TextEditingController collegenameController = TextEditingController();
   var _isLoading = false;
   File? file;
   var education = ['Select Your Education','10th or Below 10th','12th Passed','Diploma','ITI','Graduate',
@@ -91,12 +91,19 @@ class _ResumeUploadState extends State<ResumeUpload> {
   Future<void> _loadData(BuildContext context) async {
     await Provider.of<AdsProvider>(context, listen: false).getAds(context);
   }
+  final _scrollController = ScrollController();
+
+  void _scrollToFocus() {
+    double offset = 80;
+    print("offset ${offset}");
+    _scrollController.animateTo(offset, duration: Duration(milliseconds: 500), curve: Curves.ease);
+  }
 
   Future<void> _savestep4() async {
     final sharedPreferences = await SharedPreferences.getInstance();
     if(eduvalue!='Select Your Education'&&degreevalue!='Select Your Education Details')
       {
-        String university=collegenameController.text.trim();
+        String university="University";
             if(university.isNotEmpty&&eduvalue.isNotEmpty)
               {
                 if(shiftvalue!='Select Prefered workshift') {
@@ -112,6 +119,7 @@ class _ResumeUploadState extends State<ResumeUpload> {
                     setState(() {
                       _isLoading = false;
                     });
+                    _scrollToFocus();
                     CommonFunctions.showInfoDialog("Please Select Prefered Work shift", context);
                   }
               }
@@ -120,11 +128,13 @@ class _ResumeUploadState extends State<ResumeUpload> {
                 setState(() {
                   _isLoading = false;
                 });
+                _scrollToFocus();
                 CommonFunctions.showInfoDialog("Please Enter Education Details", context);
               }
       }
     else
       {
+        _scrollToFocus();
         CommonFunctions.showInfoDialog("Please Select Your Education and Detail.", context);
         setState(() {
           _isLoading = false;
@@ -224,6 +234,7 @@ class _ResumeUploadState extends State<ResumeUpload> {
     Form(
       key: _formKey,
       child: SingleChildScrollView(
+        controller: _scrollController,
         child:new Column(
           mainAxisAlignment: MainAxisAlignment.start,
           mainAxisSize: MainAxisSize.max,
@@ -382,19 +393,19 @@ class _ResumeUploadState extends State<ResumeUpload> {
                             ),
                                 //: Container(),
                           //  showextraedu?
-                            new Row(
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                mainAxisSize: MainAxisSize.max,
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: <Widget>[
-                                  Container(
-                                      width: deviceSize.width*0.4,
-                                      child:
-                                      Text("( "+collegenameController.text+" )" ,style: TextStyle(fontSize: 12,color: Primary))
-
-                                  ),
-                                ]
-                            ),
+                          //   new Row(
+                          //       mainAxisAlignment: MainAxisAlignment.start,
+                          //       mainAxisSize: MainAxisSize.max,
+                          //       crossAxisAlignment: CrossAxisAlignment.start,
+                          //       children: <Widget>[
+                          //         Container(
+                          //             width: deviceSize.width*0.4,
+                          //             child:
+                          //             Text("( "+collegenameController.text+" )" ,style: TextStyle(fontSize: 12,color: Primary))
+                          //
+                          //         ),
+                          //       ]
+                          //   ),
                                 //: Container(),
 
                           ]
@@ -540,27 +551,27 @@ class _ResumeUploadState extends State<ResumeUpload> {
                           },
                         ),
                       ),
-                      Padding(
-                        padding: const EdgeInsets.only(top: 10.0,left: 3,right: 3),
-                        child: TextFormField(
-                          style: new TextStyle(fontSize: 14),
-                          decoration: InputDecoration(
-                              isDense: true,
-                              filled: true,
-                              fillColor: Colors.white,
-                              labelText: 'Board/University/Institute Name',
-                              focusColor: Colors.white// myIcon is a 48px-wide widget.
-                          ),
-                          keyboardType: TextInputType.text,
-                          controller: collegenameController,
-                          validator: (value) {
-                            if (value == null || value.isEmpty||value!.length<4) {
-                              return 'Please Enter Board/University/Institute Name';
-                            }
-                            return null;
-                          },
-                        ),
-                      ),
+                      // Padding(
+                      //   padding: const EdgeInsets.only(top: 10.0,left: 3,right: 3),
+                      //   child: TextFormField(
+                      //     style: new TextStyle(fontSize: 14),
+                      //     decoration: InputDecoration(
+                      //         isDense: true,
+                      //         filled: true,
+                      //         fillColor: Colors.white,
+                      //         labelText: 'Board/University/Institute Name',
+                      //         focusColor: Colors.white// myIcon is a 48px-wide widget.
+                      //     ),
+                      //     keyboardType: TextInputType.text,
+                      //     controller: collegenameController,
+                      //     validator: (value) {
+                      //       if (value == null || value.isEmpty||value!.length<4) {
+                      //         return 'Please Enter Board/University/Institute Name';
+                      //       }
+                      //       return null;
+                      //     },
+                      //   ),
+                      // ),
                     ]
                 ),
                 padding: const EdgeInsets.all(10.0),
@@ -700,9 +711,13 @@ class _ResumeUploadState extends State<ResumeUpload> {
         :
     setState(() {
     _isLoading=false;
+    _scrollToFocus();
     CommonFunctions.showSuccessToast('Please Select file to upload');
     });
-    }
+    } else
+      {
+        _scrollToFocus();
+      }
                         },
                         style: ElevatedButton.styleFrom(
                             minimumSize: new Size(deviceSize.width * 0.5,20),

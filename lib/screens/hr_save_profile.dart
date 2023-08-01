@@ -30,16 +30,12 @@ import 'package:geolocator/geolocator.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:video_player/video_player.dart';
-import 'package:Aap_job/providers/profile_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:dio/dio.dart';
 import 'package:Aap_job/utill/app_constants.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:Aap_job/helper/LocationManager.dart';
-import 'package:Aap_job/helper/SharedManager.dart';
 import 'package:google_language_fonts/google_language_fonts.dart';
-import '../models/ContentModel.dart';
 import 'package:lottie/lottie.dart';
 import 'package:http/http.dart' as http;
 
@@ -94,42 +90,100 @@ class _HrSaveProfileState extends State<HrSaveProfile> {
 
   List<CityModel> duplicateItems = <CityModel>[];
   List<LocationModel> duplicatelocation = <LocationModel>[];
-  //
-  // getcities() async {
-  //   try {
-  //     Response response = await _dio.get(_baseUrl + AppConstants.CITIES_URI);
-  //     apidata = response.data;
-  //     print('City List: ${apidata}');
-  //     List<dynamic> data=json.decode(apidata);
-  //
-  //     if(data.toString()=="[]")
-  //     {
-  //       duplicateItems=[];
-  //     }
-  //     else
-  //     {
-  //       data.forEach((city) =>
-  //           duplicateItems.add(CityModel.fromJson(city)));
-  //     }
-  //     print('City List: ${duplicateItems}');
-  //
-  //   } on DioError catch (e) {
-  //     // The request was made and the server responded with a status code
-  //     // that falls out of the range of 2xx and is also not 304.
-  //     if (e.response != null) {
-  //       print('Dio error!');
-  //       print('STATUS: ${e.response?.statusCode}');
-  //       print('DATA: ${e.response?.data}');
-  //       print('HEADERS: ${e.response?.headers}');
-  //     } else {
-  //       // Error due to setting up or sending the request
-  //       print('Error sending request!');
-  //       print(e.message);
-  //     }
-  //   }
-  //
-  // }
 
+  String _currentAddress = 'Tap the button to get your address';
+
+  Future<void> _getCurrentAddress() async {
+    LocationPermission permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied || permission==LocationPermission.unableToDetermine||permission == LocationPermission.deniedForever) {
+      // Open app settings when permission is denied or denied forever
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied || permission == LocationPermission.deniedForever|| permission==LocationPermission.unableToDetermine) {
+        // User denied the permission or denied forever
+        print("pp1 $permission");
+        // Navigator.pop(context);
+        _getCurrentAddress();
+        return;
+      }
+      else
+      {
+        //   Navigator.pop(context);
+        _getCurrentAddress();
+      }
+    }
+    if (permission == LocationPermission.whileInUse || permission == LocationPermission.always) {
+      try {
+        Position position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.medium,);
+        List<Placemark> placemarks = await placemarkFromCoordinates(position.latitude, position.longitude);
+        print("location list ${placemarks}");
+        if (placemarks.isNotEmpty) {
+          Navigator.pop(context);
+          Placemark placemark = placemarks.first;
+          var first = placemark;
+          if(first.locality!=null)
+          {
+            this.city = first.locality!;
+          }
+          if(this.addressline_2!=null)
+          {
+            this.addressline_2 = first.postalCode!;
+          }
+          setState(() {
+            print("Final Address:---->$first");
+          });
+          // ;
+          String cityname="Delhi";
+          if(first.subAdministrativeArea!=null) {
+
+            String q=first.subAdministrativeArea!;
+            if(q.contains("Division"))
+              q=q.toString().trim().substring(0,q.toString().trim().length - 8);
+            cityname=q.toString().trim();
+
+          } else if(first.locality!=null)
+          {
+            cityname= first.locality!;
+          }
+          if(cityname!=null) {
+            _jobcityController.text = cityname;
+            CityModel city = filterSearchResult(cityname);
+            if (city.id != "0"){
+              cityid = (city.id==null?city.id:"0")!;
+            }
+            else {
+              CommonFunctions.showInfoDialog("Your City is not in list. Please select a near by city from City List", context);
+            }
+            if (cityname != first.locality && first.locality != null) {
+              _localityController.text = first.locality!;
+              _jobloczController.text = first.name!+", "+first.street!+", "+first.locality!;
+            } else if (cityname != first.subLocality && first.subLocality != null) {
+              _localityController.text = first.subLocality!;
+              _jobloczController.text = first.name!+", "+first.street!+", "+first.locality!;
+            }
+            else {
+              _localityController.text = cityname;
+              _jobloczController.text = first.name!+", "+first.street!+", "+first.locality!;
+            }
+          }
+          else
+          {
+            CommonFunctions.showInfoDialog(getTranslated('NO_LOCATION', context)!, context);
+          }
+        }
+        else
+          {
+            Navigator.pop(context);
+          }
+        print(" _currentAddress ${ _currentAddress}");
+      } catch (e) {
+        print(e.toString());
+        Navigator.pop(context);
+        setState(() {
+          _currentAddress = 'Error getting location or address';
+        });
+      }
+    }
+  }
   getlocation() async {
     duplicatelocation.clear();
     try {
@@ -171,58 +225,6 @@ class _HrSaveProfileState extends State<HrSaveProfile> {
 
   }
 
-  _getLocation() async {
-    final coordinate = await SharedManager.shared.getLocationCoordinate();
-    this.latitude = coordinate.latitude;
-    this.longitude = coordinate.longitude;
-    _getAddressFromCurrentLocation( await SharedManager.shared.getLocationCoordinate());
-  //  await _getCurrentPosition();
-  }
-
-  // String? _currentAddress;
-  // Position? _currentPosition;
-  //
-  // Future<bool> _handleLocationPermission() async {
-  //   bool serviceEnabled;
-  //   LocationPermission permission;
-  //
-  //   serviceEnabled = await Geolocator.isLocationServiceEnabled();
-  //   if (!serviceEnabled) {
-  //     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-  //         content: Text(
-  //             'Location services are disabled. Please enable the services')));
-  //     return false;
-  //   }
-  //   permission = await Geolocator.checkPermission();
-  //   if (permission == LocationPermission.denied) {
-  //     permission = await Geolocator.requestPermission();
-  //     if (permission == LocationPermission.denied) {
-  //       ScaffoldMessenger.of(context).showSnackBar(
-  //           const SnackBar(content: Text('Location permissions are denied')));
-  //       return false;
-  //     }
-  //   }
-  //   if (permission == LocationPermission.deniedForever) {
-  //     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-  //         content: Text(
-  //             'Location permissions are permanently denied, we cannot request permissions.')));
-  //     return false;
-  //   }
-  //   return true;
-  // }
-  //
-  // Future<void> _getCurrentPosition() async {
-  //   final hasPermission = await _handleLocationPermission();
-  //   if (!hasPermission) return;
-  //   await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high)
-  //       .then((Position position) {
-  //     setState(() => _currentPosition = position);
-  //     var latlong = LatLng(_currentPosition!.latitude, _currentPosition!.longitude);
-  //     _getAddressFromCurrentLocation(latlong);
-  //   }).catchError((e) {
-  //     debugPrint(e);
-  //   });
-  // }
 
   _getAddressFromCurrentLocation(LatLng coordinate) async {
    // var coordinate = await SharedManager.shared.getLocationCoordinate();
@@ -753,7 +755,7 @@ class _HrSaveProfileState extends State<HrSaveProfile> {
                             context: context,
                             message: 'assets/lottie/location-permissions.json',
                           );
-                          _getLocation();
+                          _getCurrentAddress();
                         },
                         child:
                         Container(

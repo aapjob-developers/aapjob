@@ -1,17 +1,10 @@
 import 'dart:convert';
 import 'dart:io';
-
-import 'package:Aap_job/helper/LocationManager.dart';
-import 'package:Aap_job/helper/SharedManager.dart';
 import 'package:Aap_job/models/common_functions.dart';
 import 'package:Aap_job/providers/cities_provider.dart';
 import 'package:Aap_job/widgets/show_loading_dialog.dart';
 import 'package:Aap_job/widgets/show_location_dialog.dart';
 import 'package:flutter/material.dart';
-import 'package:Aap_job/data/datasource/remote/dio/dio_client.dart';
-import 'package:dio/dio.dart';
-// import 'package:geocoder/geocoder.dart';
-// import 'package:geocoder/model.dart';
 import 'package:Aap_job/models/CitiesModel.dart';
 import 'package:Aap_job/utill/app_constants.dart';
 import 'package:Aap_job/utill/colors.dart';
@@ -49,59 +42,78 @@ class _CitySelectionScreenState extends State<CitySelectionScreen> {
      //LocationManager.shared.getCurrentLocation();
     super.initState();
   }
- _getLocation() async {
-   final coordinate = await SharedManager.shared.getLocationCoordinate();
-   this.latitude = coordinate.latitude;
-   this.longitude = coordinate.longitude;
-   _getAddressFromCurrentLocation( await SharedManager.shared.getLocationCoordinate());
- //  await _getCurrentPosition();
+ String _currentAddress = 'Tap the button to get your address';
+
+ Future<void> _getCurrentAddress() async {
+   LocationPermission permission = await Geolocator.checkPermission();
+   if (permission == LocationPermission.denied || permission==LocationPermission.unableToDetermine||permission == LocationPermission.deniedForever) {
+     // Open app settings when permission is denied or denied forever
+     permission = await Geolocator.requestPermission();
+     if (permission == LocationPermission.denied || permission == LocationPermission.deniedForever|| permission==LocationPermission.unableToDetermine) {
+       // User denied the permission or denied forever
+       print("pp1 $permission");
+       // Navigator.pop(context);
+       _getCurrentAddress();
+       return;
+     }
+     else
+     {
+       //   Navigator.pop(context);
+       _getCurrentAddress();
+     }
+   }
+   if (permission == LocationPermission.whileInUse ||
+       permission == LocationPermission.always) {
+     try {
+       Position position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.medium,);
+       List<Placemark> placemarks = await placemarkFromCoordinates(position.latitude, position.longitude);
+       print("location list ${placemarks}");
+       if (placemarks.isNotEmpty) {
+         Placemark placemark = placemarks.first;
+         var first = placemark;
+         if(first.locality!=null)
+         {
+           this.city = first.locality!;
+         }
+         if(this.addressline_2!=null)
+         {
+           this.addressline_2 = first.postalCode!;
+         }
+         setState(() {
+           print("Final Address:---->$first");
+         });
+         // ;
+         String cityname="Delhi";
+         if(first.subAdministrativeArea!=null) {
+
+           String q=first.subAdministrativeArea!;
+           if(q.contains("Division"))
+             q=q.toString().trim().substring(0,q.toString().trim().length - 8);
+           cityname=q.toString().trim();
+
+         } else if(first.locality!=null)
+         {
+           cityname= first.locality!;
+         }
+         filterSearchResult(cityname);
+         Navigator.pop(context);
+       } else {
+         setState(() {
+           _currentAddress = 'Address not found';
+         });
+         Navigator.pop(context);
+       }
+       print(" _currentAddress ${ _currentAddress}");
+     } catch (e) {
+       print(e.toString());
+       setState(() {
+         _currentAddress = 'Error getting location or address';
+       });
+       Navigator.pop(context);
+     }
+   }
  }
 
- // String? _currentAddress;
- // Position? _currentPosition;
- //
- // Future<bool> _handleLocationPermission() async {
- //   bool serviceEnabled;
- //   LocationPermission permission;
- //
- //   serviceEnabled = await Geolocator.isLocationServiceEnabled();
- //   if (!serviceEnabled) {
- //     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
- //         content: Text(
- //             'Location services are disabled. Please enable the services')));
- //     return false;
- //   }
- //   permission = await Geolocator.checkPermission();
- //   if (permission == LocationPermission.denied) {
- //     permission = await Geolocator.requestPermission();
- //     if (permission == LocationPermission.denied) {
- //       ScaffoldMessenger.of(context).showSnackBar(
- //           const SnackBar(content: Text('Location permissions are denied')));
- //       return false;
- //     }
- //   }
- //   if (permission == LocationPermission.deniedForever) {
- //     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
- //         content: Text(
- //             'Location permissions are permanently denied, we cannot request permissions.')));
- //     return false;
- //   }
- //   return true;
- // }
- //
- // Future<void> _getCurrentPosition() async {
- //   final hasPermission = await _handleLocationPermission();
- //
- //   if (!hasPermission) return;
- //   await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high)
- //       .then((Position position) {
- //     setState(() => _currentPosition = position);
- //     var latlong = LatLng(_currentPosition!.latitude, _currentPosition!.longitude);
- //     _getAddressFromCurrentLocation(latlong);
- //   }).catchError((FlutterError e) {
- //     debugPrint(e.toString());
- //   });
- // }
 
  _getAddressFromCurrentLocation(LatLng coordinate) async {
    // var coordinate = await SharedManager.shared.getLocationCoordinate();
@@ -142,7 +154,6 @@ class _CitySelectionScreenState extends State<CitySelectionScreen> {
       cityname= first.locality!;
     }
     filterSearchResult(cityname);
-   //filterSearchResult(first.subAdminArea);
  }
 
 
@@ -229,15 +240,11 @@ class _CitySelectionScreenState extends State<CitySelectionScreen> {
               child:
                   GestureDetector(
                     onTap:(){
-                      // showLoadingDialog(
-                      //   context: context,
-                      //   message: "Getting Your Current Location. Please Wait.",
-                      // );
                       showLocationDialog(
                         context: context,
                         message: 'assets/lottie/location-permissions.json',
                       );
-                      _getLocation();
+                      _getCurrentAddress();
                     },
                     child:
                       Container(

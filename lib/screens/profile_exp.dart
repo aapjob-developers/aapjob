@@ -39,6 +39,7 @@ class _ProfileExpState extends State<ProfileExp> {
   Color yesbutton=Colors.amber,nobutton=Colors.amber;
   String pt="";
   File? file;
+  final _scrollController = ScrollController();
 
   void initState() {
     super.initState();
@@ -51,6 +52,7 @@ class _ProfileExpState extends State<ProfileExp> {
       uploadFile();
     });
   }
+
 
   Future<void> initializePreference() async{
     this.sharedPreferences = await SharedPreferences.getInstance();
@@ -71,7 +73,11 @@ class _ProfileExpState extends State<ProfileExp> {
       }
     }
   }
-
+  void _scrollToFocus() {
+    double offset = 80;
+    print("offset ${offset}");
+    _scrollController.animateTo(offset, duration: Duration(milliseconds: 500), curve: Curves.ease);
+  }
   Future<void> _savestep3() async {
     final sharedPreferences = await SharedPreferences.getInstance();
     if(exp)
@@ -137,6 +143,7 @@ class _ProfileExpState extends State<ProfileExp> {
     backgroundColor: Colors.transparent,
     body:
     SingleChildScrollView(
+      controller: _scrollController,
       child:
       new Column(
         mainAxisAlignment: MainAxisAlignment.start,
@@ -186,7 +193,6 @@ class _ProfileExpState extends State<ProfileExp> {
             ),
 
           ),
-
           new Padding(
             child:
             new Row(
@@ -269,7 +275,6 @@ class _ProfileExpState extends State<ProfileExp> {
 
                 ]
             ),
-
           new Padding(
             child:
             new Row(
@@ -277,7 +282,7 @@ class _ProfileExpState extends State<ProfileExp> {
                 mainAxisSize: MainAxisSize.max,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: <Widget>[
-                  exp? ExpBox():
+                  exp? ExpBox(callback: _scrollToFocus):
                   Container(width: deviceSize.width-40,),
                 ]
             ),
@@ -356,8 +361,8 @@ class _ProfileExpState extends State<ProfileExp> {
 
 
 class ExpBox extends StatefulWidget {
-  ExpBox({Key? key}) : super(key: key);
-
+  final VoidCallback callback; // Callback function to be passed from ProfileExp
+  ExpBox({Key? key, required this.callback}) : super(key: key);
   @override
   _ExpBoxState createState() => new _ExpBoxState();
 }
@@ -371,12 +376,37 @@ class _ExpBoxState extends State<ExpBox> {
   String apijobskilldata="";
   final selectedIndexes = [];
   TextEditingController companynameController = TextEditingController();
+  final _scrollController = ScrollController();
 
   final _formKey = GlobalKey<FormState>();
 // Initial Selected Value
-  String dropdownvalue = 'Please Select Salary';
+    String dropdownvalue = 'Please Select Salary';
   String totalexp="none";
   // List of items in our dropdown menu
+  final _companynameFocus = FocusNode();
+  final _jobtitleFocus = FocusNode();
+  final _dropdownFocus = FocusNode();
+  final _selectedIndexFocus = FocusNode();
+
+  void callProfileExpFunction() {
+    // Call the function in ProfileExp using the callback function
+    widget.callback();
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    companynameController.dispose();
+    _jobtitleController.dispose();
+    selectedIndexNotifier.dispose();
+    // Dispose the FocusNodes
+    _companynameFocus.dispose();
+    _jobtitleFocus.dispose();
+    _dropdownFocus.dispose();
+    _selectedIndexFocus.dispose();
+    super.dispose();
+  }
+
   var items = [
     'Please Select Salary',
     '0- Rs. 10,000',
@@ -409,47 +439,6 @@ class _ExpBoxState extends State<ExpBox> {
 
   List<JobTitleModel> duplicateJobTitle = <JobTitleModel>[];
 
-  // getJobTitles() async {
-  //   duplicateJobTitle.clear();
-  //   try {
-  //     Response response = await _dio.get(_baseUrl + AppConstants.JOB_TITLE_URI);
-  //     apidata = response.data;
-  //     print('JobTitle : ${apidata}');
-  //     List<dynamic> data=json.decode(apidata);
-  //     if(data.toString()=="[]")
-  //     {
-  //       duplicateJobTitle=[];
-  //       setState(() {
-  //         _hasJobTitle = false;
-  //       });
-  //     }
-  //     else
-  //     {
-  //       data.forEach((location) =>
-  //           duplicateJobTitle.add(JobTitleModel.fromJson(location)));
-  //       setState(() {
-  //         _hasJobTitle=true;
-  //       });
-  //     }
-  //     print('Jobtitle List: ${duplicateJobTitle}');
-  //
-  //   } on DioError catch (e) {
-  //     // The request was made and the server responded with a status code
-  //     // that falls out of the range of 2xx and is also not 304.
-  //     if (e.response != null) {
-  //       print('Dio error!');
-  //       print('STATUS: ${e.response?.statusCode}');
-  //       print('DATA: ${e.response?.data}');
-  //       print('HEADERS: ${e.response?.headers}');
-  //     } else {
-  //       // Error due to setting up or sending the request
-  //       print('Error sending request!');
-  //       print(e.message);
-  //     }
-  //   }
-  //
-  // }
-
   _JobtitleDisplaySelection(BuildContext context) async {
     _hasJobTitle = duplicateJobTitle.length >= 1;
     if(_hasJobTitle) {
@@ -468,9 +457,6 @@ class _ExpBoxState extends State<ExpBox> {
     {
       CommonFunctions.showInfoDialog("Please Wait..", context);
     }
-
-
-
   }
 
 ///////////////////////////////////////////////////////
@@ -562,34 +548,13 @@ class _ExpBoxState extends State<ExpBox> {
       width: deviceSize.width-40,
       padding: EdgeInsets.all(5.0),
       child:
-
+      SingleChildScrollView(
+      controller: _scrollController,
+      child:
       Form(
         key: _formKey,
         child: Column(
           children: [
-            // Container(
-            //   padding: EdgeInsets.only(bottom: 5),
-            //   width: deviceSize.width * 0.8,
-            //   // padding: EdgeInsets.all(16.0),
-            //   child:
-            //   TextFormField(
-            //     style: new TextStyle(fontSize: 14),
-            //     decoration: InputDecoration(
-            //       isDense: true,
-            //         filled: true,
-            //         fillColor: Colors.white,
-            //         labelText: 'job Title',
-            //         focusColor: Colors.white// myIcon is a 48px-wide widget.
-            //     ),
-            //     keyboardType: TextInputType.text,
-            //     validator: (value) {
-            //       if (value.isEmpty) {
-            //         return 'Please Enter your job title';
-            //       }
-            //     },
-            //     controller: jobtitleController,
-            //   ),
-            // ),
             new Padding(
               child:
               Container(
@@ -647,8 +612,10 @@ class _ExpBoxState extends State<ExpBox> {
                   if (value!.isEmpty||value!.length<5) {
                     return 'Please Enter Valid Company Name';
                   }
+                  return null;
                 },
                controller: companynameController,
+                focusNode: _companynameFocus,
               ),
             ),
             Container(
@@ -680,7 +647,12 @@ class _ExpBoxState extends State<ExpBox> {
                                            text: j==1?' < 1 ':j==2?'1-3 ':j==3?'3-5 ':j==4?'5-10 ':' 10+ ',
                                            isFavorite: selectedIndex == j,
                                            onPressed: () {
-                                             selectedIndex == j ?  selectedIndexNotifier.value = 0 : selectedIndexNotifier.value = j;
+                                             if (selectedIndex == j) {
+                                               selectedIndexNotifier.value = 0;
+                                             } else {
+                                               selectedIndexNotifier.value = j;
+                                               // Scroll to the row if a MyWidget element is not selected
+                                             }
                                              _saveexp(j==1?' < 1 ':j==2?'1-3 ':j==3?'3-5 ':j==4?'5-10 ':' 10+ ');
                                            }
                                        ),
@@ -699,31 +671,36 @@ class _ExpBoxState extends State<ExpBox> {
               Text("Current Monthly Salary",style: new TextStyle(color: Colors.white,fontSize: 14,)),
             ),
             Container(
-              padding: EdgeInsets.only(left: 20,),
+              padding: EdgeInsets.only(left: 20),
               decoration: new BoxDecoration(color: Colors.white),
-              width: deviceSize.width * 0.8,
-              child:
-              DropdownButton(
-               focusColor: Colors.white,
+              width: MediaQuery.of(context).size.width * 0.8,
+              child: DropdownButtonFormField<String>(
                 value: dropdownvalue,
-                // Down Arrow Icon
-                icon: const Icon(Icons.keyboard_arrow_down),
-                // Array list of items
-                items: items.map((String items) {
-                  return DropdownMenuItem(
-                    value: items,
-                    child: Text(items),
+                focusNode: _dropdownFocus, // Link the focus node to the dropdown
+                decoration: InputDecoration(
+                  enabledBorder: InputBorder.none,
+                ),
+                items: items.map((String item) {
+                  return DropdownMenuItem<String>(
+                    value: item,
+                    child: Text(item),
                   );
                 }).toList(),
-                // After selecting the desired option,it will
-                // change button value to selected value
                 onChanged: (value) {
                   setState(() {
                     dropdownvalue = value!;
                   });
                 },
+                validator: (value) {
+                  // Your validation logic for the dropdown
+                  if (value == null || value.isEmpty) {
+                    return 'Please select an option';
+                  }
+                  return null;
+                },
               ),
             ),
+            SizedBox(height: 20),
             SizedBox(height: 3,),
             new Padding(
               child:
@@ -790,7 +767,6 @@ class _ExpBoxState extends State<ExpBox> {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: <Widget>[
                   Container(
-
                     padding: EdgeInsets.all(3.0),
                     child:
                     new Padding(
@@ -805,6 +781,19 @@ class _ExpBoxState extends State<ExpBox> {
                               onPressed: () {
     if (_formKey.currentState!.validate()) {
       _savestep3();
+    }else {
+      callProfileExpFunction();
+      // Scroll to the position of the dropdown when it causes an error
+      // if (dropdownvalue.isEmpty) {
+      //   _scrollToFocus(_dropdownFocus);
+      // } else if (companynameController.text.isEmpty) {
+      //   // Scroll to the position of the company name field if it causes an error
+      //   print("Company Name failed");
+      //   _scrollToFocus(_companynameFocus);
+      // } else if (_jobtitleController.text.isEmpty) {
+      //   // Scroll to the position of the job title field if it causes an error
+      //   _scrollToFocus(_jobtitleFocus);
+      // }
     }
                               },
                               style: ElevatedButton.styleFrom(
@@ -828,7 +817,13 @@ class _ExpBoxState extends State<ExpBox> {
             ),
           ],
         ),
-      ),);
+      ),),);
+  }
+  // Method to scroll to the position of the focus node
+  void _scrollToFocus(FocusNode focusNode) {
+    double offset = focusNode.context!.findRenderObject()!.getTransformTo(null).getTranslation().y+50;
+    print("offset ${offset}");
+    _scrollController.animateTo(offset, duration: Duration(milliseconds: 500), curve: Curves.ease);
   }
 }
 

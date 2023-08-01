@@ -8,6 +8,8 @@ import 'package:Aap_job/localization/language_constrants.dart';
 import 'package:Aap_job/models/ChatUserModel.dart';
 import 'package:Aap_job/providers/localization_provider.dart';
 import 'package:Aap_job/screens/HrVerificationScreen.dart';
+import 'package:Aap_job/screens/JobtypeSelect.dart';
+import 'package:Aap_job/screens/ResumeUpload.dart';
 import 'package:Aap_job/screens/homepage.dart';
 import 'package:Aap_job/screens/hr_save_profile.dart';
 import 'package:Aap_job/screens/hrhomepage.dart';
@@ -216,9 +218,25 @@ class _SelectLanguageState extends State<SelectLanguage> {
             else
             {
               sharedPreferences!.setBool("step3", true);
+
               if(Provider.of<AuthProvider>(context, listen: false).getfullsubmited()=="0") {
-                Navigator.pushAndRemoveUntil(context, MaterialPageRoute(
-                    builder: (context) => ProfileExp()), (route) => false);
+                if(sharedPreferences!.getBool("step4")==true)
+                  {
+                        if(sharedPreferences!.getBool("step5")==true)
+                        {
+                          Navigator.pushAndRemoveUntil(context,  MaterialPageRoute(builder: (context)=> JobTypeSelect()), (route) => false);
+                        }
+                        else
+                        {
+                          Navigator.pushAndRemoveUntil(context, MaterialPageRoute(
+                              builder: (context) => ResumeUpload()), (route) => false);
+                        }
+                  }
+                else
+                  {
+                    Navigator.pushAndRemoveUntil(context, MaterialPageRoute(
+                        builder: (context) => ProfileExp()), (route) => false);
+                  }
               }
               else
               {

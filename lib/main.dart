@@ -70,7 +70,6 @@ Future<void> main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
-
   // final appleSignInAvailable = await AppleSignInAvailable.check();
   ErrorWidget.builder = (FlutterErrorDetails details) {
     return Container(

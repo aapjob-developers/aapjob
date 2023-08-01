@@ -1,9 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
-import 'package:Aap_job/data/chat/chat_auth_repository.dart';
-import 'package:Aap_job/helper/LocationManager.dart';
-import 'package:Aap_job/helper/SharedManager.dart';
 import 'package:Aap_job/helper/uploader.dart';
 import 'package:Aap_job/localization/language_constrants.dart';
 import 'package:Aap_job/models/CitiesModel.dart';
@@ -86,6 +83,7 @@ class _SaveProfileState extends State<SaveProfile> {
 
   var contentdata;
   final _formKey = GlobalKey<FormState>();
+  final _scrollController = ScrollController();
 
   bool videorecord=false;
 
@@ -95,12 +93,13 @@ class _SaveProfileState extends State<SaveProfile> {
   TextEditingController _nameController = TextEditingController();
   TextEditingController _jobcityController = TextEditingController();
   TextEditingController _jobloczController = TextEditingController();
-  TextEditingController _dobController = TextEditingController();
-
+ // TextEditingController _dobController = TextEditingController();
+  final _fieldKeys = <GlobalKey>[];
   @override
   void initState() {
     super.initState();
     initializePreference().whenComplete((){
+      _fieldKeys.addAll(List.generate(10, (_) => GlobalKey()));
       setState(() {
         status=sharedp.getString("status")?? "0";
         _nameController.text= sharedp.getString("name")=="no Name"?"":sharedp.getString("name")?? "";
@@ -119,15 +118,7 @@ class _SaveProfileState extends State<SaveProfile> {
         {
           _profileuploaded=true;
         }
-        // if(status=="1")
-        //   {
-        //     Navigator.pushAndRemoveUntil(context, MaterialPageRoute(
-        //         builder: (context) => HomePage()), (
-        //         route) => false);
-        //   }
-        // getcities();
         button=Colors.amber;
-        //LocationManager.shared.getCurrentLocation();
         if(pathe!="") {
           _controller = VideoPlayerController.file(File(pathe))
             ..initialize().then((_) {
@@ -139,7 +130,11 @@ class _SaveProfileState extends State<SaveProfile> {
       });
     });
   }
-
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
   Future<void> initializePreference() async{
     await  Provider.of<ContentProvider>(context, listen: false).getContent(context);
     duplicateItems.addAll(Provider.of<CitiesProvider>(context, listen: false).cityModelList);
@@ -151,40 +146,6 @@ class _SaveProfileState extends State<SaveProfile> {
 
   List<CityModel> duplicateItems = <CityModel>[];
   List<LocationModel> duplicatelocation = <LocationModel>[];
-  // getcities() async {
-  //   try {
-  //     Response response = await _dio.get(_baseUrl + AppConstants.CITIES_URI);
-  //     apidatacity= response.data;
-  //     print('City List: ${apidatacity}');
-  //     List<dynamic> data=json.decode(apidatacity);
-  //
-  //     if(data.toString()=="[]")
-  //     {
-  //       duplicateItems=[];
-  //     }
-  //     else
-  //     {
-  //       data.forEach((city) =>
-  //           duplicateItems.add(CityModel.fromJson(city)));
-  //     }
-  //     print('City List: ${duplicateItems}');
-  //
-  //   } on DioError catch (e) {
-  //     // The request was made and the server responded with a status code
-  //     // that falls out of the range of 2xx and is also not 304.
-  //     if (e.response != null) {
-  //       print('Dio error!');
-  //       print('STATUS: ${e.response?.statusCode}');
-  //       print('DATA: ${e.response?.data}');
-  //       print('HEADERS: ${e.response?.headers}');
-  //     } else {
-  //       // Error due to setting up or sending the request
-  //       print('Error sending request!');
-  //       print(e.message);
-  //     }
-  //   }
-  //
-  // }
   getlocation() async {
     duplicatelocation.clear();
     try {
@@ -226,58 +187,86 @@ class _SaveProfileState extends State<SaveProfile> {
 
   }
 
-  _getLocation() async {
-    final coordinate = await SharedManager.shared.getLocationCoordinate();
-    this.latitude = coordinate.latitude;
-    this.longitude = coordinate.longitude;
-    _getAddressFromCurrentLocation( await SharedManager.shared.getLocationCoordinate());
+  String _currentAddress = 'Tap the button to get your address';
+
+  Future<void> _getCurrentAddress() async {
+    LocationPermission permission = await Geolocator.checkPermission();
+    print("pp0 $permission");
+    if (permission == LocationPermission.denied || permission==LocationPermission.unableToDetermine||permission == LocationPermission.deniedForever) {
+      // Open app settings when permission is denied or denied forever
+      permission = await Geolocator.requestPermission();
+      print("pp1 $permission");
+      if (permission == LocationPermission.denied || permission == LocationPermission.deniedForever|| permission==LocationPermission.unableToDetermine) {
+        // User denied the permission or denied forever
+        print("pp2 $permission");
+       // Navigator.pop(context);
+        _getCurrentAddress();
+        return;
+      }
+      else
+        {
+       //   Navigator.pop(context);
+          print("pp3 $permission");
+         // _getCurrentAddress();
+        }
+    }
+    if (permission == LocationPermission.whileInUse || permission == LocationPermission.always) {
+      print("pp4 $permission");
+      try {
+        Position position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.medium,);
+        List<Placemark> placemarks = await placemarkFromCoordinates(position.latitude, position.longitude);
+        print("location list ${placemarks}");
+        if (placemarks.isNotEmpty) {
+          Placemark placemark = placemarks.first;
+          var first = placemark;
+          String cityname="Delhi";
+          if(first.subAdministrativeArea!=null) {
+            String q=first.subAdministrativeArea!;
+            if(q.contains("Division"))
+              q=q.toString().trim().substring(0,q.toString().trim().length - 8);
+            cityname=q.toString().trim();
+          } else if(first.locality!=null)
+          {
+            cityname= first.locality!;
+          }
+
+          if(cityname!=null) {
+            _jobcityController.text = cityname;
+            if(first.locality!=null)
+            {
+              _jobloczController.text = first.locality!;
+            }
+            if (cityname != first.locality && first.locality != null) {
+              _jobloczController.text = first.locality!;
+            } else if (cityname != first.subLocality && first.subLocality != null) {
+              _jobloczController.text = first.subLocality!;
+            }
+            else {
+              _jobloczController.text = cityname;
+            }
+          }
+          setState(() {
+             _currentAddress =
+             '${placemark.street}, ${placemark.locality}, ${placemark.administrativeArea}, ${placemark.country}';
+          });
+          //Navigator.pop(context);
+        } else {
+          //Navigator.pop(context);
+          setState(() {
+            _currentAddress = 'Address not found';
+          });
+        }
+        print(" _currentAddress ${ _currentAddress}");
+        Navigator.pop(context);
+      } catch (e) {
+        print(e.toString());
+        Navigator.pop(context);
+        setState(() {
+          _currentAddress = 'Error getting location or address';
+        });
+      }
+    }
   }
-  //
-  // String? _currentAddress;
-  // Position? _currentPosition;
-  //
-  // Future<bool> _handleLocationPermission() async {
-  //   bool serviceEnabled;
-  //   LocationPermission permission;
-  //
-  //   serviceEnabled = await Geolocator.isLocationServiceEnabled();
-  //   if (!serviceEnabled) {
-  //     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-  //         content: Text(
-  //             'Location services are disabled. Please enable the services')));
-  //     return false;
-  //   }
-  //   permission = await Geolocator.checkPermission();
-  //   if (permission == LocationPermission.denied) {
-  //     permission = await Geolocator.requestPermission();
-  //     if (permission == LocationPermission.denied) {
-  //       ScaffoldMessenger.of(context).showSnackBar(
-  //           const SnackBar(content: Text('Location permissions are denied')));
-  //       return false;
-  //     }
-  //   }
-  //   if (permission == LocationPermission.deniedForever) {
-  //     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-  //         content: Text(
-  //             'Location permissions are permanently denied, we cannot request permissions.')));
-  //     return false;
-  //   }
-  //   return true;
-  // }
-  //
-  // Future<void> _getCurrentPosition() async {
-  //   final hasPermission = await _handleLocationPermission();
-  //
-  //   if (!hasPermission) return;
-  //   await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.medium)
-  //       .then((Position position) {
-  //     setState(() => _currentPosition = position);
-  //     var latlong = LatLng(_currentPosition!.latitude, _currentPosition!.longitude);
-  //     _getAddressFromCurrentLocation(latlong);
-  //   }).catchError((e) {
-  //     debugPrint(e);
-  //   });
-  // }
 
   _navigateAndDisplaySelection(BuildContext context) async {
     _hasData = duplicateItems.length > 1;
@@ -310,68 +299,6 @@ class _SaveProfileState extends State<SaveProfile> {
       addressnode.requestFocus();
     }
 
-  }
-
-  _getAddressFromCurrentLocation(LatLng coordinate) async {
-   // var coordinate = await SharedManager.shared.getLocationCoordinate();
-  //  print("Stored Location:$coordinate");
-    var addresses=await placemarkFromCoordinates(coordinate.latitude, coordinate.longitude);
-    Navigator.pop(context);
-    var first = addresses.first;
-    // print('adminArea: ${first.administrativeArea}');
-    // print('locality: ${first.locality}');
-    // print('addressLine: ${first.name}');
-    // print('featureName: ${first.street}');
-    // print('subAdminArea: ${first.subAdministrativeArea}');
-    // print('subLocality: ${first.subLocality}');
-    // print('subThoroughfare: ${first.subThoroughfare}');
-    // print('thoroughfare: ${first.thoroughfare}');
-    // if(first.locality!=null)
-    // {
-    //   this.city = first.locality!;
-    // }
-    // if(this.addressline_2!=null)
-    // {
-    //   this.addressline_2 = first.postalCode!;
-    // }
-    String cityname="Delhi";
-    if(first.subAdministrativeArea!=null) {
-      String q=first.subAdministrativeArea!;
-      if(q.contains("Division"))
-        q=q.toString().trim().substring(0,q.toString().trim().length - 8);
-      cityname=q.toString().trim();
-    } else if(first.locality!=null)
-    {
-      cityname= first.locality!;
-    }
-
-    if(cityname!=null) {
-      _jobcityController.text = cityname;
-    //  CityModel city = filterSearchResult(cityname);
-    //   if (city.id != "0"){
-    //     cityid = (city.id==null?city.id:"0")!;
-    //   }
-    //   else {
-    //     CommonFunctions.showInfoDialog("Your City is not in list. Please select a near by city from City List", context);
-    //   }
-
-      if(first.locality!=null)
-      {
-        _jobloczController.text = first.locality!;
-      }
-      if (cityname != first.locality && first.locality != null) {
-        _jobloczController.text = first.locality!;
-      } else if (cityname != first.subLocality && first.subLocality != null) {
-        _jobloczController.text = first.subLocality!;
-      }
-      else {
-        _jobloczController.text = cityname;
-      }
-    }
-    else
-    {
-      CommonFunctions.showInfoDialog(getTranslated('NO_LOCATION', context)!, context);
-    }
   }
 
   CityModel filterSearchResult(String query) {
@@ -420,7 +347,7 @@ class _SaveProfileState extends State<SaveProfile> {
     String _Name = _nameController.text.trim();
     String _jobcity = _jobcityController.text.trim();
     String _joblocation = _jobloczController.text.trim();
-    String _dob = _dobController.text.trim();
+    String _dob = "2000-01-01";
 
     if (_Name.isEmpty||_jobcity.isEmpty||_joblocation.isEmpty||_dob.isEmpty||_dob=="Enter Date of Birth")
     {
@@ -577,17 +504,11 @@ class _SaveProfileState extends State<SaveProfile> {
   }
   bool isselect=false;
 
-
   @override
   Widget build(BuildContext context) {
     final deviceSize = MediaQuery
         .of(context)
         .size;
-    final TextStyle? textStyle = Theme
-        .of(context)
-        .textTheme
-        .caption;
-
     return
       Container(
         decoration: new BoxDecoration(color: Primary),
@@ -626,13 +547,13 @@ class _SaveProfileState extends State<SaveProfile> {
           ),
           backgroundColor: Colors.transparent,
           body:
-
           Stack(
             children: <Widget>[
               Align(
                 alignment: Alignment.topCenter,
                 child:
                 SingleChildScrollView(
+                  controller: _scrollController,
                   child:
                   Form(
                     key: _formKey,
@@ -705,15 +626,11 @@ class _SaveProfileState extends State<SaveProfile> {
                           child:
                           GestureDetector(
                             onTap:(){
-                              // showLoadingDialog(
-                              //   context: context,
-                              //   message: "Getting Your Current Location. Please Wait.",
-                              // );
                               showLocationDialog(
                                 context: context,
                                 message: 'assets/lottie/location-permissions.json',
                               );
-                              _getLocation();
+                              _getCurrentAddress();
                             },
                             child:
                             Container(
@@ -832,65 +749,65 @@ class _SaveProfileState extends State<SaveProfile> {
                           ),
                           padding: const EdgeInsets.all(5.0),
                         ),
-                        Platform.isIOS ?
-                            Container()
-                            :
-                        new Padding(
-                          child:
-                          new Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              mainAxisSize: MainAxisSize.max,
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: <Widget>[
-                                Container(
-                                  width: deviceSize.width-20,
-                                  decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    border: Border.all(color: Primary),
-                                    borderRadius: BorderRadius.only(topRight: Radius.circular(6), topLeft: Radius.circular(6),bottomLeft:Radius.circular(6), bottomRight: Radius.circular(6) ),
-                                    boxShadow: [
-                                      BoxShadow(color: Colors.grey.withOpacity(0.1), spreadRadius: 1, blurRadius: 3, offset: Offset(0, 1)) // changes position of shadow
-                                    ],
-                                  ),
-                                  child: TextFormField(
-                                    controller: _dobController,
-                                    decoration: InputDecoration(
-                                      icon: Icon(Icons.calendar_today),
-                                      hintText: "Enter Date of birth",
-                                      filled: true,
-                                      contentPadding: EdgeInsets.symmetric(vertical: 12.0, horizontal: 15),
-                                      isDense: true,
-                                      focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: Theme.of(context).primaryColor)),
-                                      errorStyle: TextStyle(height: 1.5),
-                                      border: InputBorder.none,
-                                    ),
-                                    readOnly: true,  //set it true, so that user will not able to edit text
-                                    onTap: () async {
-                                      DateTime? pickedDate = await showDatePicker(
-                                          context: context, initialDate: DateTime(2000),
-                                          firstDate: DateTime(1950), //DateTime.now() - not to allow to choose before today.
-                                          lastDate: DateTime(2005)
-                                      );
-                                      if(pickedDate != null ){
-                                        print(pickedDate);  //pickedDate output format => 2021-03-10 00:00:00.000
-                                        String formattedDate = DateFormat('dd-MM-yyyy').format(pickedDate);
-                                        print(formattedDate); //formatted date output using intl package =>  2021-03-16
-                                        //you can implement different kind of Date Format here according to your requirement
-
-                                        setState(() {
-                                          _dobController.text = formattedDate; //set output date to TextField value.
-                                        });
-                                      }else{
-                                        print("Date is not selected");
-                                      }
-                                    },
-                                  ),
-                                ),
-
-                              ]
-                          ),
-                          padding: const EdgeInsets.all(5.0),
-                        ),
+                        //Platform.isIOS ?
+                            //Container()
+                           // :
+                        // new Padding(
+                        //   child:
+                        //   new Row(
+                        //       mainAxisAlignment: MainAxisAlignment.center,
+                        //       mainAxisSize: MainAxisSize.max,
+                        //       crossAxisAlignment: CrossAxisAlignment.center,
+                        //       children: <Widget>[
+                        //         Container(
+                        //           width: deviceSize.width-20,
+                        //           decoration: BoxDecoration(
+                        //             color: Colors.white,
+                        //             border: Border.all(color: Primary),
+                        //             borderRadius: BorderRadius.only(topRight: Radius.circular(6), topLeft: Radius.circular(6),bottomLeft:Radius.circular(6), bottomRight: Radius.circular(6) ),
+                        //             boxShadow: [
+                        //               BoxShadow(color: Colors.grey.withOpacity(0.1), spreadRadius: 1, blurRadius: 3, offset: Offset(0, 1)) // changes position of shadow
+                        //             ],
+                        //           ),
+                        //           child: TextFormField(
+                        //             controller: _dobController,
+                        //             decoration: InputDecoration(
+                        //               icon: Icon(Icons.calendar_today),
+                        //               hintText: "Enter Date of birth",
+                        //               filled: true,
+                        //               contentPadding: EdgeInsets.symmetric(vertical: 12.0, horizontal: 15),
+                        //               isDense: true,
+                        //               focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: Theme.of(context).primaryColor)),
+                        //               errorStyle: TextStyle(height: 1.5),
+                        //               border: InputBorder.none,
+                        //             ),
+                        //             readOnly: true,  //set it true, so that user will not able to edit text
+                        //             onTap: () async {
+                        //               DateTime? pickedDate = await showDatePicker(
+                        //                   context: context, initialDate: DateTime(2000),
+                        //                   firstDate: DateTime(1950), //DateTime.now() - not to allow to choose before today.
+                        //                   lastDate: DateTime(2005)
+                        //               );
+                        //               if(pickedDate != null ){
+                        //                 print(pickedDate);  //pickedDate output format => 2021-03-10 00:00:00.000
+                        //                 String formattedDate = DateFormat('dd-MM-yyyy').format(pickedDate);
+                        //                 print(formattedDate); //formatted date output using intl package =>  2021-03-16
+                        //                 //you can implement different kind of Date Format here according to your requirement
+                        //
+                        //                 setState(() {
+                        //                   _dobController.text = formattedDate; //set output date to TextField value.
+                        //                 });
+                        //               }else{
+                        //                 print("Date is not selected");
+                        //               }
+                        //             },
+                        //           ),
+                        //         ),
+                        //
+                        //       ]
+                        //   ),
+                        //   padding: const EdgeInsets.all(5.0),
+                        // ),
                         Platform.isIOS ?
                         Container()
                             :
@@ -1134,9 +1051,11 @@ class _SaveProfileState extends State<SaveProfile> {
                                                   :
                                               CommonFunctions.showInfoDialog('Please Submit Your Profile Image',context);
                                             }
-                                          },
+                                            else
+                                              {
 
-                                          //     Navigator.pushAndRemoveUntil(context,  MaterialPageRoute(builder: (context)=> ProfileExp()), (route) => false);
+                                              }
+                                          },
                                           style: ElevatedButton.styleFrom(
                                               minimumSize: new Size(deviceSize.width * 0.5,20),
                                               shape: RoundedRectangleBorder(

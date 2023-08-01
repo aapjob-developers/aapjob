@@ -1,10 +1,5 @@
 
 import 'package:Aap_job/data/datasource/remote/dio/dio_client.dart';
-import 'package:Aap_job/data/datasource/remote/exception/api_error_handler.dart';
-import 'package:Aap_job/helper/LocationManager.dart';
-import 'package:Aap_job/models/response/api_response.dart';
-import 'package:Aap_job/utill/app_constants.dart';
-import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 

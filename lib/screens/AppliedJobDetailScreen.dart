@@ -602,7 +602,7 @@ class _AppliedJobDetailScreenState extends State<AppliedJobDetailScreen> {
                       mainAxisSize: MainAxisSize.max,
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: <Widget>[
-                                    currenttime>10&&currenttime<19&&widget.jobsModel.callAllow=="Allow"?
+                                    currenttime>10&&currenttime<19?
                                     ElevatedButton(
                                       child:
                                       Row(

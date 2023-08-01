@@ -1,3 +1,4 @@
+import 'package:Aap_job/main.dart';
 import 'package:Aap_job/screens/myloginscreen.dart';
 import 'package:Aap_job/screens/splashscreen.dart';
 import 'package:Aap_job/utill/authentification.dart';
@@ -10,6 +11,7 @@ import 'package:Aap_job/screens/loginscreen.dart';
 import 'package:Aap_job/screens/mainloginScreen.dart';
 import 'package:Aap_job/utill/colors.dart';
 import 'package:Aap_job/utill/dimensions.dart';
+import 'package:restart_app/restart_app.dart';
 // import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
 
@@ -56,8 +58,9 @@ class SignOutConfirmationDialog extends StatelessWidget {
                 FirebaseMessaging.instance.deleteToken();
                 Navigator.pop(context);
                 Provider.of<AuthProvider>(context,listen: false).clearSharedData();
-               // signOut();
-                Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (context) => SplashScreen()), (route) => false);
+                sharedp.clear();
+                Restart.restartApp();                // signOut();
+               // Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (context) => SplashScreen()), (route) => false);
               });
             },
             child: Container(

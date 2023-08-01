@@ -32,12 +32,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:dio/dio.dart';
 import 'package:Aap_job/utill/app_constants.dart';
 import 'package:http/http.dart' as http;
-import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:Aap_job/helper/LocationManager.dart';
-import 'package:Aap_job/helper/SharedManager.dart';
-//import 'package:geocoder/geocoder.dart';
 import 'package:lottie/lottie.dart';
-import 'package:intl/intl.dart';
 
 class EditJobProfileDetails extends StatefulWidget {
   EditJobProfileDetails({Key? key}) : super(key: key);
@@ -87,42 +82,6 @@ class _EditJobProfileDetailsState extends State<EditJobProfileDetails> {
 
   List<CityModel> duplicateItems = <CityModel>[];
   List<LocationModel> duplicatelocation = <LocationModel>[];
-  //
-  // getcities() async {
-  //   try {
-  //     Response response = await _dio.get(_baseUrl + AppConstants.CITIES_URI);
-  //     apidata = response.data;
-  //     print('City List: ${apidata}');
-  //     List<dynamic> data=json.decode(apidata);
-  //
-  //     if(data.toString()=="[]")
-  //     {
-  //       duplicateItems=[];
-  //     }
-  //     else
-  //     {
-  //       data.forEach((city) =>
-  //           duplicateItems.add(CityModel.fromJson(city)));
-  //     }
-  //     print('City List: ${duplicateItems}');
-  //
-  //   } on DioError catch (e) {
-  //     // The request was made and the server responded with a status code
-  //     // that falls out of the range of 2xx and is also not 304.
-  //     if (e.response != null) {
-  //       print('Dio error!');
-  //       print('STATUS: ${e.response?.statusCode}');
-  //       print('DATA: ${e.response?.data}');
-  //       print('HEADERS: ${e.response?.headers}');
-  //     } else {
-  //       // Error due to setting up or sending the request
-  //       print('Error sending request!');
-  //       print(e.message);
-  //     }
-  //   }
-  //
-  // }
-
   getlocation() async {
     duplicatelocation.clear();
     try {
@@ -201,7 +160,6 @@ class _EditJobProfileDetailsState extends State<EditJobProfileDetails> {
     duplicateItems.addAll(Provider.of<CitiesProvider>(context, listen: false).cityModelList);
   }
 
-
   Future<void> _savestep2() async {
     setState(() {
       _isLoading=true;
@@ -210,7 +168,7 @@ class _EditJobProfileDetailsState extends State<EditJobProfileDetails> {
     String _Name = _nameController.text.trim();
     String _jobcity = _jobcityController.text.trim();
     String _locality = _localityController.text.trim();
-    String _dob = _dobController.text.trim();
+    String _dob = "2000-01-01";
     String _email = _emailController.text.trim();
 
     if (_Name.isEmpty||_jobcity.isEmpty||_locality.isEmpty||_dob.isEmpty||_dob=="Enter Date of Birth")
@@ -343,111 +301,82 @@ class _EditJobProfileDetailsState extends State<EditJobProfileDetails> {
 
   }
 
-  _getLocation() async {
+  String _currentAddress = 'Tap the button to get your address';
 
-    final coordinate = await SharedManager.shared.getLocationCoordinate();
-    this.latitude = coordinate.latitude;
-    this.longitude = coordinate.longitude;
-    _getAddressFromCurrentLocation( await SharedManager.shared.getLocationCoordinate());
-    // await _getCurrentPosition();
-  }
+  Future<void> _getCurrentAddress() async {
+    LocationPermission permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied || permission==LocationPermission.unableToDetermine||permission == LocationPermission.deniedForever) {
+      // Open app settings when permission is denied or denied forever
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied || permission == LocationPermission.deniedForever|| permission==LocationPermission.unableToDetermine) {
+        // User denied the permission or denied forever
+        print("pp1 $permission");
+        // Navigator.pop(context);
+        _getCurrentAddress();
+        return;
+      }
+      else
+      {
+        //   Navigator.pop(context);
+        _getCurrentAddress();
+      }
+    }
+    if (permission == LocationPermission.whileInUse ||
+        permission == LocationPermission.always) {
+      try {
+        Position position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.medium,);
+        List<Placemark> placemarks = await placemarkFromCoordinates(position.latitude, position.longitude);
+        print("location list ${placemarks}");
+        if (placemarks.isNotEmpty) {
+          Placemark placemark = placemarks.first;
+          var first = placemark;
+          if(first.locality!=null)
+          {
+            this.city = first.locality!;
+          }
+          if(this.addressline_2!=null)
+          {
+            this.addressline_2 = first.postalCode!;
+          }
+          // ;
+          String cityname="Delhi";
+          if(first.subAdministrativeArea!=null) {
+            String q=first.subAdministrativeArea!;
+            if(q.contains("Division"))
+              q=q.toString().trim().substring(0,q.toString().trim().length - 8);
+            cityname=q.toString().trim();
 
-  // String? _currentAddress;
-  // Position? _currentPosition;
-  //
-  // Future<bool> _handleLocationPermission() async {
-  //   bool serviceEnabled;
-  //   LocationPermission permission;
-  //   serviceEnabled = await Geolocator.isLocationServiceEnabled();
-  //   if (!serviceEnabled) {
-  //     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-  //         content: Text(
-  //             'Location services are disabled. Please enable the services')));
-  //     return false;
-  //   }
-  //   permission = await Geolocator.checkPermission();
-  //   if (permission == LocationPermission.denied) {
-  //     permission = await Geolocator.requestPermission();
-  //     if (permission == LocationPermission.denied) {
-  //       ScaffoldMessenger.of(context).showSnackBar(
-  //           const SnackBar(content: Text('Location permissions are denied')));
-  //       return false;
-  //     }
-  //   }
-  //   if (permission == LocationPermission.deniedForever) {
-  //     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-  //         content: Text(
-  //             'Location permissions are permanently denied, we cannot request permissions.')));
-  //     return false;
-  //   }
-  //   return true;
-  // }
-  //
-  // Future<void> _getCurrentPosition() async {
-  //   final hasPermission = await _handleLocationPermission();
-  //   if (!hasPermission) return;
-  //   await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high)
-  //       .then((Position position) {
-  //     setState(() => _currentPosition = position);
-  //     var latlong = LatLng(_currentPosition!.latitude, _currentPosition!.longitude);
-  //     _getAddressFromCurrentLocation(latlong);
-  //   }).catchError((e) {
-  //     debugPrint(e);
-  //   });
-  // }
-
-  _getAddressFromCurrentLocation(LatLng coordinate) async {
-    //var coordinate = await SharedManager.shared.getLocationCoordinate();
-    print("Stored Location:$coordinate");
-    var addresses=await placemarkFromCoordinates(coordinate.latitude, coordinate.longitude);
-    Navigator.pop(context);
-    var first = addresses.first;
-    if(first.locality!=null)
-    {
-      this.city = first.locality!;
+          } else if(first.locality!=null)
+          {
+            cityname= first.locality!;
+          }
+          if(cityname!=null) {
+            _jobcityController.text = cityname;
+            if(cityname!=first.locality&&first.locality!=null) {
+              _localityController.text = first.locality!;
+            } else if(cityname!=first.subLocality&&first.subLocality!=null)
+            {
+              _localityController.text = first.subLocality!;
+            }
+        setState(() {
+            _currentAddress =
+            '${placemark.street}, ${placemark.locality}, ${placemark.administrativeArea}, ${placemark.country}';
+          });
+          Navigator.pop(context);
+        } else {
+          setState(() {
+            _currentAddress = 'Address not found';
+          });
+        }
+        print(" _currentAddress ${ _currentAddress}");
+        }
+      } catch (e) {
+        print(e.toString());
+        setState(() {
+          _currentAddress = 'Error getting location or address';
+        });
+      }
     }
-    if(this.addressline_2!=null)
-    {
-      this.addressline_2 = first.postalCode!;
-    }
-    setState(() {
-      print("Final Address:---->$first");
-    });
-    // ;
-    String cityname="Delhi";
-    if(first.subAdministrativeArea!=null) {
-      String q=first.subAdministrativeArea!;
-      if(q.contains("Division"))
-        q=q.toString().trim().substring(0,q.toString().trim().length - 8);
-      cityname=q.toString().trim();
-
-    } else if(first.locality!=null)
-    {
-      cityname= first.locality!;
-    }
-    if(cityname!=null) {
-    _jobcityController.text = cityname;
-    // CityModel city=filterSearchResult(cityname);
-    //
-    // if (city.id != "0"){
-    //   cityid = (city.id==null?city.id:"0")!;
-    // }
-    // else {
-    //   CommonFunctions.showInfoDialog("Your City is not in list. Please select a near by city from City List", context);
-    // }
-
-    if(cityname!=first.locality&&first.locality!=null) {
-      _localityController.text = first.locality!;
-    } else if(cityname!=first.subLocality&&first.subLocality!=null)
-    {
-      _localityController.text = first.subLocality!;
-    }
-    }
-    else
-    {
-      CommonFunctions.showInfoDialog(getTranslated('NO_LOCATION', context)!, context);
-    }
-    // _localityController.text=first.addressLine;
   }
 
   CityModel filterSearchResult(String query) {
@@ -474,11 +403,6 @@ class _EditJobProfileDetailsState extends State<EditJobProfileDetails> {
     final deviceSize = MediaQuery
         .of(context)
         .size;
-    final TextStyle? textStyle = Theme
-        .of(context)
-        .textTheme
-        .caption;
-
     return Container(
       decoration: new BoxDecoration(color: Primary),
       width: deviceSize.width-40,
@@ -619,7 +543,7 @@ class _EditJobProfileDetailsState extends State<EditJobProfileDetails> {
                             context: context,
                             message: 'assets/lottie/location-permissions.json',
                           );
-                          _getLocation();
+                          _getCurrentAddress();
                         },
                         child:
                         Container(
@@ -840,89 +764,89 @@ class _EditJobProfileDetailsState extends State<EditJobProfileDetails> {
                       ),
                       padding: const EdgeInsets.all(5.0),
                     ),
-                    new Padding(
-                      child:
-                      new Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          mainAxisSize: MainAxisSize.max,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: <Widget>[
-                            Container(
-                              width: deviceSize.width-50,
-                              child: Text(getTranslated("DOB", context)!,style: LatinFonts.aBeeZee(color: Colors.white),),
-                            ),
-
-                          ]
-                      ),
-                      padding: const EdgeInsets.all(5.0),
-                    ),
-                    new Padding(
-                      child:
-                      new Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          mainAxisSize: MainAxisSize.max,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: <Widget>[
-                            Expanded(
-                                // child: TextField(
-                                //   hintText: "Enter date",
-                                //   textInputType: TextInputType.text,
-                                //   isOtp: false,
-                                //   maxLine: 1,
-                                //   capitalization: TextCapitalization.words,
-                                //   controller: _dobController,
-                                // )),
-                          child:
-                          Container(
-                            padding: EdgeInsets.all(5),
-                            width: deviceSize.width-20,
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.only(topRight: Radius.circular(6), topLeft: Radius.circular(6),bottomLeft:Radius.circular(6), bottomRight: Radius.circular(6) ),
-                              boxShadow: [
-                                BoxShadow(color: Colors.grey.withOpacity(0.1), spreadRadius: 1, blurRadius: 3, offset: Offset(0, 1)) // changes position of shadow
-                              ],
-                            ),
-                            child:
-                            TextField(
-                                  controller: _dobController,
-                        decoration: InputDecoration(
-                          icon: Icon(Icons.calendar_today),
-                          hintText: "Enter Date of birth",
-                          filled: true,
-                          contentPadding: EdgeInsets.symmetric(vertical: 12.0, horizontal: 15),
-                          isDense: true,
-                          focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: Theme.of(context).primaryColor)),
-                          errorStyle: TextStyle(height: 1.5),
-                          border: InputBorder.none,
-                        ),
-                                  readOnly: true,  //set it true, so that user will not able to edit text
-                                  onTap: () async {
-                                    DateTime? pickedDate = await showDatePicker(
-                                        context: context, initialDate: DateTime(2000),
-                                        firstDate: DateTime(1950), //DateTime.now() - not to allow to choose before today.
-                                        lastDate: DateTime(2005)
-                                    );
-                                    if(pickedDate != null ){
-                                      print(pickedDate);  //pickedDate output format => 2021-03-10 00:00:00.000
-                                      String formattedDate = DateFormat('dd-MM-yyyy').format(pickedDate);
-                                      print(formattedDate); //formatted date output using intl package =>  2021-03-16
-                                      //you can implement different kind of Date Format here according to your requirement
-
-                                      setState(() {
-                                        _dobController.text = formattedDate; //set output date to TextField value.
-                                      });
-                                    }else{
-                                      print("Date is not selected");
-                                    }
-                                  },
-                                ),
-                    )
-                            )
-                          ]
-                      ),
-                      padding: const EdgeInsets.all(5.0),
-                    ),
+                    // new Padding(
+                    //   child:
+                    //   new Row(
+                    //       mainAxisAlignment: MainAxisAlignment.center,
+                    //       mainAxisSize: MainAxisSize.max,
+                    //       crossAxisAlignment: CrossAxisAlignment.center,
+                    //       children: <Widget>[
+                    //         Container(
+                    //           width: deviceSize.width-50,
+                    //           child: Text(getTranslated("DOB", context)!,style: LatinFonts.aBeeZee(color: Colors.white),),
+                    //         ),
+                    //
+                    //       ]
+                    //   ),
+                    //   padding: const EdgeInsets.all(5.0),
+                    // ),
+                    // new Padding(
+                    //   child:
+                    //   new Row(
+                    //       mainAxisAlignment: MainAxisAlignment.center,
+                    //       mainAxisSize: MainAxisSize.max,
+                    //       crossAxisAlignment: CrossAxisAlignment.center,
+                    //       children: <Widget>[
+                    //         Expanded(
+                    //             // child: TextField(
+                    //             //   hintText: "Enter date",
+                    //             //   textInputType: TextInputType.text,
+                    //             //   isOtp: false,
+                    //             //   maxLine: 1,
+                    //             //   capitalization: TextCapitalization.words,
+                    //             //   controller: _dobController,
+                    //             // )),
+                    //       child:
+                    //       Container(
+                    //         padding: EdgeInsets.all(5),
+                    //         width: deviceSize.width-20,
+                    //         decoration: BoxDecoration(
+                    //           color: Colors.white,
+                    //           borderRadius: BorderRadius.only(topRight: Radius.circular(6), topLeft: Radius.circular(6),bottomLeft:Radius.circular(6), bottomRight: Radius.circular(6) ),
+                    //           boxShadow: [
+                    //             BoxShadow(color: Colors.grey.withOpacity(0.1), spreadRadius: 1, blurRadius: 3, offset: Offset(0, 1)) // changes position of shadow
+                    //           ],
+                    //         ),
+                    //         child:
+                    //         TextField(
+                    //               controller: _dobController,
+                    //               decoration: InputDecoration(
+                    //       icon: Icon(Icons.calendar_today),
+                    //       hintText: "Enter Date of birth",
+                    //       filled: true,
+                    //       contentPadding: EdgeInsets.symmetric(vertical: 12.0, horizontal: 15),
+                    //       isDense: true,
+                    //       focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: Theme.of(context).primaryColor)),
+                    //       errorStyle: TextStyle(height: 1.5),
+                    //       border: InputBorder.none,
+                    //     ),
+                    //               readOnly: true,  //set it true, so that user will not able to edit text
+                    //               onTap: () async {
+                    //                 DateTime? pickedDate = await showDatePicker(
+                    //                     context: context, initialDate: DateTime(2000),
+                    //                     firstDate: DateTime(1950), //DateTime.now() - not to allow to choose before today.
+                    //                     lastDate: DateTime(2005)
+                    //                 );
+                    //                 if(pickedDate != null ){
+                    //                   print(pickedDate);  //pickedDate output format => 2021-03-10 00:00:00.000
+                    //                   String formattedDate = DateFormat('dd-MM-yyyy').format(pickedDate);
+                    //                   print(formattedDate); //formatted date output using intl package =>  2021-03-16
+                    //                   //you can implement different kind of Date Format here according to your requirement
+                    //
+                    //                   setState(() {
+                    //                     _dobController.text = formattedDate; //set output date to TextField value.
+                    //                   });
+                    //                 }else{
+                    //                   print("Date is not selected");
+                    //                 }
+                    //               },
+                    //             ),
+                    // )
+                    //         )
+                    //       ]
+                    //   ),
+                    //   padding: const EdgeInsets.all(5.0),
+                    // ),
                     new Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         mainAxisSize: MainAxisSize.max,

@@ -3,6 +3,7 @@ import 'package:Aap_job/utill/dimensions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:geolocator/geolocator.dart';
 
 class CommonFunctions {
 
@@ -132,4 +133,6 @@ class CommonFunctions {
         textColor: Colors.white,
         fontSize: 16.0);
   }
+
+
 }

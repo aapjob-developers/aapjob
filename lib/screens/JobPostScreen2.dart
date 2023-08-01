@@ -65,6 +65,7 @@ class _JobPostScreen2State extends State<JobPostScreen2> {
     this.sharedPreferences = await SharedPreferences.getInstance();
   }
   final _formKey = GlobalKey<FormState>();
+  final _scrollController = ScrollController();
   @override
   void initState() {
     initializePreference().whenComplete((){
@@ -98,6 +99,28 @@ class _JobPostScreen2State extends State<JobPostScreen2> {
   ///////////////////////////// Job Skill
   List<JobskillModel> duplicateJobSkill = <JobskillModel>[];
   bool _hasJobSkill=false;
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _scrollToFocusTop() {
+    print("scrollToFocusTop");
+    _scrollController.animateTo(_scrollController.position.minScrollExtent, duration: Duration(milliseconds: 500), curve: Curves.ease);
+  }
+
+  void _scrollToFocusMiddle() {
+    print("scrollToFocusMiddle");
+    _scrollController.animateTo(_scrollController.position.maxScrollExtent/2, duration: Duration(milliseconds: 500), curve: Curves.ease);
+  }
+
+  void _scrollToFocusBottom() {
+    print("scrollToFocusBottom");
+    _scrollController.animateTo(_scrollController.position.maxScrollExtent, duration: Duration(milliseconds: 500), curve: Curves.ease);
+  }
+
+
   getJobSkills() async {
     duplicateJobSkill.clear();
     try {
@@ -248,25 +271,39 @@ class _JobPostScreen2State extends State<JobPostScreen2> {
     sharedPreferences!.setString("jobdes", Jobdescription);
     sharedPreferences!.setString("Experience", experience_level);
 
-    if (Minexp=="Min exp."||Maxexp=="Max exp."||shift==""||englishlevel=="")
+    if (Minexp=="Min exp."||Maxexp=="Max exp.")
     {
       setState(() {
         _isLoading=false;
       });
-      CommonFunctions.showInfoDialog("Please Select All Required Details", context);
+      _scrollToFocusTop();
+      CommonFunctions.showInfoDialog("Please Select Minimum or Maximum Experience", context);
+    } else
+    if (shift=="")
+    {
+      setState(() {
+        _isLoading=false;
+      });
+      _scrollToFocusMiddle();
+      CommonFunctions.showInfoDialog("Please Select Shift of Job", context);
+    }  else
+    if (englishlevel=="")
+    {
+      setState(() {
+        _isLoading=false;
+      });
+      _scrollToFocusMiddle();
+      CommonFunctions.showInfoDialog("Please Select english level required", context);
     }
     else if(_hasJobSkill&&selectedIndexes.length<1)
       {
+        _scrollToFocusMiddle();
         CommonFunctions.showInfoDialog("Please Select atleast one job skill", context);
         setState(() {
           _isLoading=false;
         });
       }
     else{
-      setState(() {
-        _isLoading=false;
-      });
-
       FormData formData = new FormData.fromMap({"recruiter_id": Provider.of<AuthProvider>(context, listen: false).getUserid(), "category_id":Jobcatid, "job_role":jobtitle,"workplace":workplace,"company_name":HrCompany,
         "company_website":HrWebsite,"job_city_id":jobcityid,"job_location":joblocation,"address":address,"type_of_job":jobtype,"isContractJob":contract,"min_salary":Minsalary,"max_salary":Maxsalary,"openings_no":openings,"shift":shift,"min_qualification":education,"gender":Gender,"experience_level":experience_level,"min_exp":Minexp,"max_exp":Maxexp,"incentive":incentive,"english_level":englishlevel,"des":Jobdescription,"recruiter_name":HrName,"recruiter_mobile":phone,
         "call_allow":callallow,"whatsapp_optin":updateoptin,"status":"open","jobskills":selectedIndexes.toString(),
@@ -311,7 +348,9 @@ class _JobPostScreen2State extends State<JobPostScreen2> {
             sharedPreferences!.remove("Gender");
             sharedPreferences!.remove("education");
             sharedPreferences!.remove("postjobstep1");
-
+            setState(() {
+              _isLoading=false;
+            });
             Navigator.pushAndRemoveUntil( context,  MaterialPageRoute(builder: (context) => HrHomePage()), (Route route) => false);
           }
         else
@@ -321,6 +360,9 @@ class _JobPostScreen2State extends State<JobPostScreen2> {
       }
       on DioError catch (e)
       {
+        setState(() {
+          _isLoading=false;
+        });
         // The request was made and the server responded with a status code
         // that falls out of the range of 2xx and is also not 304.
         if (e.response != null) {
@@ -354,6 +396,7 @@ class _JobPostScreen2State extends State<JobPostScreen2> {
         backgroundColor: Colors.transparent,
         body:
         SingleChildScrollView(
+          controller: _scrollController,
           child:
           Form(
             key: _formKey,
@@ -534,7 +577,8 @@ class _JobPostScreen2State extends State<JobPostScreen2> {
                                     // controller: editingController,
                                     validator: (value) {
                                       if (value == null || value.isEmpty) {
-                                        minsalnode.requestFocus();
+                                       // minsalnode.requestFocus();
+                                        _scrollToFocusTop();
                                         return 'Please Enter Minimum Salary';
                                       }
                                       return null;
@@ -565,7 +609,8 @@ class _JobPostScreen2State extends State<JobPostScreen2> {
                                     // controller: editingController,
                                     validator: (value) {
                                       if (value == null || value.isEmpty) {
-                                        maxsalnode.requestFocus();
+                                        //maxsalnode.requestFocus();
+                                        _scrollToFocusTop();
                                         return 'Please Enter Maximum Salary';
                                       }
                                       return null;
@@ -704,7 +749,7 @@ class _JobPostScreen2State extends State<JobPostScreen2> {
                                   decoration: new BoxDecoration(color: Colors.pink.shade200,border: Border.all(color:Primary,width: 1),borderRadius: BorderRadius.all(Radius.circular(25))),
                                   padding: EdgeInsets.symmetric(horizontal: 10,vertical: 10),
                                   margin: EdgeInsets.all(5),
-                                  width: deviceSize.width*0.2,
+                                  width: deviceSize.width*0.3,
                                   child:
                                   new Row(
                                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -729,7 +774,7 @@ class _JobPostScreen2State extends State<JobPostScreen2> {
                                   decoration: new BoxDecoration(color: Colors.white,border: Border.all(color:Primary,width: 1),borderRadius: BorderRadius.all(Radius.circular(25))),
                                   padding: EdgeInsets.symmetric(horizontal: 10,vertical: 10),
                                   margin: EdgeInsets.all(5),
-                                  width: deviceSize.width*0.2,
+                                  width: deviceSize.width*0.3,
                                   child:
                                   new Row(
                                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -742,60 +787,59 @@ class _JobPostScreen2State extends State<JobPostScreen2> {
 
                                       ]
                                   ),),),
-
-
                                 //////////Cab
-                                selectedInsurance?
+                                selectedPF?
                                 GestureDetector(
-                                    onTap: (){
-                                      setState(() {
-                                        selectedInsurance=false;
-                                      });
-                                    },
-                                    child:
-                                Container(
-                                  decoration: new BoxDecoration(color: Colors.pink.shade200,border: Border.all(color:Primary,width: 1),borderRadius: BorderRadius.all(Radius.circular(25))),
-                                  padding: EdgeInsets.symmetric(horizontal: 10,vertical: 10),
-                                  margin: EdgeInsets.all(5),
-                                  width: deviceSize.width*0.3,
+                                  onTap: (){
+                                    setState(() {
+                                      selectedPF=false;
+                                    });
+                                  },
                                   child:
-                                  new Row(
-                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                      mainAxisSize: MainAxisSize.max,
-                                      crossAxisAlignment: CrossAxisAlignment.center,
-                                      children: <Widget>[
-                                        Text("Insurance",style: TextStyle(color: Primary,fontSize: 14),),
+                                  Container(
+                                    decoration: new BoxDecoration(color: Colors.pink.shade200,border: Border.all(color:Primary,width: 1),borderRadius: BorderRadius.all(Radius.circular(25))),
+                                    padding: EdgeInsets.symmetric(horizontal: 10,vertical: 10),
+                                    margin: EdgeInsets.all(5),
+                                    width: deviceSize.width*0.2,
+                                    child:
+                                    new Row(
+                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                        mainAxisSize: MainAxisSize.max,
+                                        crossAxisAlignment: CrossAxisAlignment.center,
+                                        children: <Widget>[
+                                          Text("PF",style: TextStyle(color: Primary,fontSize: 14),),
 
                                           Icon(Icons.check,size: 20,color: Colors.black,),
 
-                                      ]
-                                  ),
-                                ),):
+                                        ]
+                                    ),
+                                  ),)
+                                    :
                                 GestureDetector(
-                                    onTap: (){
-                                      setState(() {
-                                        selectedInsurance=true;
-                                      });
-                                    },
-                                    child:
-                                Container(
-                                  decoration: new BoxDecoration(color: Colors.white,border: Border.all(color:Primary,width: 1),borderRadius: BorderRadius.all(Radius.circular(25))),
-                                  padding: EdgeInsets.symmetric(horizontal: 10,vertical: 10),
-                                  margin: EdgeInsets.all(5),
-                                  width: deviceSize.width*0.3,
+                                  onTap: (){
+                                    setState(() {
+                                      selectedPF=true;
+                                    });
+                                  },
                                   child:
-                                  new Row(
-                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                      mainAxisSize: MainAxisSize.max,
-                                      crossAxisAlignment: CrossAxisAlignment.center,
-                                      children: <Widget>[
-                                        Text("Insurance",style: TextStyle(color: Primary,fontSize: 14),),
+                                  Container(
+                                    decoration: new BoxDecoration(color: Colors.white,border: Border.all(color:Primary,width: 1),borderRadius: BorderRadius.all(Radius.circular(25))),
+                                    padding: EdgeInsets.symmetric(horizontal: 10,vertical: 10),
+                                    margin: EdgeInsets.all(5),
+                                    width: deviceSize.width*0.2,
+                                    child:
+                                    new Row(
+                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                        mainAxisSize: MainAxisSize.max,
+                                        crossAxisAlignment: CrossAxisAlignment.center,
+                                        children: <Widget>[
+                                          Text("PF",style: TextStyle(color: Primary,fontSize: 14),),
 
                                           Icon(Icons.add,size: 20,color: Colors.black,),
 
-                                      ]
-                                  ),
-                                ),),
+                                        ]
+                                    ),
+                                  ),),
 
                               ]
                           ),
@@ -810,59 +854,57 @@ class _JobPostScreen2State extends State<JobPostScreen2> {
                               crossAxisAlignment: CrossAxisAlignment.center,
                               children: <Widget>[
                                 //////////Cab
-                                selectedPF?
-                          GestureDetector(
-                          onTap: (){
-                        setState(() {
-                        selectedPF=false;
-                        });
-                        },
-                            child:
-                                Container(
-                                  decoration: new BoxDecoration(color: Colors.pink.shade200,border: Border.all(color:Primary,width: 1),borderRadius: BorderRadius.all(Radius.circular(25))),
-                                  padding: EdgeInsets.symmetric(horizontal: 10,vertical: 10),
-                                  margin: EdgeInsets.all(5),
-                                  width: deviceSize.width*0.2,
+                                selectedInsurance?
+                                GestureDetector(
+                                  onTap: (){
+                                    setState(() {
+                                      selectedInsurance=false;
+                                    });
+                                  },
                                   child:
-                                  new Row(
-                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                      mainAxisSize: MainAxisSize.max,
-                                      crossAxisAlignment: CrossAxisAlignment.center,
-                                      children: <Widget>[
-                                        Text("PF",style: TextStyle(color: Primary,fontSize: 14),),
+                                  Container(
+                                    decoration: new BoxDecoration(color: Colors.pink.shade200,border: Border.all(color:Primary,width: 1),borderRadius: BorderRadius.all(Radius.circular(25))),
+                                    padding: EdgeInsets.symmetric(horizontal: 10,vertical: 10),
+                                    margin: EdgeInsets.all(5),
+                                    width: deviceSize.width*0.3,
+                                    child:
+                                    new Row(
+                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                        mainAxisSize: MainAxisSize.max,
+                                        crossAxisAlignment: CrossAxisAlignment.center,
+                                        children: <Widget>[
+                                          Text("Insurance",style: TextStyle(color: Primary,fontSize: 14),),
 
                                           Icon(Icons.check,size: 20,color: Colors.black,),
 
-                                      ]
-                                  ),
-                                ),)
-                                    :
-                  GestureDetector(
-                  onTap: (){
-            setState(() {
-            selectedPF=true;
-            });
-            },
-                child:
-                                Container(
-                                  decoration: new BoxDecoration(color: Colors.white,border: Border.all(color:Primary,width: 1),borderRadius: BorderRadius.all(Radius.circular(25))),
-                                  padding: EdgeInsets.symmetric(horizontal: 10,vertical: 10),
-                                  margin: EdgeInsets.all(5),
-                                  width: deviceSize.width*0.2,
+                                        ]
+                                    ),
+                                  ),):
+                                GestureDetector(
+                                  onTap: (){
+                                    setState(() {
+                                      selectedInsurance=true;
+                                    });
+                                  },
                                   child:
-                                  new Row(
-                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                      mainAxisSize: MainAxisSize.max,
-                                      crossAxisAlignment: CrossAxisAlignment.center,
-                                      children: <Widget>[
-                                        Text("PF",style: TextStyle(color: Primary,fontSize: 14),),
+                                  Container(
+                                    decoration: new BoxDecoration(color: Colors.white,border: Border.all(color:Primary,width: 1),borderRadius: BorderRadius.all(Radius.circular(25))),
+                                    padding: EdgeInsets.symmetric(horizontal: 10,vertical: 10),
+                                    margin: EdgeInsets.all(5),
+                                    width: deviceSize.width*0.3,
+                                    child:
+                                    new Row(
+                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                        mainAxisSize: MainAxisSize.max,
+                                        crossAxisAlignment: CrossAxisAlignment.center,
+                                        children: <Widget>[
+                                          Text("Insurance",style: TextStyle(color: Primary,fontSize: 14),),
 
                                           Icon(Icons.add,size: 20,color: Colors.black,),
 
-                                      ]
-                                  ),
-                                ),),
-
+                                        ]
+                                    ),
+                                  ),),
                                 //////////Cab
                                 selectedMedical?
                                 GestureDetector(
@@ -876,7 +918,7 @@ class _JobPostScreen2State extends State<JobPostScreen2> {
                                   decoration: new BoxDecoration(color: Colors.pink.shade200,border: Border.all(color:Primary,width: 1),borderRadius: BorderRadius.all(Radius.circular(25))),
                                   padding: EdgeInsets.symmetric(horizontal: 5,vertical: 10),
                                   margin: EdgeInsets.all(5),
-                                  width: deviceSize.width*0.35,
+                                  width: deviceSize.width*0.4,
                                   child:
                                   new Row(
                                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -884,7 +926,6 @@ class _JobPostScreen2State extends State<JobPostScreen2> {
                                       crossAxisAlignment: CrossAxisAlignment.center,
                                       children: <Widget>[
                                         Text("Medical Benefits",style: TextStyle(color: Primary,fontSize: 14),),
-
                                           Icon(Icons.check,size: 20,color: Colors.black,),
                                       ]
                                   ),
@@ -900,7 +941,7 @@ class _JobPostScreen2State extends State<JobPostScreen2> {
                                   decoration: new BoxDecoration(color: Colors.white,border: Border.all(color:Primary,width: 1),borderRadius: BorderRadius.all(Radius.circular(25))),
                                   padding: EdgeInsets.symmetric(horizontal: 5,vertical: 10),
                                   margin: EdgeInsets.all(5),
-                                  width: deviceSize.width*0.35,
+                                  width: deviceSize.width*0.4,
                                   child:
                                   new Row(
                                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -914,35 +955,45 @@ class _JobPostScreen2State extends State<JobPostScreen2> {
                                       ]
                                   ),
                                 ),),
-
-                                //////////Cab
+                              ]
+                          ),
+                          // Text('Job Title',style: LatinFonts.aBeeZee(fontSize: 14, fontWeight: FontWeight.bold),),
+                          padding: const EdgeInsets.all(5.0),
+                        ),
+                        new Padding(
+                          child:
+                          Row(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              mainAxisSize: MainAxisSize.max,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: <Widget>[
                                 selectedOther?
                                 Container():
                                 GestureDetector(
-                                    onTap: (){
-                                      setState(() {
-                                        selectedOther=true;
-                                      });
-                                    },
-                                    child:
-                                Container(
-                                  decoration: new BoxDecoration(color: Colors.white,border: Border.all(color:Primary,width: 1),borderRadius: BorderRadius.all(Radius.circular(25))),
-                                  padding: EdgeInsets.symmetric(horizontal: 10,vertical: 10),
-                                  margin: EdgeInsets.all(5),
-                                  width: deviceSize.width*0.3,
+                                  onTap: (){
+                                    setState(() {
+                                      selectedOther=true;
+                                    });
+                                  },
                                   child:
-                                  new Row(
-                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                      mainAxisSize: MainAxisSize.max,
-                                      crossAxisAlignment: CrossAxisAlignment.center,
-                                      children: <Widget>[
-                                        Text("Add More",style: TextStyle(color: Primary,fontSize: 14),),
+                                  Container(
+                                    decoration: new BoxDecoration(color: Colors.white,border: Border.all(color:Primary,width: 1),borderRadius: BorderRadius.all(Radius.circular(25))),
+                                    padding: EdgeInsets.symmetric(horizontal: 10,vertical: 10),
+                                    margin: EdgeInsets.all(5),
+                                    width: deviceSize.width*0.3,
+                                    child:
+                                    new Row(
+                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                        mainAxisSize: MainAxisSize.max,
+                                        crossAxisAlignment: CrossAxisAlignment.center,
+                                        children: <Widget>[
+                                          Text("Add More",style: TextStyle(color: Primary,fontSize: 14),),
 
                                           Icon(Icons.add,size: 20,color: Colors.black,),
 
-                                      ]
-                                  ),
-                                ),),
+                                        ]
+                                    ),
+                                  ),),
                               ]
                           ),
                           // Text('Job Title',style: LatinFonts.aBeeZee(fontSize: 14, fontWeight: FontWeight.bold),),
@@ -1441,7 +1492,7 @@ class _JobPostScreen2State extends State<JobPostScreen2> {
                                                   activeColor: Colors.black,
                                                   ), Text(
                                                   "${duplicateJobSkill[index].name}",
-                                                  style: TextStyle(fontSize: 17.0),
+                                                  style: TextStyle(fontSize: 12.0),
                                                   ),  ],
                                                   ),
                                                   );
@@ -1533,7 +1584,8 @@ class _JobPostScreen2State extends State<JobPostScreen2> {
                             // controller: editingController,
                             validator: (value) {
                               if (value == null || value.isEmpty) {
-                                jobdescriptionnode.requestFocus();
+                               // jobdescriptionnode.requestFocus();
+                                _scrollToFocusBottom();
                                 return 'Please Enter Job Details';
                               }
                               return null;

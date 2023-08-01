@@ -349,8 +349,12 @@ class _HrProfileHomeScreenState extends State<HrProfileHomeScreen> {
                     mainAxisSize: MainAxisSize.max,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: <Widget>[
+                Row(
+                children: <Widget>[
+                      Icon(Icons.arrow_circle_right,color: Colors.amber,),
                       Text(getTranslated('EDIT_COMPANY_DETAILS', context)!,style: LatinFonts.aBeeZee(fontSize: 14,fontWeight: FontWeight.bold, color: Color.fromARGB(255,39, 170, 225))),
-                      Lottie.asset(
+                  ]),
+                  Lottie.asset(
                         'assets/lottie/arrowright.json',
                         height: MediaQuery.of(context).size.width*0.08,
                         width: MediaQuery.of(context).size.width*0.08,
@@ -372,14 +376,18 @@ class _HrProfileHomeScreenState extends State<HrProfileHomeScreen> {
               },
               child:
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: const EdgeInsets.all(5.0),
                 child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     mainAxisSize: MainAxisSize.max,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: <Widget>[
+                Row(
+                children: <Widget>[
+                      Icon(Icons.arrow_circle_right,color: Colors.amber,),
                       Text(getTranslated('MY_CLOSED_JOBS', context)!,style: LatinFonts.aBeeZee(fontSize: 14,fontWeight: FontWeight.bold, color: Color.fromARGB(255,39, 170, 225))),
-                      Lottie.asset(
+                  ]),
+                  Lottie.asset(
                         'assets/lottie/arrowright.json',
                         height: MediaQuery.of(context).size.width*0.08,
                         width: MediaQuery.of(context).size.width*0.08,
@@ -401,14 +409,18 @@ class _HrProfileHomeScreenState extends State<HrProfileHomeScreen> {
               },
               child:
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: const EdgeInsets.all(5.0),
                 child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     mainAxisSize: MainAxisSize.max,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: <Widget>[
+                Row(
+                children: <Widget>[
+                      Icon(Icons.arrow_circle_right,color: Colors.amber,),
                       Text(getTranslated('MY_BILLING', context)!,style: LatinFonts.aBeeZee(fontSize: 14,fontWeight: FontWeight.bold,color: Color.fromARGB(255,39, 170, 225))),
-                      Lottie.asset(
+                  ]),    
+                  Lottie.asset(
                         'assets/lottie/arrowright.json',
                         height: MediaQuery.of(context).size.width*0.08,
                         width: MediaQuery.of(context).size.width*0.08,
@@ -427,14 +439,18 @@ class _HrProfileHomeScreenState extends State<HrProfileHomeScreen> {
               },
               child:
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: const EdgeInsets.all(5.0),
                 child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     mainAxisSize: MainAxisSize.max,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: <Widget>[
+                Row(
+                children: <Widget>[
+                      Icon(Icons.arrow_circle_right,color: Colors.amber,),
                       Text(getTranslated('CHANGE_LANGUAGE', context)!,style: LatinFonts.aBeeZee(fontSize: 14,fontWeight: FontWeight.bold,color: Color.fromARGB(255,39, 170, 225))),
-                      Lottie.asset(
+                  ]),    
+                  Lottie.asset(
                         'assets/lottie/arrowright.json',
                         height: MediaQuery.of(context).size.width*0.08,
                         width: MediaQuery.of(context).size.width*0.08,
@@ -453,15 +469,18 @@ class _HrProfileHomeScreenState extends State<HrProfileHomeScreen> {
               },
               child:
               Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Container(
+                padding: const EdgeInsets.all(5.0),
                   child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       mainAxisSize: MainAxisSize.max,
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: <Widget>[
+                  Row(
+                  children: <Widget>[
+                        Icon(Icons.arrow_circle_right,color: Colors.amber,),
                         Text(getTranslated('Rate_and_Share', context)!,style: LatinFonts.aBeeZee(fontSize: 14,fontWeight: FontWeight.bold,color: Color.fromARGB(255,39, 170, 225))),
-                        Lottie.asset(
+                    ]),    
+                    Lottie.asset(
                           'assets/lottie/arrowright.json',
                           height: MediaQuery.of(context).size.width*0.08,
                           width: MediaQuery.of(context).size.width*0.08,
@@ -469,7 +488,6 @@ class _HrProfileHomeScreenState extends State<HrProfileHomeScreen> {
                       ]
 
                   ),
-                ),
               ),
             ),
             Platform.isIOS ? Divider(
@@ -484,8 +502,12 @@ class _HrProfileHomeScreenState extends State<HrProfileHomeScreen> {
                   mainAxisSize: MainAxisSize.max,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: <Widget>[
+              Row(
+              children: <Widget>[
+                    Icon(Icons.arrow_circle_right,color: Colors.amber,),
                     Text("Delete My Profile",style: LatinFonts.aBeeZee(fontSize: 14,fontWeight: FontWeight.bold,color: Color.fromARGB(255,39, 170, 225))),
-                    Lottie.asset(
+                ]),    
+                Lottie.asset(
                       'assets/lottie/arrowright.json',
                       height: MediaQuery.of(context).size.width*0.08,
                       width: MediaQuery.of(context).size.width*0.08,

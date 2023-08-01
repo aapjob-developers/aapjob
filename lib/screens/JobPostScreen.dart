@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'dart:io';
-import 'package:Aap_job/helper/SharedManager.dart';
 import 'package:Aap_job/localization/language_constrants.dart';
 import 'package:Aap_job/providers/jobtitle_provider.dart';
 import 'package:Aap_job/screens/widget/job_reset_confirmation_dialog.dart';
@@ -70,6 +69,7 @@ class _JobPostScreenState extends State<JobPostScreen> {
   }
   final _formKey = GlobalKey<FormState>();
   String address="n";
+  final _scrollController = ScrollController();
 
   @override
   void initState() {
@@ -123,17 +123,12 @@ class _JobPostScreenState extends State<JobPostScreen> {
           addressController.text=address;
         }
         duplicateJobTitle= Provider.of<JobtitleProvider>(context, listen: false).jobtitleList;
-        //getJobTitles();
-       // getJobCategory();
-       // getcities();
+
       });
     });
 
     super.initState();
   }
-
-
-
 ///////////////////////////////////job titles ////////////////////
 
   bool _hasJobTitle=false;
@@ -147,116 +142,104 @@ class _JobPostScreenState extends State<JobPostScreen> {
   var addressline_2 = "";
   var city = "";
 
-  _getLocation() async {
-    final coordinate = await SharedManager.shared.getLocationCoordinate();
-    this.latitude = coordinate.latitude;
-    this.longitude = coordinate.longitude;
-    _getAddressFromCurrentLocation(await SharedManager.shared.getLocationCoordinate());
-  }
-
   String? _currentAddress;
-  Position? _currentPosition;
 
-  Future<bool> _handleLocationPermission() async {
-    bool serviceEnabled;
-    LocationPermission permission;
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
 
-    serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content: Text(
-              'Location services are disabled. Please enable the services')));
-      return false;
-    }
-    permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
+  void _scrollToFocusTop() {
+    print("scrollToFocusTop");
+    _scrollController.animateTo(_scrollController.position.minScrollExtent, duration: Duration(milliseconds: 500), curve: Curves.ease);
+  }
+
+  void _scrollToFocusMiddle() {
+    print("scrollToFocusMiddle");
+    _scrollController.animateTo(_scrollController.position.maxScrollExtent/2, duration: Duration(milliseconds: 500), curve: Curves.ease);
+  }
+
+  void _scrollToFocusBottom() {
+    print("scrollToFocusBottom");
+    _scrollController.animateTo(_scrollController.position.maxScrollExtent, duration: Duration(milliseconds: 500), curve: Curves.ease);
+  }
+
+
+
+  Future<void> _getCurrentAddress() async {
+    LocationPermission permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied || permission==LocationPermission.unableToDetermine||permission == LocationPermission.deniedForever) {
+      // Open app settings when permission is denied or denied forever
       permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.denied) {
-        ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Location permissions are denied')));
-        return false;
+      if (permission == LocationPermission.denied || permission == LocationPermission.deniedForever|| permission==LocationPermission.unableToDetermine) {
+        // User denied the permission or denied forever
+        print("pp1 $permission");
+        // Navigator.pop(context);
+        _getCurrentAddress();
+        return;
+      }
+      else
+      {
+        //   Navigator.pop(context);
+        _getCurrentAddress();
       }
     }
-    if (permission == LocationPermission.deniedForever) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content: Text(
-              'Location permissions are permanently denied, we cannot request permissions.')));
-      return false;
-    }
-    return true;
-  }
+    if (permission == LocationPermission.whileInUse ||
+        permission == LocationPermission.always) {
+      try {
+        Position position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.medium,);
+        List<Placemark> placemarks = await placemarkFromCoordinates(position.latitude, position.longitude);
+        print("location list ${placemarks}");
+        if (placemarks.isNotEmpty) {
+          Placemark placemark = placemarks.first;
+          var first = placemark;
+          if(first.locality!=null)
+          {
+            this.city = first.locality!;
+          }
+          if(this.addressline_2!=null)
+          {
+            this.addressline_2 = first.postalCode!;
+          }
+          // ;
+          String cityname="Delhi";
+          if(first.subAdministrativeArea!=null) {
+            String q=first.subAdministrativeArea!;
+            if(q.contains("Division"))
+              q=q.toString().trim().substring(0,q.toString().trim().length - 8);
+            cityname=q.toString().trim();
 
-  Future<void> _getCurrentPosition() async {
-    final hasPermission = await _handleLocationPermission();
-    if (!hasPermission) return;
-    await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.medium)
-        .then((Position position) {
-      setState(() => _currentPosition = position);
-      var latlong = LatLng(_currentPosition!.latitude, _currentPosition!.longitude);
-      _getAddressFromCurrentLocation(latlong);
-    }).catchError((e) {
-      debugPrint(e);
-      Navigator.pop(context);
-    });
-  }
-
-  _getAddressFromCurrentLocation(LatLng coordinate) async {
-   // var coordinate = await SharedManager.shared.getLocationCoordinate();
-        Navigator.pop(context);
-    print("Stored Location:$coordinate");
-    var addresses=await placemarkFromCoordinates(coordinate.latitude, coordinate.longitude);
-    var first = addresses.first;
-    // print('adminArea: ${first.administrativeArea}');
-    // print('locality: ${first.locality}');
-    // print('addressLine: ${first.name}');
-    // print('featureName: ${first.street}');
-    // print('subAdminArea: ${first.subAdministrativeArea}');
-    // print('subLocality: ${first.subLocality}');
-    // print('subThoroughfare: ${first.subThoroughfare}');
-    // print('thoroughfare: ${first.thoroughfare}');
-    if(first.locality!=null)
-    {
-      this.city = first.locality!;
-    }
-    if(this.addressline_2!=null)
-    {
-      this.addressline_2 = first.postalCode!;
-    }
-    // ;
-    String cityname="Delhi";
-    if(first.subAdministrativeArea!=null) {
-      String q=first.subAdministrativeArea!;
-      if(q.contains("Division"))
-        q=q.toString().trim().substring(0,q.toString().trim().length - 8);
-      cityname=q.toString().trim();
-    } else if(first.locality!=null)
-    {
-      cityname= first.locality!;
-    }
-    if(cityname!=null) {
-      _jobcityController.text = cityname;
-      CityModel city = filterSearchResult(cityname);
-
-      if (city.id != "0"){
-        cityid = (city.id==null?city.id:"0")!;
+          } else if(first.locality!=null)
+          {
+            cityname= first.locality!;
+          }
+          if(cityname!=null) {
+            _jobcityController.text = cityname;
+            if(cityname!=first.locality&&first.locality!=null) {
+              _localityController.text = first.locality!;
+            } else if(cityname!=first.subLocality&&first.subLocality!=null)
+            {
+              _localityController.text = first.subLocality!;
+            }
+            setState(() {
+              _currentAddress =
+              '${placemark.street}, ${placemark.locality}, ${placemark.administrativeArea}, ${placemark.country}';
+            });
+            Navigator.pop(context);
+          } else {
+            setState(() {
+              _currentAddress = 'Address not found';
+            });
+          }
+          print(" _currentAddress ${ _currentAddress}");
+        }
+      } catch (e) {
+        print(e.toString());
+        setState(() {
+          _currentAddress = 'Error getting location or address';
+        });
       }
-      else {
-        CommonFunctions.showInfoDialog("Your City is not in list. Please select a near by city from City List", context);
-      }
-
-      jobcityid=city.id!;
-      if (cityname != first.locality && first.locality != null) {
-        _localityController.text = first.locality!;
-      } else if (cityname != first.subLocality && first.subLocality != null) {
-        _localityController.text = first.subLocality!;
-      }
-      else {
-        _localityController.text = cityname;
-      }
-    }
-    else
-    {
-      CommonFunctions.showInfoDialog(getTranslated('NO_LOCATION', context)!, context);
     }
   }
 
@@ -312,48 +295,6 @@ class _JobPostScreenState extends State<JobPostScreen> {
   TextEditingController _jobcategoryController = TextEditingController();
 
   List<CategoryModel> duplicateJobCategory = <CategoryModel>[];
-  //
-  // getJobCategory() async {
-  //   duplicateJobCategory.clear();
-  //   try {
-  //     Response response = await _dio.get(_baseUrl + AppConstants.CATEGORY_URI);
-  //     apidatacat = response.data;
-  //     print('JobCategory : ${apidatacat}');
-  //     List<dynamic> data=json.decode(apidatacat);
-  //     if(data.toString()=="[]")
-  //     {
-  //       duplicateJobCategory=[];
-  //       setState(() {
-  //         _hasCategories = false;
-  //       });
-  //     }
-  //     else
-  //     {
-  //       data.forEach((jobcat) =>
-  //           duplicateJobCategory.add(JobCategoryModel.fromJson(jobcat)));
-  //       setState(() {
-  //         _hasCategories=true;
-  //       });
-  //     }
-  //     print('JobCat List: ${duplicateJobCategory}');
-  //
-  //   } on DioError catch (e) {
-  //     // The request was made and the server responded with a status code
-  //     // that falls out of the range of 2xx and is also not 304.
-  //     if (e.response != null) {
-  //       print('Dio error!');
-  //       print('STATUS: ${e.response?.statusCode}');
-  //       print('DATA: ${e.response?.data}');
-  //       print('HEADERS: ${e.response?.headers}');
-  //     } else {
-  //       // Error due to setting up or sending the request
-  //       print('Error sending request!');
-  //       print(e.message);
-  //     }
-  //   }
-  //
-  // }
-
   _JobcategoryDisplaySelection(BuildContext context) async {
     _hasJobTitle = duplicateJobCategory.length >= 1;
     if(_hasJobTitle) {
@@ -571,6 +512,7 @@ String Jobtype="";
         });
         CommonFunctions.showInfoDialog(
             "Please Select Job Type and Gender", context);
+        _scrollToFocusMiddle();
       }
       else {
         setState(() {
@@ -605,6 +547,7 @@ String Jobtype="";
           _isLoading=false;
         });
         CommonFunctions.showInfoDialog("Please Select minimum Education Required", context);
+        _scrollToFocusBottom();
       }
 
   }
@@ -616,13 +559,13 @@ String Jobtype="";
         .size;
     return Container(
       decoration: new BoxDecoration(color: Colors.white),
-
       child:
       SafeArea(child:
       Scaffold(
         backgroundColor: Colors.transparent,
         body:
         SingleChildScrollView(
+          controller: _scrollController,
           child:
           Form(
             key: _formKey,
@@ -695,9 +638,9 @@ String Jobtype="";
                               focusNode: jobtitlenode,
                               validator: (value) {
                                 if (value == null || value.isEmpty) {
-                                  jobtitlenode.requestFocus();
+                                //  jobtitlenode.requestFocus();
+                                  _scrollToFocusTop();
                                   return 'Please Select Job Title';
-
                                 }
                                 return null;
                               },
@@ -756,7 +699,8 @@ String Jobtype="";
                               },
                               validator: (value) {
                                 if (value == null || value.isEmpty) {
-                                  jobcategorynode.requestFocus();
+                                 // jobcategorynode.requestFocus();
+                                  _scrollToFocusTop();
                                   return 'Please Select Job Category';
                                 }
                                 return null;
@@ -803,7 +747,8 @@ String Jobtype="";
                           inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9]'))],
     validator: (value) {
                                if (value == null || value.isEmpty) {
-                                 opeingnode.requestFocus();
+                                // opeingnode.requestFocus();
+                                 _scrollToFocusTop();
                                  return 'Please Enter Total No. of Jobs Openings';
                                }
                                return null;
@@ -957,286 +902,7 @@ String Jobtype="";
                           // Text('Job Title',style: LatinFonts.aBeeZee(fontSize: 14, fontWeight: FontWeight.bold),),
                           padding: const EdgeInsets.all(5.0),
                         ),
-  ////////////////////////////////// Work From Home
-                        Padding(
-                          padding: EdgeInsets.symmetric(horizontal: Dimensions.PADDING_SIZE_EXTRA_SMALL),
-                          child:
-                              Row(
-                                children: [
-                                  Checkbox(
-                                    value: this.value,
-                                    onChanged: (bool? value) {
-                                      setState(() {
-                                        this.value = value!;
-                                        if(value==true)
-                                        {
-                                          workplace="Work from Home";
-                                        }
-                                        else
-                                        {
-                                          workplace="In Office";
-
-                                        }
-                                      });
-                                    },
-                                  ),
-                                   Text(' This is a Work from Home Job',style: LatinFonts.aBeeZee(fontSize: 14, fontWeight: FontWeight.bold),),
-                                ],
-                              )
-                          //Checkbox
-                        ),
-                        ////////////////////////////////// Contract
-                        Padding(
-                            padding: EdgeInsets.symmetric(horizontal: Dimensions.PADDING_SIZE_EXTRA_SMALL),
-                            child:
-                            Row(
-                              children: [
-                                Checkbox(
-                                  value: this.contractvalue,
-                                  onChanged: (bool? value) {
-                                    setState(() {
-                                      this.contractvalue = value!;
-                                      if(value==true)
-                                      {
-                                        contract="Contract";
-                                      }
-                                      else
-                                      {
-                                        contract="Permanant";
-
-                                      }
-                                    });
-                                  },
-                                ),
-                                Text(' This is a Contract Job',style: LatinFonts.aBeeZee(fontSize: 14, fontWeight: FontWeight.bold),),
-                              ],
-                            )
-                          //Checkbox
-                        ),
-  ////////////////////// Job city and Location
-                        Platform.isIOS ? Container():
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child:
-                          GestureDetector(
-                            onTap:(){
-                              //  CommonFunctions.showSuccessToast("");
-                              // showLoadingDialog(
-                              //   context: context,
-                              //   message: "Getting Your Current Location. Please Wait.",
-                              // );
-                              showLocationDialog(
-                                context: context,
-                                message: 'assets/lottie/location-permissions.json',
-                              );
-                              _getLocation();
-                            },
-                            child:
-                            Container(
-                              padding: const EdgeInsets.all(10.0),
-                              margin: EdgeInsets.only(left: 1.0,top: 1.0,right: 1.0,bottom: 1.0),
-                              decoration: new BoxDecoration(
-                                  color: Colors.tealAccent,
-                                  border: Border.all(color: Colors.white),
-                                  borderRadius: BorderRadius.all(Radius.circular(5.0))),
-                              child:
-                              Row(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(getTranslated('USE_MY_CUURENT_LOCATION', context)!, style: LatinFonts.aBeeZee(fontSize: 14, fontWeight: FontWeight.bold,color:Colors.teal),),
-                                  Lottie.asset(
-                                    'assets/lottie/gps.json',
-                                    height: MediaQuery.of(context).size.width*0.05,
-                                    //width: MediaQuery.of(context).size.width*0.45,
-                                    animate: true,),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                        new Padding(
-                          child:
-                          Text.rich(
-                              TextSpan(
-                                  text: 'Job City',
-                                  style: LatinFonts.aBeeZee(fontSize: 14, fontWeight: FontWeight.bold),
-                                  children: <InlineSpan>[
-                                    TextSpan(
-                                      text: '*',
-                                      style: LatinFonts.aBeeZee(fontSize: 14, fontWeight: FontWeight.bold,color:Colors.red),
-                                    )
-                                  ]
-                              )
-                          ),
-                          // Text('Job Title',style: LatinFonts.aBeeZee(fontSize: 14, fontWeight: FontWeight.bold),),
-                          padding: const EdgeInsets.all(10.0),
-                        ),
-                        new Padding(
-                          child:
-                          new Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              mainAxisSize: MainAxisSize.max,
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: <Widget>[
-                                Container(
-                                  width: deviceSize.width-20,
-                                  decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    border: Border.all(color: Primary),
-                                    borderRadius: BorderRadius.only(topRight: Radius.circular(6), topLeft: Radius.circular(6),bottomLeft:Radius.circular(6), bottomRight: Radius.circular(6) ),
-                                    boxShadow: [
-                                      BoxShadow(color: Colors.grey.withOpacity(0.1), spreadRadius: 1, blurRadius: 3, offset: Offset(0, 1)) // changes position of shadow
-                                    ],
-                                  ),
-                                  child: TextFormField(
-                                    readOnly: true,
-                                    focusNode: locationnode,
-                                    onTap: () {
-                                      _navigateAndDisplaySelection(context);
-                                    },
-                                    controller: _jobcityController,
-                                    validator: (value) {
-                                      if (value == null || value.isEmpty) {
-                                        locationnode.requestFocus();
-                                        return 'Please Select Job City';
-                                      }
-                                      return null;
-                                    },
-                                    decoration: InputDecoration(
-                                      hintText:"City",
-                                      filled: true,
-                                      contentPadding: EdgeInsets.symmetric(vertical: 12.0, horizontal: 15),
-                                      isDense: true,
-                                      counterText: '',
-                                      focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: Theme.of(context).primaryColor)),
-                                      errorStyle: TextStyle(height: 1.5),
-                                      border: InputBorder.none,
-                                    ),
-                                  ),
-                                ),
-
-                              ]
-                          ),
-                          padding: const EdgeInsets.all(5.0),
-                        ),
-                        new Padding(
-                          child:
-                          Text.rich(
-                              TextSpan(
-                                  text: 'Job Location',
-                                  style: LatinFonts.aBeeZee(fontSize: 14, fontWeight: FontWeight.bold),
-                                  children: <InlineSpan>[
-                                    TextSpan(
-                                      text: '*',
-                                      style: LatinFonts.aBeeZee(fontSize: 14, fontWeight: FontWeight.bold,color:Colors.red),
-                                    )
-                                  ]
-                              )
-                          ),
-                          // Text('Job Title',style: LatinFonts.aBeeZee(fontSize: 14, fontWeight: FontWeight.bold),),
-                          padding: const EdgeInsets.all(10.0),
-                        ),
-                        new Padding(
-                          child:
-                          new Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              mainAxisSize: MainAxisSize.max,
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: <Widget>[
-                                Container(
-                                  width: deviceSize.width-20,
-                                  decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    border: Border.all(color: Primary),
-                                    borderRadius: BorderRadius.only(topRight: Radius.circular(6), topLeft: Radius.circular(6),bottomLeft:Radius.circular(6), bottomRight: Radius.circular(6) ),
-                                    boxShadow: [
-                                      BoxShadow(color: Colors.grey.withOpacity(0.1), spreadRadius: 1, blurRadius: 3, offset: Offset(0, 1)) // changes position of shadow
-                                    ],
-                                  ),
-                                  child: TextFormField(
-                                    readOnly: true,
-                                    enabled: _hasLocation,
-                                    onTap: () {
-                                      _LocationDisplaySelection(context);
-                                    },
-                                    focusNode: addressnode,
-                                    controller: _localityController,
-                                    validator: (value) {
-                                      if (value == null || value.isEmpty) {
-                                        addressnode.requestFocus();
-                                        return 'Please Enter Job Locality';
-                                      }
-                                      return null;
-                                    },
-                                    decoration: InputDecoration(
-                                      hintText: _hasLocation?"Locality In city is located":" No Location in this city",
-                                      filled: true,
-                                      contentPadding: EdgeInsets.symmetric(vertical: 12.0, horizontal: 15),
-                                      isDense: true,
-                                      focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: Theme.of(context).primaryColor)),
-                                      errorStyle: TextStyle(height: 1.5),
-                                      border: InputBorder.none,
-                                    ),
-                                  ),
-                                ),
-
-                              ]
-                          ),
-                          padding: const EdgeInsets.all(5.0),
-                        ),
-                        //////////////////////////////////// Address
-                        new Padding(
-                          child:
-                          Text.rich(
-                              TextSpan(
-                                  text: 'Full Interview Address',
-                                  style: LatinFonts.aBeeZee(fontSize: 14, fontWeight: FontWeight.bold),
-                                  children: <InlineSpan>[
-                                    TextSpan(
-                                      text: '*',
-                                      style: LatinFonts.aBeeZee(fontSize: 14, fontWeight: FontWeight.bold,color:Colors.red),
-                                    )
-                                  ]
-                              )
-                          ),
-                          // Text('Job Title',style: LatinFonts.aBeeZee(fontSize: 14, fontWeight: FontWeight.bold),),
-                          padding: const EdgeInsets.all(10.0),
-                        ),
-                        Container(
-                          width:deviceSize.width*0.9,
-                          padding: EdgeInsets.symmetric(vertical: 10,horizontal: 10.0),
-                          child:
-                          TextFormField(
-                            maxLines: 3,
-                            controller: addressController,
-                            keyboardType: TextInputType.multiline,
-                            onChanged: (value) {
-                              setState(() {
-                                address=value;
-                              });
-
-                            },
-                            // controller: editingController,
-                            focusNode: fulladdressnode,
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                fulladdressnode.requestFocus();
-                                return 'Please Enter Interview Address';
-                              }
-                              return null;
-                            },
-                            decoration: InputDecoration(
-                                isDense:true,
-                                filled: true,
-                                fillColor: Colors.white,
-                                // labelText:"Number of Openings",
-                                hintText:"Enter Interview Address",
-                                // prefixIcon: Icon(Icons.numbers),
-                                border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(10.0)))),
-                          ),
-                        ),
-////////////////// Gender
+                        ////////////////// Gender
                         new Padding(
                           child:
                           Text.rich(
@@ -1432,6 +1098,283 @@ String Jobtype="";
                           // Text('Job Title',style: LatinFonts.aBeeZee(fontSize: 14, fontWeight: FontWeight.bold),),
                           padding: const EdgeInsets.all(5.0),
                         ),
+  ////////////////////////////////// Work From Home
+                        Padding(
+                          padding: EdgeInsets.symmetric(horizontal: Dimensions.PADDING_SIZE_EXTRA_SMALL),
+                          child:
+                              Row(
+                                children: [
+                                  Checkbox(
+                                    value: this.value,
+                                    onChanged: (bool? value) {
+                                      setState(() {
+                                        this.value = value!;
+                                        if(value==true)
+                                        {
+                                          workplace="Work from Home";
+                                        }
+                                        else
+                                        {
+                                          workplace="In Office";
+
+                                        }
+                                      });
+                                    },
+                                  ),
+                                   Text(' This is a Work from Home Job',style: LatinFonts.aBeeZee(fontSize: 14, fontWeight: FontWeight.bold),),
+                                ],
+                              )
+                          //Checkbox
+                        ),
+                        ////////////////////////////////// Contract
+                        Padding(
+                            padding: EdgeInsets.symmetric(horizontal: Dimensions.PADDING_SIZE_EXTRA_SMALL),
+                            child:
+                            Row(
+                              children: [
+                                Checkbox(
+                                  value: this.contractvalue,
+                                  onChanged: (bool? value) {
+                                    setState(() {
+                                      this.contractvalue = value!;
+                                      if(value==true)
+                                      {
+                                        contract="Contract";
+                                      }
+                                      else
+                                      {
+                                        contract="Permanant";
+                                      }
+                                    });
+                                  },
+                                ),
+                                Text(' This is a Contract Job',style: LatinFonts.aBeeZee(fontSize: 14, fontWeight: FontWeight.bold),),
+                              ],
+                            )
+                          //Checkbox
+                        ),
+  ////////////////////// Job city and Location
+                        Platform.isIOS ? Container():
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child:
+                          GestureDetector(
+                            onTap:(){
+                              showLocationDialog(
+                                context: context,
+                                message: 'assets/lottie/location-permissions.json',
+                              );
+                              _getCurrentAddress();
+                            },
+                            child:
+                            Container(
+                              padding: const EdgeInsets.all(10.0),
+                              margin: EdgeInsets.only(left: 1.0,top: 1.0,right: 1.0,bottom: 1.0),
+                              decoration: new BoxDecoration(
+                                  color: Colors.tealAccent,
+                                  border: Border.all(color: Colors.white),
+                                  borderRadius: BorderRadius.all(Radius.circular(5.0))),
+                              child:
+                              Row(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(getTranslated('USE_MY_CUURENT_LOCATION', context)!, style: LatinFonts.aBeeZee(fontSize: 14, fontWeight: FontWeight.bold,color:Colors.teal),),
+                                  Lottie.asset(
+                                    'assets/lottie/gps.json',
+                                    height: MediaQuery.of(context).size.width*0.05,
+                                    //width: MediaQuery.of(context).size.width*0.45,
+                                    animate: true,),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                        new Padding(
+                          child:
+                          Text.rich(
+                              TextSpan(
+                                  text: 'Job City',
+                                  style: LatinFonts.aBeeZee(fontSize: 14, fontWeight: FontWeight.bold),
+                                  children: <InlineSpan>[
+                                    TextSpan(
+                                      text: '*',
+                                      style: LatinFonts.aBeeZee(fontSize: 14, fontWeight: FontWeight.bold,color:Colors.red),
+                                    )
+                                  ]
+                              )
+                          ),
+                          // Text('Job Title',style: LatinFonts.aBeeZee(fontSize: 14, fontWeight: FontWeight.bold),),
+                          padding: const EdgeInsets.all(10.0),
+                        ),
+                        new Padding(
+                          child:
+                          new Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              mainAxisSize: MainAxisSize.max,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: <Widget>[
+                                Container(
+                                  width: deviceSize.width-20,
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    border: Border.all(color: Primary),
+                                    borderRadius: BorderRadius.only(topRight: Radius.circular(6), topLeft: Radius.circular(6),bottomLeft:Radius.circular(6), bottomRight: Radius.circular(6) ),
+                                    boxShadow: [
+                                      BoxShadow(color: Colors.grey.withOpacity(0.1), spreadRadius: 1, blurRadius: 3, offset: Offset(0, 1)) // changes position of shadow
+                                    ],
+                                  ),
+                                  child: TextFormField(
+                                    readOnly: true,
+                                    focusNode: locationnode,
+                                    onTap: () {
+                                      _navigateAndDisplaySelection(context);
+                                    },
+                                    controller: _jobcityController,
+                                    validator: (value) {
+                                      if (value == null || value.isEmpty) {
+                                      //  locationnode.requestFocus();
+                                        _scrollToFocusMiddle();
+                                        return 'Please Select Job City';
+                                      }
+                                      return null;
+                                    },
+                                    decoration: InputDecoration(
+                                      hintText:"City",
+                                      filled: true,
+                                      contentPadding: EdgeInsets.symmetric(vertical: 12.0, horizontal: 15),
+                                      isDense: true,
+                                      counterText: '',
+                                      focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: Theme.of(context).primaryColor)),
+                                      errorStyle: TextStyle(height: 1.5),
+                                      border: InputBorder.none,
+                                    ),
+                                  ),
+                                ),
+
+                              ]
+                          ),
+                          padding: const EdgeInsets.all(5.0),
+                        ),
+                        new Padding(
+                          child:
+                          Text.rich(
+                              TextSpan(
+                                  text: 'Job Location',
+                                  style: LatinFonts.aBeeZee(fontSize: 14, fontWeight: FontWeight.bold),
+                                  children: <InlineSpan>[
+                                    TextSpan(
+                                      text: '*',
+                                      style: LatinFonts.aBeeZee(fontSize: 14, fontWeight: FontWeight.bold,color:Colors.red),
+                                    )
+                                  ]
+                              )
+                          ),
+                          // Text('Job Title',style: LatinFonts.aBeeZee(fontSize: 14, fontWeight: FontWeight.bold),),
+                          padding: const EdgeInsets.all(10.0),
+                        ),
+                        new Padding(
+                          child:
+                          new Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              mainAxisSize: MainAxisSize.max,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: <Widget>[
+                                Container(
+                                  width: deviceSize.width-20,
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    border: Border.all(color: Primary),
+                                    borderRadius: BorderRadius.only(topRight: Radius.circular(6), topLeft: Radius.circular(6),bottomLeft:Radius.circular(6), bottomRight: Radius.circular(6) ),
+                                    boxShadow: [
+                                      BoxShadow(color: Colors.grey.withOpacity(0.1), spreadRadius: 1, blurRadius: 3, offset: Offset(0, 1)) // changes position of shadow
+                                    ],
+                                  ),
+                                  child: TextFormField(
+                                    readOnly: true,
+                                    enabled: _hasLocation,
+                                    onTap: () {
+                                      _LocationDisplaySelection(context);
+                                    },
+                                    focusNode: addressnode,
+                                    controller: _localityController,
+                                    validator: (value) {
+                                      if (value == null || value.isEmpty) {
+                                        //addressnode.requestFocus();
+                                        _scrollToFocusMiddle();
+                                        return 'Please Enter Job Locality';
+                                      }
+                                      return null;
+                                    },
+                                    decoration: InputDecoration(
+                                      hintText: _hasLocation?"Locality In city is located":" No Location in this city",
+                                      filled: true,
+                                      contentPadding: EdgeInsets.symmetric(vertical: 12.0, horizontal: 15),
+                                      isDense: true,
+                                      focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: Theme.of(context).primaryColor)),
+                                      errorStyle: TextStyle(height: 1.5),
+                                      border: InputBorder.none,
+                                    ),
+                                  ),
+                                ),
+
+                              ]
+                          ),
+                          padding: const EdgeInsets.all(5.0),
+                        ),
+                        //////////////////////////////////// Address
+                        new Padding(
+                          child:
+                          Text.rich(
+                              TextSpan(
+                                  text: 'Full Interview Address',
+                                  style: LatinFonts.aBeeZee(fontSize: 14, fontWeight: FontWeight.bold),
+                                  children: <InlineSpan>[
+                                    TextSpan(
+                                      text: '*',
+                                      style: LatinFonts.aBeeZee(fontSize: 14, fontWeight: FontWeight.bold,color:Colors.red),
+                                    )
+                                  ]
+                              )
+                          ),
+                          // Text('Job Title',style: LatinFonts.aBeeZee(fontSize: 14, fontWeight: FontWeight.bold),),
+                          padding: const EdgeInsets.all(10.0),
+                        ),
+                        Container(
+                          width:deviceSize.width*0.9,
+                          padding: EdgeInsets.symmetric(vertical: 10,horizontal: 10.0),
+                          child:
+                          TextFormField(
+                            maxLines: 3,
+                            controller: addressController,
+                            keyboardType: TextInputType.multiline,
+                            onChanged: (value) {
+                              setState(() {
+                                address=value;
+                              });
+
+                            },
+                            // controller: editingController,
+                            focusNode: fulladdressnode,
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                //fulladdressnode.requestFocus();
+                                _scrollToFocusMiddle();
+                                return 'Please Enter Interview Address';
+                              }
+                              return null;
+                            },
+                            decoration: InputDecoration(
+                                isDense:true,
+                                filled: true,
+                                fillColor: Colors.white,
+                                // labelText:"Number of Openings",
+                                hintText:"Enter Interview Address",
+                                // prefixIcon: Icon(Icons.numbers),
+                                border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(10.0)))),
+                          ),
+                        ),
+
 //////////////////////////////// Minimum Qualification required
                         new Padding(
                           child:
@@ -1502,7 +1445,7 @@ String Jobtype="";
                           // Text('Job Title',style: LatinFonts.aBeeZee(fontSize: 14, fontWeight: FontWeight.bold),),
                           padding: const EdgeInsets.all(10.0),
                         ),
-////////////////////////////////////////////// Next Button
+////////////////////////////////////////////// Reset Button
                         new Padding(
                           child:
                               Row(

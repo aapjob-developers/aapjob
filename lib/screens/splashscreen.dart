@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:Aap_job/helper/LocationManager.dart';
 import 'package:Aap_job/localization/language_constrants.dart';
 import 'package:Aap_job/main.dart';
 import 'package:Aap_job/models/common_functions.dart';

@@ -1,9 +1,4 @@
 import 'dart:convert';
-
-import 'package:Aap_job/data/respository/SearchApi.dart';
-import 'package:Aap_job/helper/LocationManager.dart';
-import 'package:Aap_job/helper/SharedManager.dart';
-
 import 'package:Aap_job/models/JobTitleModel.dart';
 import 'package:Aap_job/models/JobsModel.dart';
 import 'package:Aap_job/models/common_functions.dart';

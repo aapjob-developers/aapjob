@@ -12,13 +12,11 @@ import 'package:dio/dio.dart';
 import 'package:Aap_job/models/CitiesModel.dart';
 import 'package:Aap_job/utill/app_constants.dart';
 import 'package:Aap_job/utill/colors.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:google_language_fonts/google_language_fonts.dart';
 import 'package:provider/provider.dart';
 import '../../models/LocationModel.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:http/http.dart' as http;
-import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:Aap_job/helper/SharedManager.dart';
 import 'package:lottie/lottie.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/cities_provider.dart';
@@ -113,8 +111,8 @@ class _ChangeLocationScreenState extends State<ChangeLocationScreen> {
     _jobcityController.text=widget.CurrentCity;
     _localityController.text=widget.CurrentLocation;
     duplicateItems.addAll(Provider.of<CitiesProvider>(context, listen: false).cityModelList);
-      jobcity = widget.CurrentCity;
-      locality = widget.CurrentLocation;
+    jobcity = widget.CurrentCity;
+    locality = widget.CurrentLocation;
   }
 
   _navigateAndDisplaySelection(BuildContext context) async {
@@ -162,7 +160,7 @@ class _ChangeLocationScreenState extends State<ChangeLocationScreen> {
         });
       }
       else {
-       // await updateHrProfileDetails(_jobcity, _locality);
+        // await updateHrProfileDetails(_jobcity, _locality);
         FormData formData = new FormData.fromMap({'userid':Provider.of<AuthProvider>(context, listen: false).getUserid(),'HrCity':_jobcity, 'HrLocality':_locality});
         try {
           Response response = await _dio.post('${AppConstants.BASE_URL}${AppConstants.SAVE_HR_CITY_DATA_URI}',data:formData );
@@ -206,131 +204,42 @@ class _ChangeLocationScreenState extends State<ChangeLocationScreen> {
         setState(() {  _isLoading = false; });
       }
       else {
-       // await updateProfileDetails(_jobcity, _locality);
+        // await updateProfileDetails(_jobcity, _locality);
         FormData formData = new FormData.fromMap({'userid':Provider.of<AuthProvider>(context, listen: false).getUserid(), 'City':_jobcity,'Locality':_locality});
-                try {
-                  Response response = await _dio.post('${AppConstants.BASE_URL}${AppConstants.SAVE_CITY_DATA_URI}',data:formData );
-                  // apiresponse= response.data;
-                   print('Save Response: ${response.data.toString()}');
-                  if(response.data.toString()=="updated")
-                  {
-                    setState(() {
-                    _isLoading=false;
-                  });
-                  sharedPreferences!.setString("jobcity",_jobcity);
-                  sharedPreferences!.setString("joblocation", _locality);
-                  Navigator.pushAndRemoveUntil(context,  MaterialPageRoute(builder: (context)=> HomePage()),(route) => false);
-                  }
-                  else
-                  {
-                    CommonFunctions.showInfoDialog("Sorry! There is an error in saving prefered city", context);
-                  }
-                }
-                on DioError catch (e)
-                {
-                  if (e.response != null) {
-                    print('Dio error!');
-                    print('STATUS: ${e.response?.statusCode}');
-                    print('DATA: ${e.response?.data}');
-                    print('HEADERS: ${e.response?.headers}');
-                  } else {
-                    // Error due to setting up or sending the request
-                    print('Error sending request!');
-                    print(e.message);
-                  }
-                }
+        try {
+          Response response = await _dio.post('${AppConstants.BASE_URL}${AppConstants.SAVE_CITY_DATA_URI}',data:formData );
+          // apiresponse= response.data;
+          print('Save Response: ${response.data.toString()}');
+          if(response.data.toString()=="updated")
+          {
+            setState(() {
+              _isLoading=false;
+            });
+            sharedPreferences!.setString("jobcity",_jobcity);
+            sharedPreferences!.setString("joblocation", _locality);
+            Navigator.pushAndRemoveUntil(context,  MaterialPageRoute(builder: (context)=> HomePage()),(route) => false);
+          }
+          else
+          {
+            CommonFunctions.showInfoDialog("Sorry! There is an error in saving prefered city", context);
+          }
+        }
+        on DioError catch (e)
+        {
+          if (e.response != null) {
+            print('Dio error!');
+            print('STATUS: ${e.response?.statusCode}');
+            print('DATA: ${e.response?.data}');
+            print('HEADERS: ${e.response?.headers}');
+          } else {
+            // Error due to setting up or sending the request
+            print('Error sending request!');
+            print(e.message);
+          }
+        }
       }
     }
   }
-
-  // Future<http.StreamedResponse> updateHrProfileDetails(String HrCity,String HrLocality) async {
-  //   http.MultipartRequest request = http.MultipartRequest('POST', Uri.parse('${AppConstants.BASE_URL}${AppConstants.SAVE_HR_CITY_DATA_URI}'));
-  //   Map<String, String> _fields = Map();
-  //   _fields.addAll(<String, String>{
-  //     'userid':Provider.of<AuthProvider>(context, listen: false).getUserid(),
-  //     'HrCity':HrCity,
-  //     'HrLocality':HrLocality
-  //   });
-  //   request.fields.addAll(_fields);
-  //   http.StreamedResponse response = await request.send();
-  //   response.stream.transform(utf8.decoder).listen((value) {
-  //     print("response : "+value);
-  //     if (response.statusCode == 200) {
-  //       if(response.toString()!="Failed")
-  //       {
-  //         setState(() {
-  //           _isLoading=false;
-  //         });
-  //         sharedPreferences!.setString("HrCity", HrCity);
-  //         sharedPreferences!.setString("HrLocality", HrLocality);
-  //         Navigator.pushReplacement(context,  MaterialPageRoute(builder: (context)=> HrHomePage()));
-  //       }
-  //       else
-  //       {
-  //         setState(() {
-  //           _isLoading=false;
-  //           CommonFunctions.showInfoDialog("Error in Updating Details", context);
-  //         });
-  //       }
-  //
-  //     } else {
-  //
-  //       setState(() {
-  //         _isLoading=false;
-  //       });
-  //
-  //       print('${response.statusCode} ${response.reasonPhrase}');
-  //
-  //       CommonFunctions.showErrorDialog("Error in Connection", context);
-  //     }
-  //   });
-  //   return response;
-  // }
-  //
-  // Future<http.StreamedResponse> updateProfileDetails(String City,String Locality) async {
-  //   http.MultipartRequest request = http.MultipartRequest('POST', Uri.parse('${AppConstants.BASE_URL}${AppConstants.SAVE_CITY_DATA_URI}'));
-  //   Map<String, String> _fields = Map();
-  //   _fields.addAll(<String, String>{
-  //     'userid':Provider.of<AuthProvider>(context, listen: false).getUserid(),
-  //     'City':City,
-  //     'Locality':Locality,
-  //   });
-  //   request.fields.addAll(_fields);
-  //   http.StreamedResponse response = await request.send();
-  //   response.stream.transform(utf8.decoder).listen((value) {
-  //     print("response : "+value);
-  //
-  //     if (response.statusCode == 200) {
-  //       if(response.toString()!="Failed")
-  //       {
-  //         setState(() {
-  //           _isLoading=false;
-  //         });
-  //         sharedPreferences!.setString("jobcity",City);
-  //         sharedPreferences!.setString("joblocation", Locality);
-  //         Navigator.pushAndRemoveUntil(context,  MaterialPageRoute(builder: (context)=> HomePage()),(route) => false);
-  //       }
-  //       else
-  //       {
-  //         setState(() {
-  //           _isLoading=false;
-  //           CommonFunctions.showErrorDialog("Error in Updating Details", context);
-  //         });
-  //       }
-  //
-  //     } else {
-  //
-  //       setState(() {
-  //         _isLoading=false;
-  //       });
-  //       print('${response.statusCode} ${response.reasonPhrase}');
-  //       CommonFunctions.showErrorDialog("Error in Connection", context);
-  //     }
-  //   });
-  //   return response;
-  // }
-  //
-
 
   bool _checkdetails()
   {
@@ -344,121 +253,80 @@ class _ChangeLocationScreenState extends State<ChangeLocationScreen> {
     }
   }
 
-  _getLocation() async {
-     final coordinate = await SharedManager.shared.getLocationCoordinate();
-     this.latitude = coordinate.latitude;
-     this.longitude = coordinate.longitude;
-     _getAddressFromCurrentLocation(await SharedManager.shared.getLocationCoordinate());
-  }
+  String _currentAddress = 'Tap the button to get your address';
 
-  // String? _currentAddress;
-  // Position? _currentPosition;
-  //
-  // Future<bool> _handleLocationPermission() async {
-  //   bool serviceEnabled;
-  //   LocationPermission permission;
-  //
-  //   serviceEnabled = await Geolocator.isLocationServiceEnabled();
-  //   if (!serviceEnabled) {
-  //     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-  //         content: Text(
-  //             'Location services are disabled. Please enable the services')));
-  //     return false;
-  //   }
-  //   permission = await Geolocator.checkPermission();
-  //   if (permission == LocationPermission.denied) {
-  //     permission = await Geolocator.requestPermission();
-  //     if (permission == LocationPermission.denied) {
-  //       ScaffoldMessenger.of(context).showSnackBar(
-  //           const SnackBar(content: Text('Location permissions are denied')));
-  //       return false;
-  //     }
-  //   }
-  //   if (permission == LocationPermission.deniedForever) {
-  //     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-  //         content: Text(
-  //             'Location permissions are permanently denied, we cannot request permissions.')));
-  //     return false;
-  //   }
-  //   return true;
-  // }
-  //
-  // Future<void> _getCurrentPosition() async {
-  //   final hasPermission = await _handleLocationPermission();
-  //   if (!hasPermission) return;
-  //   await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.medium)
-  //       .then((Position position) {
-  //     setState(() => _currentPosition = position);
-  //     var latlong = LatLng(_currentPosition!.latitude, _currentPosition!.longitude);
-  //     _getAddressFromCurrentLocation(latlong);
-  //   }).catchError((e) {
-  //     debugPrint(e);
-  //   });
-  // }
-
-  _getAddressFromCurrentLocation(LatLng coordinate) async {
-   // var coordinate = await SharedManager.shared.getLocationCoordinate();
-       // Navigator.pop(context);
-    //print("Stored Location:$coordinate");
-    //final coordinates =   new Coordinates(coordinate.latitude, coordinate.longitude);
-    // final coordinates =   new Coordinates(28.426830769483015, 77.32730148765563);
-    // var addresses =
-    // await Geocoder.local.findAddressesFromCoordinates(coordinates);
-    var addresses=await placemarkFromCoordinates(coordinate.latitude, coordinate.longitude);
-    var first = addresses.first;
-     print('adminArea: ${first.administrativeArea}');
-    // print('locality: ${first.locality}');
-    // print('addressLine: ${first.name}');
-    // print('featureName: ${first.street}');
-    // print('subAdminArea: ${first.subAdministrativeArea}');
-    // print('subLocality: ${first.subLocality}');
-    // print('subThoroughfare: ${first.subThoroughfare}');
-    // print('thoroughfare: ${first.thoroughfare}');
-    // if(first.locality!=null)
-    //   {
-    //     this.city = first.locality!;
-    //   }
-    // if(this.addressline_2!=null)
-    //   {
-    //     this.addressline_2 = first.postalCode!;
-    //   }
-    // setState(() {
-    //   print("Final Address:---->$first");
-    // });
-    // ;
-    Navigator.pop(context);
-    String cityname="Delhi";
-    if(first.subAdministrativeArea!=null) {
-      String q=first.subAdministrativeArea!;
-      if(q.contains("Division"))
-        q=q.toString().trim().substring(0,q.toString().trim().length - 8);
-      cityname=q.toString().trim();
-
-    } else if(first.locality!=null)
-    {
-      cityname= first.locality!;
+  Future<void> _getCurrentAddress() async {
+    LocationPermission permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied || permission==LocationPermission.unableToDetermine||permission == LocationPermission.deniedForever) {
+      // Open app settings when permission is denied or denied forever
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied || permission == LocationPermission.deniedForever|| permission==LocationPermission.unableToDetermine) {
+        // User denied the permission or denied forever
+        print("pp1 $permission");
+        // Navigator.pop(context);
+        _getCurrentAddress();
+        return;
+      }
+      else
+      {
+        //   Navigator.pop(context);
+        _getCurrentAddress();
+      }
     }
-    if(cityname!=null) {
-      _jobcityController.text = cityname;
-    //  CityModel? city = filterSearchResult(cityname);
+    if (permission == LocationPermission.whileInUse ||
+        permission == LocationPermission.always) {
+      try {
+        Position position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.medium,);
+        List<Placemark> placemarks = await placemarkFromCoordinates(position.latitude, position.longitude);
+        print("location list ${placemarks}");
+        if (placemarks.isNotEmpty) {
+          Placemark placemark = placemarks.first;
+          var first = placemark;
+          String cityname="Delhi";
+          if(first.subAdministrativeArea!=null) {
+            String q=first.subAdministrativeArea!;
+            if(q.contains("Division"))
+              q=q.toString().trim().substring(0,q.toString().trim().length - 8);
+            cityname=q.toString().trim();
+          } else if(first.locality!=null)
+          {
+            cityname= first.locality!;
+          }
 
-    //   if (city.id != "0"){
-    //     cityid = (city.id==null?city.id:"0")!;
-    // }
-    // else {
-    //   CommonFunctions.showInfoDialog("Your City is not in list. Please select a near by city from City List", context);
-    //   }
-
-    if(cityname!=first.locality&&first.locality!=null) {
-      _localityController.text = first.locality!;
-    } else if(cityname!=first.subLocality&&first.subLocality!=null)
-    {
-      _localityController.text = first.subLocality!;
-    }
-    }
-    else
-    {
-      CommonFunctions.showInfoDialog(getTranslated('NO_LOCATION', context)!, context);
+          if(cityname!=null) {
+            _jobcityController.text = cityname;
+            if(first.locality!=null)
+            {
+              _localityController.text = first.locality!;
+            }
+            if (cityname != first.locality && first.locality != null) {
+              _localityController.text = first.locality!;
+            } else if (cityname != first.subLocality && first.subLocality != null) {
+              _localityController.text = first.subLocality!;
+            }
+            else {
+              _localityController.text = cityname;
+            }
+          }
+          setState(() {
+            _currentAddress =
+            '${placemark.street}, ${placemark.locality}, ${placemark.administrativeArea}, ${placemark.country}';
+          });
+          Navigator.pop(context);
+        } else {
+          setState(() {
+            _currentAddress = 'Address not found';
+          });
+          Navigator.pop(context);
+        }
+        print(" _currentAddress ${ _currentAddress}");
+      } catch (e) {
+        print(e.toString());
+        setState(() {
+          _currentAddress = 'Error getting location or address';
+        });
+        Navigator.pop(context);
+      }
     }
   }
 
@@ -472,21 +340,15 @@ class _ChangeLocationScreenState extends State<ChangeLocationScreen> {
         if(item.name!.toUpperCase().contains(query.toUpperCase())) {
           found=true;
           print("found");
-         city= item;
+          city= item;
         }
       });
-      // if(!found) {
-      //   CommonFunctions.showInfoDialog(
-      //       "Your Location is not in list. Please Select a city from list",
-      //       context);
-      // }
 
     } else {
       CommonFunctions.showErrorDialog("Your Location is not in list. Please Select a city from list", context);
     }
-  return city;
+    return city;
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -503,8 +365,8 @@ class _ChangeLocationScreenState extends State<ChangeLocationScreen> {
         child:
         Container(
           decoration: new BoxDecoration(color: Colors.white,borderRadius: BorderRadius.all(Radius.circular(15))),
-         padding: EdgeInsets.all(10),
-         margin: EdgeInsets.all(10),
+          padding: EdgeInsets.all(10),
+          margin: EdgeInsets.all(10),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: <Widget>[
@@ -518,7 +380,7 @@ class _ChangeLocationScreenState extends State<ChangeLocationScreen> {
                       context: context,
                       message: 'assets/lottie/location-permissions.json',
                     );
-                      _getLocation();
+                    _getCurrentAddress();
                   },
                   child:
                   Container(

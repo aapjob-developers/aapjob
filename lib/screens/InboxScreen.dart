@@ -1,9 +1,7 @@
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:Aap_job/data/chat/chat_auth_repository.dart';
-import 'package:Aap_job/helper/LocationManager.dart';
-import 'package:Aap_job/helper/SharedManager.dart';
+
 import 'package:Aap_job/localization/language_constrants.dart';
 import 'package:Aap_job/models/common_functions.dart';
 import 'package:Aap_job/screens/chat_home_page.dart';

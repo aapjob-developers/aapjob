@@ -145,16 +145,17 @@ class _DeleteProfileScreenState extends State<DeleteProfileScreen> {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: <Widget>[
                     ElevatedButton(
-                      child: const Text('I Confirm to delete My Profile data'),
+                      child:Text('I Confirm to delete My Profile data'),
                       onPressed: () => Deleteprofile(),
                       style: ElevatedButton.styleFrom(
                           minimumSize: new Size(deviceSize.width * 0.5,20),
+                          maximumSize: new Size(deviceSize.width * 0.9,20),
                           shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(15)),
                           primary: Colors.amber,
                           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
                           textStyle:
-                          const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                          const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
 
                     ),
                   ],),

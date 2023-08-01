@@ -16,6 +16,7 @@ import 'package:Aap_job/screens/EditProfileImage.dart';
 import 'package:Aap_job/screens/EditProfileVideo.dart';
 import 'package:Aap_job/screens/MyAppliedJobs.dart';
 import 'package:Aap_job/screens/MyInterviewCalls.dart';
+import 'package:Aap_job/screens/ResumeUpload.dart';
 import 'package:Aap_job/screens/homePageController.dart';
 import 'package:Aap_job/screens/homepage.dart';
 import 'package:Aap_job/screens/widget/ChangeLocationScreen.dart';
@@ -48,6 +49,8 @@ import 'package:google_language_fonts/google_language_fonts.dart';
 import 'package:lottie/lottie.dart';
 import 'package:Aap_job/utill/app_constants.dart';
 import 'package:http/http.dart' as http;
+
+import 'ReUploadScreen.dart';
 
 class ProfileHomeScreen extends StatefulWidget {
   ProfileHomeScreen({Key? key}) : super(key: key);
@@ -96,6 +99,7 @@ class _ProfileHomeScreenState extends State<ProfileHomeScreen> {
               .split(".")
               .last
               .toString() == "pdf") {
+            print("pdffile->${strarray.last.toString().split(".").last.toString()}");
             loadPdf();
           }
         }
@@ -133,6 +137,7 @@ class _ProfileHomeScreenState extends State<ProfileHomeScreen> {
   Future<String> downloadAndSavePdf() async {
     final directory = await getApplicationDocumentsDirectory();
     final file = File('${directory.path}/${strarray.last}');
+    print('${directory.path}/${strarray.last}');
     if (await file.exists()) {
       return file.path;
     }
@@ -143,6 +148,7 @@ class _ProfileHomeScreenState extends State<ProfileHomeScreen> {
 
   void loadPdf() async {
     pdfFlePath = await downloadAndSavePdf();
+    print('${pdfFlePath}');
     setState(() {});
   }
 
@@ -746,7 +752,6 @@ class _ProfileHomeScreenState extends State<ProfileHomeScreen> {
                                         ),
 
                                       ],),
-
                                       GestureDetector(
                                         onTap: (){
                                           Navigator.push(
@@ -757,8 +762,6 @@ class _ProfileHomeScreenState extends State<ProfileHomeScreen> {
                                         child:
                                         Icon(Icons.mode_edit,size: 25,color: Colors.white,),
                                       ),
-
-
                                     ]
                                 ),
                                 Container(
@@ -785,11 +788,13 @@ class _ProfileHomeScreenState extends State<ProfileHomeScreen> {
                                                 ),
                                               ],
                                             )
-
                                       ],),
-
                                       GestureDetector(
                                         onTap: (){
+                                          Provider.of<ProfileProvider>(context, listen: false).getResumeString()==""||Provider.of<ProfileProvider>(context, listen: false).getResumeString()==null||Provider.of<ProfileProvider>(context, listen: false).getResumeString()=="uploads/candidate_resume/docs/SampleResume.pdf"
+                                              ?
+                                          Navigator.push( context,  MaterialPageRoute(builder: (context) =>  ReUploadScreen()))
+                                              :
                                           showModalBottomSheet(
                                             context: context,
                                             builder: ((builder) => bottomSheet()),
@@ -802,7 +807,6 @@ class _ProfileHomeScreenState extends State<ProfileHomeScreen> {
 
                                     ]
                                 ),
-
                               ]
                           ),
                           ),
@@ -841,7 +845,12 @@ class _ProfileHomeScreenState extends State<ProfileHomeScreen> {
                         mainAxisSize: MainAxisSize.max,
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: <Widget>[
-                          Text(getTranslated('My_Applied_jobs', context)!,style: LatinFonts.aBeeZee(fontSize: 14,fontWeight: FontWeight.bold, color: Color.fromARGB(255,39, 170, 225))),
+                          Row(
+                              children: <Widget>[
+                                Icon(Icons.arrow_circle_right,color: Colors.amber,),
+                                Text(getTranslated('My_Applied_jobs', context)!,style: LatinFonts.aBeeZee(fontSize: 14,fontWeight: FontWeight.bold, color: Color.fromARGB(255,39, 170, 225))),
+                              ],
+                          ),
                           Lottie.asset(
                             'assets/lottie/arrowright.json',
                             height: MediaQuery.of(context).size.width*0.08,
@@ -875,6 +884,7 @@ class _ProfileHomeScreenState extends State<ProfileHomeScreen> {
                           children: <Widget>[
                             Row(
                               children: [
+                                Icon(Icons.arrow_circle_right,color: Colors.amber,),
                                 Text(getTranslated('MY_SHORT_LIST', context)!,style: LatinFonts.aBeeZee(fontSize: 14,fontWeight: FontWeight.bold, color: Color.fromARGB(255,39, 170, 225))),
                                 _hasJobsModel==true?
                                 Jobslist.length==Provider.of<AuthProvider>(context, listen: false).getCurrentShortlistCount()
@@ -915,8 +925,12 @@ class _ProfileHomeScreenState extends State<ProfileHomeScreen> {
                           mainAxisSize: MainAxisSize.max,
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: <Widget>[
+                      Row(
+                      children: <Widget>[
+                            Icon(Icons.arrow_circle_right,color: Colors.amber,),
                             Text(getTranslated('CHANGE_LANGUAGE', context)!,style: LatinFonts.aBeeZee(fontSize: 14,fontWeight: FontWeight.bold,color: Color.fromARGB(255,39, 170, 225))),
-                            Lottie.asset(
+                        ]),
+                        Lottie.asset(
                               'assets/lottie/arrowright.json',
                               height: MediaQuery.of(context).size.width*0.08,
                               width: MediaQuery.of(context).size.width*0.08,
@@ -940,8 +954,12 @@ class _ProfileHomeScreenState extends State<ProfileHomeScreen> {
                           mainAxisSize: MainAxisSize.max,
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: <Widget>[
+                      Row(
+                      children: <Widget>[
+                            Icon(Icons.arrow_circle_right,color: Colors.amber,),
                             Text(getTranslated('Rate_and_Share', context)!,style: LatinFonts.aBeeZee(fontSize: 14,fontWeight: FontWeight.bold,color: Color.fromARGB(255,39, 170, 225))),
-                            Lottie.asset(
+                        ]),
+                        Lottie.asset(
                               'assets/lottie/arrowright.json',
                               height: MediaQuery.of(context).size.width*0.08,
                               width: MediaQuery.of(context).size.width*0.08,
@@ -963,6 +981,7 @@ class _ProfileHomeScreenState extends State<ProfileHomeScreen> {
                         mainAxisSize: MainAxisSize.max,
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: <Widget>[
+                          Icon(Icons.arrow_circle_right,color: Colors.amber,),
                           Text("Delete My Profile",style: LatinFonts.aBeeZee(fontSize: 14,fontWeight: FontWeight.bold,color: Color.fromARGB(255,39, 170, 225))),
                           Lottie.asset(
                             'assets/lottie/arrowright.json',
@@ -1040,328 +1059,403 @@ class _ProfileHomeScreenState extends State<ProfileHomeScreen> {
     );
   }
 
+  // Widget bottomSheet() {
+  //   return Container(
+  //     height: MediaQuery.of(context).size.width,
+  //     width: MediaQuery.of(context).size.width,
+  //     margin: EdgeInsets.symmetric(
+  //       horizontal: 10,
+  //       vertical: 10,
+  //     ),
+  //     child:
+  //     Provider.of<ProfileProvider>(context, listen: false).getResumeString()==""||Provider.of<ProfileProvider>(context, listen: false).getResumeString()==null||Provider.of<ProfileProvider>(context, listen: false).getResumeString()=="uploads/candidate_resume/docs/SampleResume.pdf"
+  //       ? filename==""
+  //             ?
+  //             Column(
+  //               mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  //               crossAxisAlignment: CrossAxisAlignment.center,
+  //               children: <Widget>[
+  //                 Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  //                     children: <Widget>[
+  //                       Column(
+  //                         mainAxisAlignment: MainAxisAlignment.start,
+  //                         crossAxisAlignment: CrossAxisAlignment.start,
+  //                         children: [
+  //                           Text(
+  //                             "Upload your resume",
+  //                             style: TextStyle(
+  //                               fontSize: 14.0,
+  //                             ),
+  //                           ),
+  //                           Text(
+  //                             "only HRs on AapJob can view",
+  //                             style: TextStyle(
+  //                               color: Colors.black26,
+  //                               fontSize: 14.0,
+  //                             ),
+  //                           ),
+  //                         ],
+  //                       ),
+  //                       TextButton.icon(
+  //                         icon: Icon(Icons.clear),
+  //                         onPressed: () {
+  //                           Navigator.of(context).pop();
+  //                         },
+  //                         label: Text("Close"),
+  //                       ),
+  //                     ]),
+  //                 GestureDetector(
+  //                   onTap: (){
+  //                     _fileipload();
+  //                   },
+  //                   child: Container(
+  //                     //decoration: new BoxDecoration(border: Border.all(color: Colors.blueAccent),borderRadius: BorderRadius.all(Radius.circular(20))),
+  //                     height: MediaQuery.of(context).size.width*0.6,
+  //                     width: MediaQuery.of(context).size.width*0.6,
+  //                     child:
+  //                     Center(child:
+  //                         Column(
+  //                           crossAxisAlignment: CrossAxisAlignment.center,
+  //                           mainAxisAlignment: MainAxisAlignment.center,
+  //                           children: <Widget>[
+  //                                   new Image.asset(
+  //                                     'assets/images/pdficon.png',
+  //                                     fit: BoxFit.contain,
+  //                                     height: MediaQuery.of(context).size.width*0.2,
+  //                                     width: MediaQuery.of(context).size.width*0.2,
+  //                                   ),
+  //                            // Icon(Icons.upload, color: Colors.blueAccent,size: MediaQuery.of(context).size.width*0.1,),
+  //                             Text("Please Click Here Upload a Resume",style: LatinFonts.aBeeZee(color:Colors.grey),textAlign: TextAlign.center,)
+  //                           ],
+  //                         ),
+  //                     ),
+  //                   ),
+  //                 ),
+  //                 Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  //                     children: <Widget>[
+  //                       Column(
+  //                         mainAxisAlignment: MainAxisAlignment.start,
+  //                         crossAxisAlignment: CrossAxisAlignment.start,
+  //                         children: [
+  //                           Text(
+  //                             "Tips for a good resume",
+  //                             style: TextStyle(
+  //                               fontSize: 20.0,
+  //                             ),
+  //                           ),
+  //                           Container(
+  //                             width: MediaQuery.of(context).size.width-30,
+  //                             child: Text(
+  //                               "* Your name and mobile number should be mentioned in the resume",
+  //                               maxLines: 3,
+  //                               style: TextStyle(
+  //                                 color: Colors.black54,
+  //                                 fontSize: 12.0,
+  //                               ),
+  //                             ),
+  //                           ),
+  //                           Container(
+  //                             width: MediaQuery.of(context).size.width-30,
+  //                             child: Text(
+  //                               "* Highlight important details about your work & education",
+  //                               maxLines: 3,
+  //                               style: TextStyle(
+  //                                 color: Colors.black54,
+  //                                 fontSize: 12.0,
+  //                               ),
+  //                             ),
+  //                           ),
+  //                           Container(
+  //                             width: MediaQuery.of(context).size.width-30,
+  //                             child: Text(
+  //                               "* Try top keep your resume to 1-2 pages only",
+  //                               maxLines: 3,
+  //                               style: TextStyle(
+  //                                 color: Colors.black54,
+  //                                 fontSize: 12.0,
+  //                               ),
+  //                             ),
+  //                           ),
+  //                         ],
+  //                       ),
+  //
+  //                     ]),
+  //               ],
+  //             )
+  //             :
+  //             Column(
+  //               children: <Widget>[
+  //                 Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  //                     children: <Widget>[
+  //                       Column(
+  //                         mainAxisAlignment: MainAxisAlignment.start,
+  //                         crossAxisAlignment: CrossAxisAlignment.start,
+  //                         children: [
+  //                           Text(
+  //                             "Submit your resume",
+  //                             style: TextStyle(
+  //                               fontSize: 14.0,
+  //                             ),
+  //                           ),
+  //                           Text(
+  //                             "only HRs on AapJob can view",
+  //                             style: TextStyle(
+  //                               color: Colors.black26,
+  //                               fontSize: 14.0,
+  //                             ),
+  //                           ),
+  //                         ],
+  //                       ),
+  //                       TextButton.icon(
+  //                         icon: Icon(Icons.clear),
+  //                         onPressed: () {
+  //                           Navigator.of(context).pop();
+  //                         },
+  //                         label: Text("Close"),
+  //                       ),
+  //                     ]),
+  //                 certificatepath==""?
+  //                 Container():
+  //                 new Padding(
+  //                   child:
+  //                   new Row(
+  //                       mainAxisAlignment: MainAxisAlignment.center,
+  //                       mainAxisSize: MainAxisSize.max,
+  //                       crossAxisAlignment: CrossAxisAlignment.center,
+  //                       children: <Widget>[
+  //                         Container(
+  //                           width:MediaQuery.of(context).size.width*0.6,
+  //                           height: MediaQuery.of(context).size.width*0.6,
+  //                           child:
+  //                           Image.file(
+  //                               File(certificatepath)),
+  //                         )
+  //                       ]
+  //                   ),
+  //                   padding: const EdgeInsets.all(5.0),
+  //                 ),
+  //                 pdfpath==""?
+  //                 Container():
+  //                 new Padding(
+  //                   child:
+  //                   new Row(
+  //                       mainAxisAlignment: MainAxisAlignment.center,
+  //                       mainAxisSize: MainAxisSize.max,
+  //                       crossAxisAlignment: CrossAxisAlignment.center,
+  //                       children: <Widget>[
+  //                         Container(
+  //                          // decoration: new BoxDecoration(border: Border.all(color:Colors.white,width: 2),borderRadius: BorderRadius.all(Radius.circular(5))),
+  //                           width:MediaQuery.of(context).size.width*0.6,
+  //                           height: MediaQuery.of(context).size.width*0.6,
+  //                           child:PdfView(path: pdfpath),
+  //                         )
+  //                       ]
+  //                   ),
+  //                   padding: const EdgeInsets.all(5.0),
+  //                 ),
+  //                 _isLoading?
+  //                 CircularProgressIndicator():
+  //                 Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  //                     children: <Widget>[
+  //                       Container(
+  //                         width: MediaQuery.of(context).size.width*0.35,
+  //                         decoration: BoxDecoration(border: Border.all(color: Colors.red,width: 2),
+  //                           borderRadius: BorderRadius.only(topRight: Radius.circular(6), topLeft: Radius.circular(6),bottomLeft:Radius.circular(6), bottomRight: Radius.circular(6) ),),
+  //                         margin: EdgeInsets.all(5),
+  //                         child:
+  //                         TextButton.icon(
+  //                           icon: Icon(Icons.delete_rounded,color: Colors.red,),
+  //                           onPressed: () {
+  //                             setState(() {
+  //                               filename="";
+  //                               Navigator.pop(this.context);
+  //                               showModalBottomSheet(
+  //                                 context: context,
+  //                                 builder: ((builder) => bottomSheet()),
+  //                               );
+  //                             });
+  //                             },
+  //                           label: Text("Remove",style: LatinFonts.aBeeZee(color: Colors.red,fontSize:12),),
+  //                         ),
+  //                       ),
+  //                       Container(
+  //                         width: MediaQuery.of(context).size.width*0.35,
+  //                         decoration: BoxDecoration(border: Border.all(color: Colors.green,width: 2),
+  //                           borderRadius: BorderRadius.only(topRight: Radius.circular(6), topLeft: Radius.circular(6),bottomLeft:Radius.circular(6), bottomRight: Radius.circular(6) ),),
+  //                         margin: EdgeInsets.all(5),
+  //                         child:
+  //                         TextButton.icon(
+  //                           icon: Icon(Icons.upload,color: Colors.green,),
+  //                           onPressed: () {
+  //                             setState(() {
+  //                               _isLoading=true;
+  //                             });
+  //                             _submit(filename);
+  //                           },
+  //                           label: Text("Submit",style: LatinFonts.aBeeZee(color: Colors.green,fontSize:12),),
+  //                         ),
+  //                       ),
+  //
+  //                     ])
+  //               ],
+  //             )
+  //       :
+  //         //showing resume
+  //     Column(
+  //       children: <Widget>[
+  //     Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  //       children: <Widget>[
+  //         Column(
+  //           mainAxisAlignment: MainAxisAlignment.start,
+  //           crossAxisAlignment: CrossAxisAlignment.start,
+  //           children: [
+  //             Text(
+  //               "My Resume",
+  //               style: TextStyle(
+  //                 fontSize: 20.0,
+  //               ),
+  //             ),
+  //             Text(
+  //               "only HRs on AapJob can view",
+  //               style: TextStyle(
+  //                 color: Colors.black26,
+  //                 fontSize: 14.0,
+  //               ),
+  //             ),
+  //           ],
+  //         ),
+  //         TextButton.icon(
+  //           icon: Icon(Icons.clear),
+  //           onPressed: () {
+  //             Navigator.of(context).pop();
+  //           },
+  //           label: Text("Close"),
+  //         ),
+  //       ]),
+  //         Container(
+  //           // height: MediaQuery.of(context).size.width*0.6,
+  //           width: MediaQuery.of(context).size.width*0.7,
+  //           child:
+  //           strarray.last.toString().split(".").last.toString()=="jpg" ?
+  //           Container(
+  //              // decoration: new BoxDecoration(border: Border.all(color:Colors.black,width: 2),borderRadius: BorderRadius.all(Radius.circular(5))),
+  //               width:MediaQuery.of(context).size.width*0.5,
+  //               height: MediaQuery.of(context).size.width*0.5,
+  //               child:CachedNetworkImage(
+  //                 width:MediaQuery.of(context).size.width*0.5,
+  //                 height:MediaQuery.of(context).size.width*0.5,
+  //                 placeholder: (context, url) => const CircularProgressIndicator(),
+  //                 imageUrl: AppConstants.BASE_URL+Provider.of<ProfileProvider>(context, listen: false).getResumeString(),
+  //               )
+  //           )
+  //               :
+  //           strarray.last.toString().split(".").last.toString()=="pdf"
+  //               ?
+  //           Container(
+  //           //  decoration: new BoxDecoration(border: Border.all(color:Colors.black,width: 2),borderRadius: BorderRadius.all(Radius.circular(5))),
+  //             width:MediaQuery.of(context).size.width*0.5,
+  //             height:MediaQuery.of(context).size.width*0.5,
+  //             child:PdfView(path: pdfFlePath!),
+  //           )
+  //               :
+  //           Container(),
+  //         ),
+  //         //reuploaded and download
+  //         Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  //             children: <Widget>[
+  //               Container(
+  //                   width: MediaQuery.of(context).size.width*0.35,
+  //                   decoration: BoxDecoration(border: Border.all(color: Colors.red,width: 2),
+  //                     borderRadius: BorderRadius.only(topRight: Radius.circular(6), topLeft: Radius.circular(6),bottomLeft:Radius.circular(6), bottomRight: Radius.circular(6) ),),
+  //                   margin: EdgeInsets.all(5),
+  //                   child:
+  //               TextButton.icon(
+  //                 icon: Icon(Icons.delete_rounded,color: Colors.red,),
+  //                 onPressed: () {
+  //                   setState(() {
+  //                     filename="";
+  //                     filenn="";
+  //                     _removeresume();
+  //                     Navigator.pop(this.context);
+  //                     showModalBottomSheet(
+  //                       context: context,
+  //                       builder: ((builder) => bottomSheet()),
+  //                     );
+  //                   });
+  //                 },
+  //                 label: Text("Reupload",style: LatinFonts.aBeeZee(color: Colors.red,fontSize:12),),
+  //               ),),
+  //               Container(
+  //                   width: MediaQuery.of(context).size.width*0.35,
+  //                   decoration: BoxDecoration(border: Border.all(color: Colors.green,width: 2),
+  //                     borderRadius: BorderRadius.only(topRight: Radius.circular(6), topLeft: Radius.circular(6),bottomLeft:Radius.circular(6), bottomRight: Radius.circular(6) ),),
+  //                   margin: EdgeInsets.all(5),
+  //                   child:
+  //               TextButton.icon(
+  //                 icon: Icon(Icons.download_for_offline_rounded,color: Colors.green,),
+  //                 onPressed: () {
+  //                  // _downloadAndSaveFile(Provider.of<ProfileProvider>(context, listen: false).getResumeString(),Provider.of<ProfileProvider>(context, listen: false).getResumeName());
+  //                   requestDownload(AppConstants.BASE_URL+Provider.of<ProfileProvider>(context, listen: false).getResumeString(),Provider.of<ProfileProvider>(context, listen: false).getResumeName());
+  //                 },
+  //                 label: Text("Download",style: LatinFonts.aBeeZee(color: Colors.green,fontSize:12),),
+  //               ),
+  //               ),
+  //             ])
+  //       ],
+  //     ),
+  //
+  //   );
+  // }
+  //
+
   Widget bottomSheet() {
     return Container(
-      height: MediaQuery.of(context).size.width,
+      height: MediaQuery.of(context).size.height*0.8,
       width: MediaQuery.of(context).size.width,
       margin: EdgeInsets.symmetric(
         horizontal: 10,
         vertical: 10,
       ),
       child:
-      Provider.of<ProfileProvider>(context, listen: false).getResumeString()==""||Provider.of<ProfileProvider>(context, listen: false).getResumeString()==null||Provider.of<ProfileProvider>(context, listen: false).getResumeString()=="uploads/candidate_resume/docs/SampleResume.pdf"
-        ?
-              filename==""
-              ?
-              Column(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: <Widget>[
-                  Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: <Widget>[
-                        Column(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              "Upload your resume",
-                              style: TextStyle(
-                                fontSize: 14.0,
-                              ),
-                            ),
-                            Text(
-                              "only HRs on AapJob can view",
-                              style: TextStyle(
-                                color: Colors.black26,
-                                fontSize: 14.0,
-                              ),
-                            ),
-                          ],
-                        ),
-                        TextButton.icon(
-                          icon: Icon(Icons.clear),
-                          onPressed: () {
-                            Navigator.of(context).pop();
-                          },
-                          label: Text("Close"),
-                        ),
-                      ]),
-                  GestureDetector(
-                    onTap: (){
-                      _fileipload();
-                    },
-                    child: Container(
-                      //decoration: new BoxDecoration(border: Border.all(color: Colors.blueAccent),borderRadius: BorderRadius.all(Radius.circular(20))),
-                      height: MediaQuery.of(context).size.width*0.6,
-                      width: MediaQuery.of(context).size.width*0.6,
-                      child:
-                      Center(child:
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: <Widget>[
-                                    new Image.asset(
-                                      'assets/images/pdficon.png',
-                                      fit: BoxFit.contain,
-                                      height: MediaQuery.of(context).size.width*0.2,
-                                      width: MediaQuery.of(context).size.width*0.2,
-                                    ),
-                             // Icon(Icons.upload, color: Colors.blueAccent,size: MediaQuery.of(context).size.width*0.1,),
-                              Text("Please Click Here Upload a Resume",style: LatinFonts.aBeeZee(color:Colors.grey),textAlign: TextAlign.center,)
-                            ],
-                          ),
-                      ),
-                    ),
-                  ),
-                  Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: <Widget>[
-                        Column(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              "Tips for a good resume",
-                              style: TextStyle(
-                                fontSize: 20.0,
-                              ),
-                            ),
-                            Container(
-                              width: MediaQuery.of(context).size.width-30,
-                              child: Text(
-                                "* Your name and mobile number should be mentioned in the resume",
-                                maxLines: 3,
-                                style: TextStyle(
-                                  color: Colors.black54,
-                                  fontSize: 12.0,
-                                ),
-                              ),
-                            ),
-                            Container(
-                              width: MediaQuery.of(context).size.width-30,
-                              child: Text(
-                                "* Highlight important details about your work & education",
-                                maxLines: 3,
-                                style: TextStyle(
-                                  color: Colors.black54,
-                                  fontSize: 12.0,
-                                ),
-                              ),
-                            ),
-                            Container(
-                              width: MediaQuery.of(context).size.width-30,
-                              child: Text(
-                                "* Try top keep your resume to 1-2 pages only",
-                                maxLines: 3,
-                                style: TextStyle(
-                                  color: Colors.black54,
-                                  fontSize: 12.0,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-
-                      ]),
-                ],
-              )
-              :
-              Column(
-                children: <Widget>[
-                  Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: <Widget>[
-                        Column(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              "Submit your resume",
-                              style: TextStyle(
-                                fontSize: 14.0,
-                              ),
-                            ),
-                            Text(
-                              "only HRs on AapJob can view",
-                              style: TextStyle(
-                                color: Colors.black26,
-                                fontSize: 14.0,
-                              ),
-                            ),
-                          ],
-                        ),
-                        TextButton.icon(
-                          icon: Icon(Icons.clear),
-                          onPressed: () {
-                            Navigator.of(context).pop();
-                          },
-                          label: Text("Close"),
-                        ),
-                      ]),
-                  certificatepath==""?
-                  Container():
-                  new Padding(
-                    child:
-                    new Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        mainAxisSize: MainAxisSize.max,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: <Widget>[
-                          Container(
-                            width:MediaQuery.of(context).size.width*0.6,
-                            height: MediaQuery.of(context).size.width*0.6,
-                            child:
-                            Image.file(
-                                File(certificatepath)),
-                          )
-                        ]
-
-                    ),
-                    padding: const EdgeInsets.all(5.0),
-                  ),
-                  pdfpath==""?
-                  Container():
-                  new Padding(
-                    child:
-                    new Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        mainAxisSize: MainAxisSize.max,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: <Widget>[
-                          Container(
-                           // decoration: new BoxDecoration(border: Border.all(color:Colors.white,width: 2),borderRadius: BorderRadius.all(Radius.circular(5))),
-                            width:MediaQuery.of(context).size.width*0.6,
-                            height: MediaQuery.of(context).size.width*0.6,
-                            child:PdfView(path: pdfpath),
-                          )
-                        ]
-
-                    ),
-                    padding: const EdgeInsets.all(5.0),
-                  ),
-                  // Container(
-                  //   decoration: new BoxDecoration(color: Colors.grey.shade300,border: Border.all(color: Colors.blueAccent),borderRadius: BorderRadius.all(Radius.circular(20))),
-                  //   height: MediaQuery.of(context).size.width*0.6,
-                  //   width: MediaQuery.of(context).size.width*0.6,
-                  //   child:
-                  //   Center(child:
-                  //   Column(
-                  //     crossAxisAlignment: CrossAxisAlignment.center,
-                  //     mainAxisAlignment: MainAxisAlignment.center,
-                  //     children: <Widget>[
-                  //       Icon(Icons.upload, color: Colors.blueAccent,size: MediaQuery.of(context).size.width*0.1,),
-                  //       Text(filenn,style: LatinFonts.aBeeZee(color:Colors.grey),textAlign: TextAlign.center,)
-                  //     ],
-                  //   ),
-                  //   ),
-                  // ),
-                  _isLoading?
-                  CircularProgressIndicator():
-                  Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: <Widget>[
-                        Container(
-                          width: MediaQuery.of(context).size.width*0.35,
-                          decoration: BoxDecoration(border: Border.all(color: Colors.red,width: 2),
-                            borderRadius: BorderRadius.only(topRight: Radius.circular(6), topLeft: Radius.circular(6),bottomLeft:Radius.circular(6), bottomRight: Radius.circular(6) ),),
-                          margin: EdgeInsets.all(5),
-                          child:
-                          TextButton.icon(
-                            icon: Icon(Icons.delete_rounded,color: Colors.red,),
-                            onPressed: () {
-                              setState(() {
-                                filename="";
-                                Navigator.pop(this.context);
-
-                                showModalBottomSheet(
-                                  context: context,
-                                  builder: ((builder) => bottomSheet()),
-                                );
-                              });
-                              },
-                            label: Text("Remove",style: LatinFonts.aBeeZee(color: Colors.red,fontSize:12),),
-                          ),
-                        ),
-                        Container(
-                          width: MediaQuery.of(context).size.width*0.35,
-                          decoration: BoxDecoration(border: Border.all(color: Colors.green,width: 2),
-                            borderRadius: BorderRadius.only(topRight: Radius.circular(6), topLeft: Radius.circular(6),bottomLeft:Radius.circular(6), bottomRight: Radius.circular(6) ),),
-                          margin: EdgeInsets.all(5),
-                          child:
-                          TextButton.icon(
-                            icon: Icon(Icons.upload,color: Colors.green,),
-                            onPressed: () {
-                              setState(() {
-                                _isLoading=true;
-                              });
-                              _submit(filename);
-                            },
-                            label: Text("Submit",style: LatinFonts.aBeeZee(color: Colors.green,fontSize:12),),
-                          ),
-                        ),
-
-                      ])
-                ],
-              )
-        :
+      //showing resume
       Column(
         children: <Widget>[
-      Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: <Widget>[
-          Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                "My Resume",
-                style: TextStyle(
-                  fontSize: 20.0,
+          Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: <Widget>[
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      "My Resume",
+                      style: TextStyle(
+                        fontSize: 20.0,
+                      ),
+                    ),
+                    Text(
+                      "only HRs on AapJob can view",
+                      style: TextStyle(
+                        color: Colors.black26,
+                        fontSize: 14.0,
+                      ),
+                    ),
+                  ],
                 ),
-              ),
-              Text(
-                "only HRs on AapJob can view",
-                style: TextStyle(
-                  color: Colors.black26,
-                  fontSize: 14.0,
+                TextButton.icon(
+                  icon: Icon(Icons.clear),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  label: Text("Close"),
                 ),
-              ),
-            ],
-          ),
-          TextButton.icon(
-            icon: Icon(Icons.clear),
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
-            label: Text("Close"),
-          ),
-        ]),
-          // Container(
-          //   decoration: new BoxDecoration(color: Colors.grey.shade300,border: Border.all(color: Colors.blueAccent),borderRadius: BorderRadius.all(Radius.circular(20))),
-          //   height: MediaQuery.of(context).size.width*0.6,
-          //   width: MediaQuery.of(context).size.width*0.6,
-          //   child:
-          //   Center(child:
-          //
-          //   // Column(
-          //   //   crossAxisAlignment: CrossAxisAlignment.center,
-          //   //   mainAxisAlignment: MainAxisAlignment.center,
-          //   //   children: <Widget>[
-          //   //   //  Icon(Icons.import_contacts, color: Colors.green,size: MediaQuery.of(context).size.width*0.1,),
-          //   //     new Image.asset(
-          //   //       'assets/images/pdficon.png',
-          //   //       fit: BoxFit.contain,
-          //   //       height: MediaQuery.of(context).size.width*0.1,
-          //   //       width: MediaQuery.of(context).size.width*0.1,
-          //   //     ),
-          //   //     Text(Provider.of<ProfileProvider>(context, listen: false).getResumeName(),style: LatinFonts.aBeeZee(color:Colors.grey),textAlign: TextAlign.center,)
-          //   //   ],
-          //   // ),
-          //   ),
-          // ),
+              ]),
           Container(
-            // height: MediaQuery.of(context).size.width*0.6,
+            height: MediaQuery.of(context).size.width*0.7,
             width: MediaQuery.of(context).size.width*0.5,
             child:
             strarray.last.toString().split(".").last.toString()=="jpg" ?
             Container(
-               // decoration: new BoxDecoration(border: Border.all(color:Colors.black,width: 2),borderRadius: BorderRadius.all(Radius.circular(5))),
+              // decoration: new BoxDecoration(border: Border.all(color:Colors.black,width: 2),borderRadius: BorderRadius.all(Radius.circular(5))),
                 width:MediaQuery.of(context).size.width*0.5,
                 height: MediaQuery.of(context).size.width*0.5,
                 child:CachedNetworkImage(
@@ -1375,53 +1469,50 @@ class _ProfileHomeScreenState extends State<ProfileHomeScreen> {
             strarray.last.toString().split(".").last.toString()=="pdf"
                 ?
             Container(
-            //  decoration: new BoxDecoration(border: Border.all(color:Colors.black,width: 2),borderRadius: BorderRadius.all(Radius.circular(5))),
-              width:MediaQuery.of(context).size.width*0.5,
-              height:MediaQuery.of(context).size.width*0.5,
+              //  decoration: new BoxDecoration(border: Border.all(color:Colors.black,width: 2),borderRadius: BorderRadius.all(Radius.circular(5))),
+              //width:MediaQuery.of(context).size.width*0.5,
+              height:MediaQuery.of(context).size.width*0.6,
               child:PdfView(path: pdfFlePath!),
             )
-
                 :
             Container(),
           ),
+          //reuploaded and download
           Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: <Widget>[
                 Container(
-                    width: MediaQuery.of(context).size.width*0.35,
-                    decoration: BoxDecoration(border: Border.all(color: Colors.red,width: 2),
-                      borderRadius: BorderRadius.only(topRight: Radius.circular(6), topLeft: Radius.circular(6),bottomLeft:Radius.circular(6), bottomRight: Radius.circular(6) ),),
-                    margin: EdgeInsets.all(5),
-                    child:
-                TextButton.icon(
-                  icon: Icon(Icons.delete_rounded,color: Colors.red,),
-                  onPressed: () {
-                    setState(() {
-                      filename="";
-                      filenn="";
-                      _removeresume();
-                      Navigator.pop(this.context);
-                      showModalBottomSheet(
-                        context: context,
-                        builder: ((builder) => bottomSheet()),
-                      );
-                    });
-                  },
-                  label: Text("Reupload",style: LatinFonts.aBeeZee(color: Colors.red,fontSize:12),),
-                ),),
+                  width: MediaQuery.of(context).size.width*0.35,
+                  decoration: BoxDecoration(border: Border.all(color: Colors.red,width: 2),
+                    borderRadius: BorderRadius.only(topRight: Radius.circular(6), topLeft: Radius.circular(6),bottomLeft:Radius.circular(6), bottomRight: Radius.circular(6) ),),
+                  margin: EdgeInsets.all(5),
+                  child:
+                  TextButton.icon(
+                    icon: Icon(Icons.delete_rounded,color: Colors.red,),
+                    onPressed: () {
+                      setState(() {
+                        //filename="";
+                       // filenn="";
+                       // _removeresume();
+                        Navigator.pop(this.context);
+                        Navigator.push( context,  MaterialPageRoute(builder: (context) => ReUploadScreen()));
+                      });
+                    },
+                    label: Text("Reupload",style: LatinFonts.aBeeZee(color: Colors.red,fontSize:12),),
+                  ),),
                 Container(
-                    width: MediaQuery.of(context).size.width*0.35,
-                    decoration: BoxDecoration(border: Border.all(color: Colors.green,width: 2),
-                      borderRadius: BorderRadius.only(topRight: Radius.circular(6), topLeft: Radius.circular(6),bottomLeft:Radius.circular(6), bottomRight: Radius.circular(6) ),),
-                    margin: EdgeInsets.all(5),
-                    child:
-                TextButton.icon(
-                  icon: Icon(Icons.download_for_offline_rounded,color: Colors.green,),
-                  onPressed: () {
-                   // _downloadAndSaveFile(Provider.of<ProfileProvider>(context, listen: false).getResumeString(),Provider.of<ProfileProvider>(context, listen: false).getResumeName());
-                    requestDownload(AppConstants.BASE_URL+Provider.of<ProfileProvider>(context, listen: false).getResumeString(),Provider.of<ProfileProvider>(context, listen: false).getResumeName());
-                  },
-                  label: Text("Download",style: LatinFonts.aBeeZee(color: Colors.green,fontSize:12),),
-                ),
+                  width: MediaQuery.of(context).size.width*0.35,
+                  decoration: BoxDecoration(border: Border.all(color: Colors.green,width: 2),
+                    borderRadius: BorderRadius.only(topRight: Radius.circular(6), topLeft: Radius.circular(6),bottomLeft:Radius.circular(6), bottomRight: Radius.circular(6) ),),
+                  margin: EdgeInsets.all(5),
+                  child:
+                  TextButton.icon(
+                    icon: Icon(Icons.download_for_offline_rounded,color: Colors.green,),
+                    onPressed: () {
+                      // _downloadAndSaveFile(Provider.of<ProfileProvider>(context, listen: false).getResumeString(),Provider.of<ProfileProvider>(context, listen: false).getResumeName());
+                      requestDownload(AppConstants.BASE_URL+Provider.of<ProfileProvider>(context, listen: false).getResumeString(),Provider.of<ProfileProvider>(context, listen: false).getResumeName());
+                    },
+                    label: Text("Download",style: LatinFonts.aBeeZee(color: Colors.green,fontSize:12),),
+                  ),
                 ),
               ])
         ],
@@ -1487,18 +1578,6 @@ class _ProfileHomeScreenState extends State<ProfileHomeScreen> {
     }
   }
 
-  // void takePhoto(ImageSource source) async {
-  //   final sharedPreferences = await SharedPreferences.getInstance();
-  //   final pickedFile = await _picker.getImage(
-  //     source: source,
-  //   );
-  //   setState(() {
-  //     if(pickedFile!=null) {
-  //       _imageFile = pickedFile;
-  //       Navigator.pop(context);
-  //     }
-  //   });
-  // }
   void _fileipload() async {
     FilePickerResult? result = await FilePicker.platform.pickFiles(
       type: FileType.custom,

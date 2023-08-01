@@ -1,7 +1,3 @@
-import 'dart:convert';
-
-import 'package:Aap_job/helper/LocationManager.dart';
-import 'package:Aap_job/helper/SharedManager.dart';
 import 'package:Aap_job/localization/language_constrants.dart';
 import 'package:Aap_job/models/common_functions.dart';
 import 'package:flutter/material.dart';
